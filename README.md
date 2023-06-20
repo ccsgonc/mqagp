@@ -1,5 +1,88 @@
-This is a template for creating an [HTML GitBook style](https://bookdown.org/yihui/bookdown/html.html#gitbook-style) **[bookdown](https://github.com/rstudio/bookdown)** book, [hosted on GitHub Pages](https://bookdown.org/yihui/bookdown/github.html). It is based on the one created with *File, New Project..., New Directory, Book Project using bookdown* in RStudio. It assumes you know how to use git/GitHub and R Markdown, and have some familiarity with the **bookdown** package. If you don't, the package author Yihue Xie's RStudio webinar *[Introduction to Bookdown (R Package)](https://www.youtube.com/watch?v=dVqVscgwSpw)* provides an excellent introduction. In addition, check out [*bookdown: Authoring Books and Technical Documents with R Markdown*](https://bookdown.org/yihui/bookdown), also by Yihui Xie, both for the content and the format--it is itself a **bookdown** book.
-If you need help getting git/GitHub to work with RStudio see: [Happy Git and GitHub for the useR](https://happygitwithr.com/) by Jenny Bryan.
+## Ementa: 
+
+Construção e interpretação de números-índices. Metodologias para a criação de indicadores sociais e econômicos na realização de diagnósticos e na definição de prioridades de política. Bases de dados e fontes de informação para a pesquisa social e econômica no Brasil. Os Registros Administrativos do Governo. 
+
+## Bibliografia Básica: 
+TOLEDO, Geraldo L e Ovalle, Ivo I. Estatística Básica. 2ª Edição, Editor Atlas, São Paulo, 2010. 
+JANNUZZI, Paulo de M. Indicadores Sociais no Brasil: conceitos, fontes de dados e aplicações. Alínea Editora, Campinas, SP, 2001. 
+TRIOLA, M. Introdução à Estatística, sétima edição, Ed. LTC, Rio de Janeiro, 1991.
+
+# Unidade I
+Sistema estatístico, estado e políticas públicas. Produção de estatísticas. Princípios fundamentais. Código de Boas Práticas. Fontes de dados (Censos, pesquisas, registros admnistrativos, big data). IBGE e órgaos subnacionais de estatística. Agenda 2030
+
+# Unidade II - Indicadores Sociais
+Indicadores Sociais: conceitos e propridades
+
+Método: Criação de índice
+Exemplo: IDH
+Exercício: IDH ajustado as pressões ambientais
+
+Construção de número-índices
+
+
+SIM e SINASC: indicadores demográficos
+
+CadUnico
+
+Método: Análise de dados amostrais complexos
+PNS: violência doméstica
+
+
+POF:
+
+PNADC: (trimestral) - replicação
+PNADC: (anual) descupação nos extratos geográficos
+PNADC: (anual) jovens nem estudam nem trabalham
+PNADC: (visita): turismo
+PNADC: (anual): índice de gini, pobreza
+
+
+Microdados
+RAIS:
+dados de cultura - CBO
+
+
+•Pesquisas Institucionais: Munic, Registro Civil, Censo Escolar
+•Registros Administrativos: RAIS, CAGED
+•Cadastros Públicos: CNEFE, Cadastro Único, Cadastro Est.Saúde
+
+MapBiomas
+Observatório do Clima
+
+
+# 2 -
+# 3 -
+# 4 -
+# 5 -
+# 6 -
+# 7 -
+# 8 -
+# 9 -
+# 10 -
+# 11 -
+# 12 -
+# 13 -
+# 14 -
+# 15 -
+# 16 -
+# 17 -
+# 18 -
+# 19 -
+# 20 - 
+# 21 -
+# 22 -
+# 23 -
+# 24 -
+# 25 -
+# 26 -
+# 27 -
+# 28 -
+# 29 -
+# 30 -
+
+
+
+
 
 
 ## ABSOLUTE ESSENTIALS
