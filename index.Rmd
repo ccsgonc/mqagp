@@ -1,6 +1,6 @@
 --- 
-title: "YOUR TITLE HERE"
-author: "YOUR NAME HERE"
+title: "MÉTODOS QUANTITATIVOS APLICADOS À GESTÃO PÚBLICA"
+author: "Caio Gonçalves"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
 ---
