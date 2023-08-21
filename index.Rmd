@@ -1,9 +1,0 @@
---- 
-title: "MÉTODOS QUANTITATIVOS APLICADOS À GESTÃO PÚBLICA"
-author: "Caio Gonçalves"
-date: "`r Sys.Date()`"
-site: bookdown::bookdown_site
----
-
-# Down the rabbit-hole
-
