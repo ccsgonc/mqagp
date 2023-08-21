@@ -1,0 +1,88 @@
+---
+title: "Informações demográficas em áreas pequenas"
+author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
+date: "23-agosto-2023"
+output:
+  html_document: 
+    toc: true
+    toc_float: true
+header-includes:
+  - \usepackage{titling}
+  - \pretitle{\begin{center}
+    \includegraphics[width=2in,height=2in]{pics\logo_metodos_quantiativos.png}\LARGE\\}
+  - \posttitle{\end{center}}
+  # pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+O objetivo é conhecer o menor nível geográfico trabalhado no Censo Demográfico e verificar as possibilidades de análises em relação a esses dados quanto as perguntas do questionário do universo. O foco inicial serão em indicadores demográficos e as limitações existentes no cálculo dessas estatísticas em um nível bastante desagregado. Regionalizações em agrupamento de setores podem ser realizadas até o agrupamento municípios e assim sucessivamente até o nível Brasil.
+
+## Censo Demográfico
+
+O Censo Demográfico é a mais complexa operação estatística realizada por um país, quando são investigadas as características de toda a população e dos domicílios do Território Nacional.
+Os Censos Demográficos, por pesquisarem todos os domicílios do País, constituem a única fonte de referência para o conhecimento das condições de ida da população em todos os municípios e em seus recortes territoriais internos – distritos, subdistritos, bairros e classificação de acordo com a localização dos domicílios em áreas urbanas ou rurais.
+Os dados deste arquivo, por setor censitário, compreendem características dos domicílios particulares e das pessoas que foram investigadas para a totalidade da população e são denominados, por convenção, resultados do universo. Estes dados foram obtidos reunindo informações captadas por meio da investigação das características dos domicílios e das pessoas, que são comuns aos dois tipos de questionários utilizados para o levantamento do Censo Demográfico 2010 e que são:
+• Questionário Básico - aplicado em todas as unidades domiciliares, exceto naquelas selecionadas para a amostra, e que contém a investigação das características do domicílio e dos moradores; e
+• Questionário da Amostra - aplicado em todas as unidades domiciliares selecionadas para a amostra. Além da investigação contida no Questionário Básico, abrange outras características do domicílio e pesquisa importantes informações sociais, econômicas e demográficas dos seus moradores.
+
+
+## Setores censitários
+O setor censitário é a menor unidade territorial, formada por área contínua, integralmente contida em área urbana ou rural, com dimensão adequada à operação de pesquisas e cujo conjunto esgota a totalidade do Território Nacional, o que permite assegurar a plena cobertura do País.
+
+Cada setor censitário possui um número identificador, denominado geocódigo. É formado através da recomposição da hierarquia político-administrativa a qual o setor censitário pertence: os dois primeiros dígitos se referem ao código do estado; os cinco subsequentes se relacionam ao município; os dois seguintes indicam o distrito; os dois na sequência apontam o subdistrito; e, por fim, os quatro últimos ao setor censitário.Mais detalhes sobre a Malha de Setores Censitários ver (aqui)[https://www.ibge.gov.br/geociencias/organizacao-do-territorio/malhas-territoriais/26565-malhas-de-setores-censitarios-divisoes-intramunicipais.html?=&t=saiba-mais-edicao)]
+
+[ inserir imagem codigo_setor]
+
+## Identificando setores
+
+Escolha um setor em: https://censo2010.ibge.gov.br/painel/ e salve o número do setor escolhido no objetivo `setor_escolhido`:
+[inserir imagem setor_fjp]
+```{r setor, echo=TRUE}
+setor_escolhido <- 310620005680043
+```
+
+## Download dos dados 
+
+
+de setores censitários agregados
+
+```{r download, echo=TRUE}
+library(readr)
+df <- read_delim("C:/Users/x15767253/Downloads/MG_20171016/MG/Base informaçoes setores2010 universo MG/CSV/Pessoa01_MG.csv", delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+```
+## Verificando variáveis
+```{r verificação, echo=TRUE}
+library(dataMaid)
+makeDataReport(df,replace = TRUE)
+
+```
+## Modificando variáveis
+```{r variaveis, echo=TRUE}
+library(tidyselect)
+df <- df %>% mutate(
+  Cod_setor= as.character(Cod_setor)
+)
+
+```
+6.1 Arquivo Básico
+
+por bairro:
+
+## Tamanho
+total de população
+densidade demográfica
+
+## Distribuição
+proporação da população
+Situação_setor
+taxa de urbanização
+
+# estrutura etária
+pirâmide etária
+razão de sexo
+indice de envelhecimento
+razão de dependência
