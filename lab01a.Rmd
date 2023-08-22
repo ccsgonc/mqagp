@@ -50,14 +50,15 @@ setor_escolhido <- 310620005680043
 de setores censitários agregados
 
 ```{r download, echo=TRUE}
-library(readr)
-df <- read_delim("C:/Users/x15767253/Downloads/MG_20171016/MG/Base informaçoes setores2010 universo MG/CSV/Pessoa01_MG.csv", delim = ";", escape_double = FALSE, trim_ws = TRUE)
-
+library(readxl)
+df.basico <- read_excel("C:/Users/x15767253/Desktop/Basico-MG.xls")
+df.pessoa <- read_excel("C:/Users/x15767253/Desktop/Pessoa01_MG.xls")
 ```
 ## Verificando variáveis
 ```{r verificação, echo=TRUE}
 library(dataMaid)
-makeDataReport(df,replace = TRUE)
+makeDataReport(df.basico,replace = TRUE)
+makeDataReport(df.pessoa,replace = TRUE)
 
 ```
 ## Modificando variáveis
