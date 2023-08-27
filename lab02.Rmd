@@ -77,20 +77,20 @@ O que foi possível verificar com o relatório produzido anteriormente? Anote pa
 
 ## Modificando variáveis
 
-Pensando em cada uma as variáveis. Faça uma lista do é possível calcular dos indicadores demográficos apresentados. Por exemplo:
+Pensando em cada um dos seguintes indicadores: 
 
 1. Total populacional e a proporção por sexo e idade (base para a pirâmide etária)
 2. Razão de dependência
 3. Índice de envelhecimento
 
-
-A partir dos indicadores que se planeja calcular, realize as modificações na base necessárias para isso:
+Qual variáveis precisam ser manipuladas para obter essas informações? Realize as modificações na base necessárias para isso:
 
 ```{r variaveis, echo=TRUE}
 library(tidyselect)
-df <- df %>% mutate(
-  Cod_setor= as.character(Cod_setor)
-)
+df.h <- df.h %>% mutate(
+  Cod_setor= as.character(Cod_setor))
+df.m <- df.m %>% mutate(
+  Cod_setor= as.character(Cod_setor))
 
 ```
 
@@ -98,8 +98,30 @@ Monte o data.frame com as idades:
 
 ```{r variaveis2, echo=TRUE}
 library(tidyselect)
-df <- df %>% mutate(
-  x00_04= V022 + V035 + V036 + V036 +V036
+df.h[,c(9:142)] <- as.numeric(df.h[,c(9:142)])
+df.h <- df.h %>% mutate(
+  Cod_setor= as.character(Cod_setor),
+  as.numeric()
+  x00_04= V022 + V035 + V036 + V037 + V038,
+  x05_09= V039 + V040 + V041 + V042 + V043,
+  x10_14= V044 + V045 + V046 + V047 + V048,
+  x15_19= V049 + V050 + V051 + V052 + V053,
+  x20_24= V054 + V055 + V056 + V057 + V058,
+  x25_29= V059 + V060 + V061 + V062 + V063,
+  x30_34= V064 + V065 + V066 + V067 + V068,
+  x35_39= V069 + V070 + V071 + V072 + V073,
+  x40_44= V074 + V075 + V076 + V077 + V078,
+  x45_49= V079 + V080 + V081 + V082 + V083,
+  x50_54= V084 + V085 + V086 + V087 + V088,
+  x55_59= V089 + V090 + V091 + V092 + V093,
+  x60_64= V094 + V095 + V096 + V097 + V098,
+  x65_69= V099 + V100 + V101 + V102 + V103,
+  x70_74= V104 + V105 + V106 + V107 + V108,
+  x75_79= V109 + V110 + V111 + V112 + V113,
+  x80_84= V114 + V115 + V116 + V117 + V118,
+  x85_mais= V119 + V120 + V121 + V122 + V123 +
+            V124 + V125 + V126 + V127 + V128 +
+            V129 + V130 + V131 + V132 + V133 + V134
 )
 
 ```
