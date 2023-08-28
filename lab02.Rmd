@@ -98,10 +98,10 @@ Monte o data.frame com as idades:
 
 ```{r variaveis2, echo=TRUE}
 library(tidyselect)
-df.h[,c(9:142)] <- as.numeric(df.h[,c(9:142)])
+df.h <- cbind(df.h[,1:8],df.h[,c(9:142)] %>% mutate_if(is.character, as.numeric))
+df.m <- cbind(df.m[,1:8],df.m[,c(9:142)] %>% mutate_if(is.character, as.numeric))
+
 df.h <- df.h %>% mutate(
-  Cod_setor= as.character(Cod_setor),
-  as.numeric()
   x00_04= V022 + V035 + V036 + V037 + V038,
   x05_09= V039 + V040 + V041 + V042 + V043,
   x10_14= V044 + V045 + V046 + V047 + V048,
@@ -122,8 +122,52 @@ df.h <- df.h %>% mutate(
   x85_mais= V119 + V120 + V121 + V122 + V123 +
             V124 + V125 + V126 + V127 + V128 +
             V129 + V130 + V131 + V132 + V133 + V134
-)
+) %>% select(Cod_setor,Cod_municipio ,     
+  Nome_do_municipio,Cod_bairro ,        
+  Nome_do_bairro,Cod_subdistrito ,   
+  Nome_do_subdistrito,x00_04,  x05_09,             
+x10_14,              x15_19,             
+x20_24,              x25_29,             
+x30_34,              x35_39,             
+x40_44,              x45_49,             
+x50_54,              x55_59,             
+x60_64,              x65_69,             
+x70_74,              x75_79,             
+x80_84,              x85_mais)
 
+df.m <- df.m %>% mutate(
+  x00_04= V022 + V035 + V036 + V037 + V038,
+  x05_09= V039 + V040 + V041 + V042 + V043,
+  x10_14= V044 + V045 + V046 + V047 + V048,
+  x15_19= V049 + V050 + V051 + V052 + V053,
+  x20_24= V054 + V055 + V056 + V057 + V058,
+  x25_29= V059 + V060 + V061 + V062 + V063,
+  x30_34= V064 + V065 + V066 + V067 + V068,
+  x35_39= V069 + V070 + V071 + V072 + V073,
+  x40_44= V074 + V075 + V076 + V077 + V078,
+  x45_49= V079 + V080 + V081 + V082 + V083,
+  x50_54= V084 + V085 + V086 + V087 + V088,
+  x55_59= V089 + V090 + V091 + V092 + V093,
+  x60_64= V094 + V095 + V096 + V097 + V098,
+  x65_69= V099 + V100 + V101 + V102 + V103,
+  x70_74= V104 + V105 + V106 + V107 + V108,
+  x75_79= V109 + V110 + V111 + V112 + V113,
+  x80_84= V114 + V115 + V116 + V117 + V118,
+  x85_mais= V119 + V120 + V121 + V122 + V123 +
+            V124 + V125 + V126 + V127 + V128 +
+            V129 + V130 + V131 + V132 + V133 + V134
+) %>% select(Cod_setor,Cod_municipio ,     
+  Nome_do_municipio,Cod_bairro ,        
+  Nome_do_bairro,Cod_subdistrito ,   
+  Nome_do_subdistrito,x00_04,  x05_09,             
+x10_14,              x15_19,             
+x20_24,              x25_29,             
+x30_34,              x35_39,             
+x40_44,              x45_49,             
+x50_54,              x55_59,             
+x60_64,              x65_69,             
+x70_74,              x75_79,             
+x80_84,              x85_mais)
 ```
 
 
@@ -134,8 +178,26 @@ df.h <- df.h %>% mutate(
 Conhecer o tamanho da população de uma determinada região, país ou grupo é fundamental para o desenvolvimento sustentável, a tomada de decisões informadas e a criação de políticas que atendam às necessidades e aspirações das pessoas que compõem essa população. A seguir são sistematizadas tabelas com totais populacionais 
 
 ```{r tamanho, echo=TRUE}
-library(knitr)
-library(kableExtra)
+library(popPyramid)
+df <- popPyramid::popPER
+df <- dplyr::filter(df, Year==2021)
+
+test<-df.h[,c(1,8:25)]
+library(tidyr)
+df.h_long <- gather(df.h, faixas, pop, x00_04:x85_mais) %>% mutate(Sex = "homem")
+df.m_long <- gather(df.m, faixas, pop, x00_04:x85_mais) %>% mutate(Sex = "mulher")
+
+df.long <- rbind(df.h_long,df.m_long)
+
+library(popPyramid)
+plotPyramid(df=df, age="gAge", sex="Sex", pop="Population")
+
+df.test <- filter(df.long, Cod_setor==setor_escolhido)
+
+plotPyramid(df.test, age="faixas", sex="Sex", pop="pop")
+
+
+
 
 # setor censitário escolhido
 tab01a <- df %>% 

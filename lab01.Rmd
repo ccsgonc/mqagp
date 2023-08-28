@@ -1,42 +1,40 @@
 ---
-title: "Indicadores demográficos"
+title: "Indicadores no R: registros de mortalidade e natalidade e as projeções populacionais"
 author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
-date: "23-agosto-2023"
+date: "28-agosto-2023"
 output:
   html_document: 
     toc: true
     toc_float: true
-header-includes:
-  - \usepackage{titling}
-  - \pretitle{\begin{center}
-    \includegraphics[width=2in,height=2in]{pics\logo_metodos_quantiativos.png}\LARGE\\}
-  - \posttitle{\end{center}}
-  # pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Censo Demográfico
+O objetivo deste tutorial produzir pirâmides etárias e calcular indicadores demográficos relacionados.
+
+# Contextualização
+
+bla bla
+
+## Estatísticas vitais
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
-```
-
-## Registros
+## SIM
 
 O pacote [microdatasus](https://github.com/rfsaldanha/microdatasus) no R é uma ferramenta que permite acessar e trabalhar com microdados de diferentes dados_sims de dados disponibilizadas pelo Departamento de Informática do Sistema Único de Saúde (DATASUS) no Brasil. 
 
 1. Instale e carregue o pacote "microdatasus":
 
 ```{r data, echo=FALSE}
+library(remotes)
 if (!require("microdatasus")){
-  install.packages("microdatasus")
+  install.packages("remotes")
+remotes::install_github("rfsaldanha/microdatasus")
   library(microdatasus)
 }
 ```
@@ -46,7 +44,7 @@ if (!require("microdatasus")){
 Vamos supor que você queira acessar os microdados de registros de óbitos da dados_sim de dados "SIM-DO". Use o seguinte código para isso:
 
 ```{r data, echo=FALSE}
-dados_sim <- fetch_datasus(year_start = 2000, 
+dados_sim <- fetch_datasus(year_start = 2020, 
                        year_end = 2021, 
                        uf = "MG", 
                        information_system = "SIM-DO",
