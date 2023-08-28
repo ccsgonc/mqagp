@@ -92,6 +92,8 @@ df.h <- df.h %>% mutate(
 df.m <- df.m %>% mutate(
   Cod_setor= as.character(Cod_setor))
 
+df.h <- replace(df.h, is.na(df.h), 0)
+df.m <- replace(df.m, is.na(df.m), 0)
 ```
 
 Monte o data.frame com as idades:
@@ -100,6 +102,9 @@ Monte o data.frame com as idades:
 library(tidyselect)
 df.h <- cbind(df.h[,1:8],df.h[,c(9:142)] %>% mutate_if(is.character, as.numeric))
 df.m <- cbind(df.m[,1:8],df.m[,c(9:142)] %>% mutate_if(is.character, as.numeric))
+df.h <- replace(df.h, is.na(df.h), 0)
+df.m <- replace(df.m, is.na(df.m), 0)
+
 
 df.h <- df.h %>% mutate(
   x00_04= V022 + V035 + V036 + V037 + V038,
@@ -178,68 +183,38 @@ x80_84,              x85_mais)
 Conhecer o tamanho da população de uma determinada região, país ou grupo é fundamental para o desenvolvimento sustentável, a tomada de decisões informadas e a criação de políticas que atendam às necessidades e aspirações das pessoas que compõem essa população. A seguir são sistematizadas tabelas com totais populacionais 
 
 ```{r tamanho, echo=TRUE}
-library(popPyramid)
-df <- popPyramid::popPER
-df <- dplyr::filter(df, Year==2021)
-
-test<-df.h[,c(1,8:25)]
 library(tidyr)
-df.h_long <- gather(df.h, faixas, pop, x00_04:x85_mais) %>% mutate(Sex = "homem")
-df.m_long <- gather(df.m, faixas, pop, x00_04:x85_mais) %>% mutate(Sex = "mulher")
-
+df.h_long <- gather(df.h, faixas, t.pop, x00_04:x85_mais) %>% mutate(Sex = "homem")
+df.m_long <- gather(df.m, faixas, t.pop, x00_04:x85_mais) %>% mutate(Sex = "mulher")
 df.long <- rbind(df.h_long,df.m_long)
+rm(df.h_long,df.m_long)
 
-library(popPyramid)
-plotPyramid(df=df, age="gAge", sex="Sex", pop="Population")
+df.long <- df.long %>% 
+ group_by(Cod_setor, Cod_municipio,
+          Nome_do_municipio, Cod_bairro,
+          Nome_do_bairro, Cod_subdistrito,
+          Nome_do_subdistrito) %>%
+  mutate(p.pop = t.pop/sum(t.pop)*100)
+                                                             
+   
+   
+library(DescTools)
 
-df.test <- filter(df.long, Cod_setor==setor_escolhido)
+df.piramide <- filter(df.long, Cod_setor==setor_escolhido)
 
-plotPyramid(df.test, age="faixas", sex="Sex", pop="pop")
+h.pop<- subset(df.piramide,df.piramide$Sex=="homem")$p.pop
+m.pop<- subset(df.piramide,df.piramide$Sex=="mulher")$p.pop
+age <- c("0-4","5-9","10-14","15-19","20-24","25-29",
+         "30-34","35-39","40-44","45-49","50-54",
+         "55-59","60-64","65-69","70-74","75-79","80-44","85+")
 
+PlotPyramid(h.pop, 
+            m.pop,
+            ylab = age, space = 0, col = c("cornflowerblue", "indianred"),
+            xlim=c(-5,5),
+            main="Pirâmide etária",
+            lxlab="Homem", rxlab="Mulher", gapwidth=0, ylab.x=-5 )
 
-
-
-# setor censitário escolhido
-tab01a <- df %>% 
-  filter(Cod_setor == setor_escolhido) %>% 
-  summarise(t.pop = sum(V001))
-tab01a %>% kbl() %>% kable_minimal()
-
-# bairro escolhido
-bairro_escolhido <- df$Nome_do_bairro[df$Cod_setor==setor_escolhido]
-tab01b <- df %>% 
-  filter(Nome_do_bairro == bairro_escolhido) %>% 
-  summarise(t.pop = sum(V001))
-tab01b %>% kbl() %>% kable_minimal()
-
-# Minas Gerais
-tab01c <- df %>% summarise(t.pop = sum(V001))
-tab01c %>% kbl() %>% kable_minimal()
-
-# Municípios de Minas Gerais
-tab01d<- df %>% group_by(Nome_do_municipio) %>% 
-  summarise(t.pop = sum(V001)) %>%  
-  arrange(desc(t.pop)) %>% 
-  mutate(p.pop = round(t.pop/sum(t.pop)*100,1))
-tab01d %>% slice(1:10) %>% kbl() %>% kable_minimal()
-
-# Subdistritos de Belo Horizonte
-tab01e<- df %>% 
-  filter(Nome_do_municipio == "BELO HORIZONTE") %>% 
-  group_by(Nome_do_subdistrito) %>% 
-  summarise(t.pop = sum(V001))%>%  
-  arrange(desc(t.pop)) %>% 
-  mutate(p.pop = round(t.pop/sum(t.pop)*100,1))
-tab01e %>% slice(1:10) %>% kbl() %>% kable_minimal()
-
-# Bairros de Belo Horizonte
-tab01f <- df %>% 
-  filter(Nome_do_municipio == "BELO HORIZONTE") %>% 
-  group_by(Nome_do_bairro) %>% 
-  summarise(t.pop = sum(V001))%>%  
-  arrange(desc(t.pop)) %>% 
-  mutate(p.pop = round(t.pop/sum(t.pop)*100,2))
-tab01f %>% slice(1:10) %>% kbl() %>% kable_minimal()
 ```
 
 ## Distribuição por situação do setor
@@ -249,19 +224,38 @@ Os totais populacionais podem ser desagregados por situação do setor. Verifiqu
 ```{r distribuição, echo=TRUE}
 
 # setor censitário escolhido
-tab02a <- df %>% 
-  filter(Cod_setor == setor_escolhido) %>% 
-  group_by(Situacao_setor_agreg) %>% 
-  summarise(t.pop = sum(V001))
-tab02a %>% kbl() %>% kable_minimal()
+df.piramide <- filter(df.long, Cod_setor==setor_escolhido)
+
+h.pop<- subset(df.piramide,df.piramide$Sex=="homem")$p.pop
+m.pop<- subset(df.piramide,df.piramide$Sex=="mulher")$p.pop
+age <- c("0-4","5-9","10-14","15-19","20-24","25-29",
+         "30-34","35-39","40-44","45-49","50-54",
+         "55-59","60-64","65-69","70-74","75-79","80-44","85+")
+
+PlotPyramid(h.pop, 
+            m.pop,
+            ylab = age, space = 0, col = c("cornflowerblue", "indianred"),
+            xlim=c(-5,5),
+            main="Pirâmide etária",
+            lxlab="Homem", rxlab="Mulher", gapwidth=0, ylab.x=-5 )
+
 
 # bairro escolhido
 bairro_escolhido <- df$Nome_do_bairro[df$Cod_setor==setor_escolhido]
-tab02b <- df %>% 
-  filter(Nome_do_bairro == bairro_escolhido) %>% 
-  group_by(Situacao_setor_agreg) %>% 
-  summarise(t.pop = sum(V001))
-tab02b %>% kbl() %>% kable_minimal()
+df.piramide02 <- df.long %>% filter(Nome_do_bairro==bairro_escolhido)
+
+h.pop<- subset(df.piramide,df.piramide$Sex=="homem")$p.pop
+m.pop<- subset(df.piramide,df.piramide$Sex=="mulher")$p.pop
+age <- c("0-4","5-9","10-14","15-19","20-24","25-29",
+         "30-34","35-39","40-44","45-49","50-54",
+         "55-59","60-64","65-69","70-74","75-79","80-44","85+")
+
+PlotPyramid(h.pop, 
+            m.pop,
+            ylab = age, space = 0, col = c("cornflowerblue", "indianred"),
+            xlim=c(-5,5),
+            main="Pirâmide etária",
+            lxlab="Homem", rxlab="Mulher", gapwidth=0, ylab.x=-5 )
 
 # Minas Gerais
 tab02c <- df %>% group_by(Situacao_setor_agreg) %>% 
