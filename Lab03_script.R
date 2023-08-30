@@ -1,111 +1,102 @@
----
-title: "Indicadores no R: registros de mortalidade e natalidade e as projeções populacionais"
-author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
-date: "28-agosto-2023"
-output:
-  html_document: 
-    toc: true
-    toc_float: true
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-O objetivo deste tutorial é realizar comparações entre os registros de óbitos e nascimentos e as projeções desses dois componentes. Nesse caso trabalha-se com o nível geográfico UF.
+# ---
+#   title: "Indicadores no R: registros de mortalidade e natalidade e as projeções populacionais"
+# author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
+# date: "30-agosto-2023"
+# ---
+  
+# O objetivo deste tutorial é realizar comparações entre os registros de óbitos e
+# nascimentos e as projeções desses dois componentes. Nesse caso trabalha-se com 
+# o nível geográfico UF.
 
 # Contextualização
 
-O Sistema de Informações da Mortalidade (SIM) e oSistema de Informações sobre Nascidos Vivos (SINASC) desempenha um papel relevante na captação e registro de dados sobre os óbitos e nascimentos do país. O sistema reune informações detalhadas sobre cada óbito como local de residência, data, sexo e sobre o recém-nascido, como local de nascimento, data, sexo, tipo de parto e características da mãe. Já as projeções populacionais realizadas pelo IBGE são essenciais para o planejamento de políticas públicas, alocação de recursos e desenvolvimento sustentável, uma vez que oferecem insights sobre as tendências demográficas futuras, permitindo que os governos e as instituições tomem decisões informadas para atender às necessidades em constante evolução das populações.
+# O Sistema de Informações da Mortalidade (SIM) e oSistema de Informações sobre 
+# Nascidos Vivos (SINASC) desempenha um papel relevante na captação e registro 
+# de dados sobre os óbitos e nascimentos do país. O sistema reune informações 
+# detalhadas sobre cada óbito como local de residência, data, sexo e sobre o 
+# recém-nascido, como local de nascimento, data, sexo, tipo de parto e 
+# características da mãe. Já as projeções populacionais realizadas pelo 
+# IBGE são essenciais para o planejamento de políticas públicas, alocação 
+# de recursos e desenvolvimento sustentável, uma vez que oferecem insights 
+# sobre as tendências demográficas futuras, permitindo que os governos e as 
+# instituições tomem decisões informadas para atender às necessidades em 
+# constante evolução das populações.
 
 # Estatísticas vitais
 
 ## SIM
 
-O pacote [microdatasus](https://github.com/rfsaldanha/microdatasus) no R é uma ferramenta que permite acessar e trabalhar com os microdados disponibilizados pelo Departamento de Informática do Sistema Único de Saúde (DATASUS) no Brasil. 
+# 1. Instale e carregue o pacote "microdatasus":
 
-1. Instale e carregue o pacote "microdatasus":
-
-```{r data, echo=FALSE}
 library(remotes)
 if (!require("microdatasus")){
   install.packages("remotes")
-remotes::install_github("rfsaldanha/microdatasus")
+  remotes::install_github("rfsaldanha/microdatasus")
   library(microdatasus)
 }
-```
 
-2. Acesse os microdados de óbitos:
-
-Vamos supor que você queira acessar os microdados de registros de óbitos da dados_sim de dados "SIM-DO". Use o seguinte código para isso:
-
-```{r data, echo=FALSE}
+# 2. Acesse os microdados de óbitos:
+  
+  # Vamos supor que você queira acessar os microdados de registros de óbitos 
+  # da dados_sim de dados "SIM-DO". Use o seguinte código para isso:
+  
 dados_sim <- fetch_datasus(year_start = 2000, 
-                       year_end = 2021, 
-                       uf = "MG", 
-                       information_system = "SIM-DO",
-                       vars=c("DTOBITO","DTNASC","IDADE","SEXO","CODMUNRES"))
+                           year_end = 2021, 
+                           uf = "DF", 
+                           information_system = "SIM-DO",
+                           vars=c("DTOBITO","DTNASC","IDADE","SEXO","CODMUNRES"))
 
-```
-3. Processa os dados
-
-pacote [dataMaid](https://cran.r-project.org/web/packages/dataMaid/index.html)
-```{r data, echo=FALSE}
+# 3. Processa os dados
 
 dados_sim <- process_sim(dados_sim)
+
+pacote [dataMaid](https://cran.r-project.org/web/packages/dataMaid/index.html)
 if (!require("dataMaid")){
   install.packages("dataMaid")
   library(dataMaid)
 }
 makeDataReport(dados_sim,replace = TRUE)
 
-
-# cria variável de faixa etária
-# resolvendo problema da variável idade_anos
-# adiciona um filtro
-dados_sim$IDADEanos[which(is.na(dados_sim$IDADEanos))]<-0
-
-
 library(tidyverse)
 dados_sim<- dados_sim %>% mutate(
-                       obt = 1,
-                       ano = as.numeric(substr(DTOBITO,1,4)),
-                       ano_nasc = as.numeric(substr(DTNASC,1,4)),
-                       IDADEanos = as.numeric(IDADEanos),
-                       faixa_idade =  cut(IDADEanos,c(-Inf,0,4,9,14,19,24,29,34,39,
-                                                        44,49,54,59,64,69,74,79,84,Inf),
-                                             labels = c("_menor que 1 ano",
-                                                        "01 a 04 anos",
-                                                        "05 a 09 anos",
-                                                        "10 a 14 anos",
-                                                        "15 a 19 anos",
-                                                        "20 a 24 anos",
-                                                        "25 a 29 anos",
-                                                        "30 a 34 anos",
-                                                        "35 a 39 anos",
-                                                        "40 a 44 anos",
-                                                        "45 a 49 anos",
-                                                        "50 a 54 anos",
-                                                        "55 a 59 anos",
-                                                        "60 a 64 anos",
-                                                        "65 a 69 anos",
-                                                        "70 a 74 anos",
-                                                        "75 a 79 anos",
-                                                        "80 a 84 anos",
-                                                        "85 anos ou mais")))
+  obt = 1,
+  ano = as.numeric(substr(DTOBITO,1,4)),
+  ano_nasc = as.numeric(substr(DTNASC,1,4)),
+  IDADEanos = as.numeric(IDADEanos),
+  faixa_idade =  cut(IDADEanos,c(-Inf,0,4,9,14,19,24,29,34,39,
+                                 44,49,54,59,64,69,74,79,84,Inf),
+                     labels = c("_menor que 1 ano",
+                                "01 a 04 anos",
+                                "05 a 09 anos",
+                                "10 a 14 anos",
+                                "15 a 19 anos",
+                                "20 a 24 anos",
+                                "25 a 29 anos",
+                                "30 a 34 anos",
+                                "35 a 39 anos",
+                                "40 a 44 anos",
+                                "45 a 49 anos",
+                                "50 a 54 anos",
+                                "55 a 59 anos",
+                                "60 a 64 anos",
+                                "65 a 69 anos",
+                                "70 a 74 anos",
+                                "75 a 79 anos",
+                                "80 a 84 anos",
+                                "85 anos ou mais")))
 
 
 
 
-# total de nascimentos para DF
+# total de óbitos para DF
 aggregate(data=dados_sim,obt~ano, FUN= sum) # problema identificado com criação de NA em 2000
 
 # correção dos NA presente na dados_sim de 2000
 dados_sim$ano[which(is.na(dados_sim$ano))]<-2000
-# total de nascimentos para DF
+# total de óbitos para DF
 aggregate(data=dados_sim,obt~ano, FUN= sum) # ok com http://tabnet.datasus.gov.br/cgi/tabcgi.exe?sim/cnv/obt10df.def
 
-# tabela 1 - total de nascimentos e por sexo
+# tabela 1 - total de obitos e por sexo
 tab1 <-dados_sim  %>%
   group_by(ano) %>%
   summarise(obt = n())
@@ -143,13 +134,13 @@ tabela1<-ts(tabela1,start = 2000,frequency = 1)
 library(zoo)
 tabela1m<-rollmean(x = tabela1,k = 3)
 
-write_xlsx(as.data.frame(tabela1m),"Tabela  1b - Total de obitos com média móvel.xlsx")
+write_xlsx(as.data.frame(tabela1m),"Tabela  1b - Total de obitos com ma.xlsx")
 
 ggplot(as.data.frame(tabela1m), aes(x=ano, y=obt)) +
   geom_line( color="steelblue") +
   geom_point() +
   xlab("Ano")+
-  ylab("Nascimentos")+
+  ylab("Óbitos")+
   ggtitle("Total de obitos - DF - 2000-2020 ")
 
 # leitura dos pacotes utilizados
@@ -166,8 +157,8 @@ ggplot(as.data.frame(proj_ibge), aes(x=ano, y=obt)) +
   geom_line( color="steelblue") +
   geom_point() +
   xlab("Ano")+
-  ylab("Nascimentos")+
-  ggtitle("Total de nascidos vivos - DF - 2000-2020 ")
+  ylab("Óbitos")+
+  ggtitle("Total de óbitos - DF - 2000-2020 ")
 
 ano1<-2010:2030
 var1<-c(round(as.data.frame(tabela1)$obt[11:21]),rep(NA,10))
@@ -176,9 +167,9 @@ var3<-as.data.frame(proj_ibge)$obt
 data1<-data.frame(ano1,var1,var2,var3)
 
 p1<-ggplot(data1, aes(x=ano1)) +
-  geom_line(aes(y=var1, col="SIM"),linetype=1,size=1.2) +
-  geom_line(aes(y=var2, col="SIM-média móvel"),linetype=1,size=1.2) +
-  geom_line(aes(y=var3, col="Proj. IBGE"),linetype=1,size=1.2) +
+  geom_line(aes(y=var1, col="SIM"),linetype=1) +
+  geom_line(aes(y=var2, col="SIM-média móvel"),linetype=1) +
+  geom_line(aes(y=var3, col="Proj. IBGE"),linetype=1) +
   labs(title="Total de óbitos por fonte de dados - DF - 2010-2030", y="Total de óbitos",x=element_blank()) +
   scale_color_manual(name="",
                      values = c("SIM"="coral4",
@@ -625,4 +616,3 @@ df <- percDF(df, "gAge", "Sex", "Population")
 library(popPyramid)
 plotPercPyramid(df=df, age="gAge", sex="Sex", perpop="perc_Population")
 ```
-
