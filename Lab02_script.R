@@ -78,62 +78,10 @@ df.basico <- read_excel("Basico-MG.xls") %>% select("Cod_setor","Cod_municipio",
   mutate(Cod_setor=as.character(Cod_setor))
 df.pessoa11 <- read_excel("Pessoa11_MG.xls", 
                           col_types = c("text", "text", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric"))
+                                        rep("numeric",133)))
 df.pessoa12 <- read_excel("Pessoa12_MG.xls", 
                           col_types = c("text", "text", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric", "numeric", 
-                                        "numeric", "numeric", "numeric", "numeric"))
+                                        rep("numeric",133)))
 
 df.h <- full_join(df.basico,df.pessoa11)
 df.m <- full_join(df.basico,df.pessoa12)
@@ -154,6 +102,7 @@ rm(df.pessoa11,df.pessoa12,df.basico)
 # que desejam garantir a qualidade e integridade dos seus dados, tornando todo 
 # o processo de análise mais eficiente e confiável.
 
+# Observe que no código anterior, algumas alterações já foram feitas.
 
 library(dataMaid)
 makeDataReport(df.h,replace = TRUE)
@@ -363,32 +312,47 @@ df.long <- df.long %>% mutate(grupos = case_when(faixas=="x00_04" | faixas=="x05
 # setor censitário escolhido
 df.01 <- filter(df.long, Cod_setor==setor_escolhido) %>% group_by(grupos) %>% 
   summarise(t.pop=sum(t.pop)) %>% mutate(p.pop = t.pop/sum(t.pop)*100)
+df.01
 
 r.dep.crian <- df.01$t.pop[df.01$grupos=="0_crianças"]/df.01$t.pop[df.01$grupos=="1_adultos"]*100
 r.dep.idos  <- df.01$t.pop[df.01$grupos=="2_idosos"]/df.01$t.pop[df.01$grupos=="1_adultos"]*100
 r.dep.total <-(df.01$t.pop[df.01$grupos=="0_crianças"]+df.01$t.pop[df.01$grupos=="2_idosos"])/df.01$t.pop[df.01$grupos=="1_adultos"]*100
 ind.envelh <- df.01$t.pop[df.01$grupos=="2_idosos"]/df.01$t.pop[df.01$grupos=="0_crianças"]*100
+r.dep.crian
+r.dep.idos
+r.dep.total
+ind.envelh
 
 # bairro escolhido
 bairro_escolhido <- df.h$Nome_do_bairro[df.h$Cod_setor==setor_escolhido]
 df.02 <- df.long %>% filter(Nome_do_bairro==bairro_escolhido) %>%
   group_by(grupos) %>% summarise(t.pop = sum(t.pop))  %>% mutate(p.pop = t.pop/sum(t.pop)*100)
+df.02
 
 r.dep.crian <- df.02$t.pop[df.02$grupos=="0_crianças"]/df.02$t.pop[df.02$grupos=="1_adultos"]*100
 r.dep.idos  <- df.02$t.pop[df.02$grupos=="2_idosos"]/df.02$t.pop[df.02$grupos=="1_adultos"]*100
 r.dep.total <-(df.02$t.pop[df.02$grupos=="0_crianças"]+df.02$t.pop[df.02$grupos=="2_idosos"])/df.02$t.pop[df.02$grupos=="1_adultos"]*100
 ind.envelh <- df.02$t.pop[df.02$grupos=="2_idosos"]/df.02$t.pop[df.02$grupos=="0_crianças"]*100
+r.dep.crian
+r.dep.idos
+r.dep.total
+ind.envelh
 
 # município escolhido
 municipio_escolhido <- df.h$Nome_do_municipio[df.h$Cod_setor==setor_escolhido]
 df.03 <- df.long %>% filter(Nome_do_municipio==municipio_escolhido) %>%
   group_by(grupos) %>% summarise(t.pop = sum(t.pop)) %>%
   mutate(p.pop = t.pop/sum(t.pop)*100)
+df.03
 
 r.dep.crian <- df.02$t.pop[df.02$grupos=="0_crianças"]/df.02$t.pop[df.02$grupos=="1_adultos"]*100
 r.dep.idos  <- df.02$t.pop[df.02$grupos=="2_idosos"]/df.02$t.pop[df.02$grupos=="1_adultos"]*100
 r.dep.total <-(df.02$t.pop[df.02$grupos=="0_crianças"]+df.02$t.pop[df.02$grupos=="2_idosos"])/df.02$t.pop[df.02$grupos=="1_adultos"]*100
 ind.envelh <- df.02$t.pop[df.02$grupos=="2_idosos"]/df.02$t.pop[df.02$grupos=="0_crianças"]*100
+r.dep.crian
+r.dep.idos
+r.dep.total
+ind.envelh
 
 # Para refletir: poderia ser usada uma outra classificação de idosos:
 #   

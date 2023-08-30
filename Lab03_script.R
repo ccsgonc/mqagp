@@ -50,7 +50,7 @@ dados_sim <- fetch_datasus(year_start = 2000,
 
 dados_sim <- process_sim(dados_sim)
 
-pacote [dataMaid](https://cran.r-project.org/web/packages/dataMaid/index.html)
+# pacote [dataMaid](https://cran.r-project.org/web/packages/dataMaid/index.html)
 if (!require("dataMaid")){
   install.packages("dataMaid")
   library(dataMaid)
@@ -133,6 +133,7 @@ write_xlsx(tabela1,"Tabela  1a - Total de obitos.xlsx")
 tabela1<-ts(tabela1,start = 2000,frequency = 1)
 library(zoo)
 tabela1m<-rollmean(x = tabela1,k = 3)
+tabela1m
 
 write_xlsx(as.data.frame(tabela1m),"Tabela  1b - Total de obitos com ma.xlsx")
 
@@ -287,15 +288,16 @@ tabela2
 
 # população geral
 # traz dados de população por faixa etária
-pop<-read_excel("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/Projecoes_IBGE/pop_faixa_etaria.xlsx",sheet="total")
+pop<-read_excel("pop_faixa_etaria.xlsx",sheet="total")
 colnames(pop)
 
 library(tidyr)
 pop_wide<-as.data.frame(pop)
 
-pop_long <- pop_wide %>% gather(faixa_idade, pop, -c(ano)) # para fazer o merge coloca o nome faixa_idade_mae_15_49
-
+pop_long <- pop_wide %>% gather(faixa_idade, pop, -c(ano)) 
 tabela2<-merge(tabela2,pop_long,by=c("ano","faixa_idade"))
+tabela2 
+
 
 # Taxas Específicas de Mortalidade (TEM) por idade (nMx)
 tabela2$tem<-tabela2$obt_ajust/tabela2$pop
@@ -446,173 +448,3 @@ dev.off()
 write_xlsx(tabela2,"Tabela  1f - Taxas Específicas de Mortalidade por sexo.xlsx")
 
 
-# Taxa de Mortalidade Infantil (TMI)
-
-# trazer informação do total de nascidos vivos
-library(readxl)
-nascidos_vivos<- read_excel("Tabela  1b - Total de nascimentos com média móvel.xlsx")
-
-subset(tabela2,faixa_idade=="_menor que 1 ano")
-
-tabela3<-subset(tabela2,faixa_idade=="_menor que 1 ano")
-
-tabela3<-merge(tabela3,nascidos_vivos,by=("ano"),all.x=TRUE)
-
-tabela3$tmi<-tabela3$obt_ajust_m/tabela3$nasc
-tabela3$tmi_h<-tabela3$obt_h_ajust_m/tabela3$nasc_masc_ajust
-tabela3$tmi_m<-tabela3$obt_m_ajust_m/tabela3$nasc_fem_ajust
-
-ano4<-2010:2030
-var1<-c(tabela3$tmi,rep(NA,10))*1000
-var2<-c(tabela3$tmi_h,rep(NA,10))*1000
-var3<-c(tabela3$tmi_m,rep(NA,10))*1000
-var4<-as.data.frame(proj_ibge)$mort_infantil_total
-var5<-as.data.frame(proj_ibge)$mort_infantil_homens
-var6<-as.data.frame(proj_ibge)$mort_infantil_mulheres
-
-data4<-data.frame(ano4,var1,var2,var3,var4,var5,var6)
-
-p5<- ggplot(data4, aes(x=ano4)) +
-  geom_line(aes(y=var1, col="SIM_geral"),linetype=1,size=1.2) +
-  geom_line(aes(y=var2, col="SIM_homens"),linetype=1,size=1.2) +
-  geom_line(aes(y=var3, col="SIM_mulheres"),linetype=1,size=1.2) +
-  geom_line(aes(y=var4, col="Proj. IBGE_geral"),linetype=1,size=1.2) +
-  geom_line(aes(y=var5, col="Proj. IBGE_homens"),linetype=1,size=1.2) +
-  geom_line(aes(y=var6, col="Proj. IBGE_mulheres"),linetype=1,size=1.2) +
-  labs(title="Taxa de Mortalidade Infantil por sexo e fonte de dados - DF - 2010-2030",
-       y="TMI",x=element_blank()) +
-  scale_linetype_manual(values = c(rep("solid", 3), rep("dashed", 3))) +
-  scale_color_manual(name="",
-                     values = c(
-                       "SIM_geral"="gray1",
-                       "SIM_homens"="gray20",
-                       "SIM_mulheres"="gray40",
-                       "Proj. IBGE_geral"="blue4",
-                       "Proj. IBGE_homens"="blue",
-                       "Proj. IBGE_mulheres"="deepskyblue1")) +
-  # ylim(0,NA)+
-  theme(legend.position="bottom",axis.text.x = element_text(angle = 90))
-
-p5
-
-png(filename = "Taxa de Mortalidade Infantil por sexo e fonte de dados - DF - 2010-2030.png",
-    width = 15, height = 12,
-    units = "cm",res = 1200)
-p5
-dev.off()
-
-write_xlsx(data4,"Tabela  1g - Taxa de Mortalidade Infantil por sexo e fontes.xlsx")
-
-
-# tempo de vida
-dados_sim$tempo_vida<-dados_sim$DTOBITO-dados_sim$DTNASC
-dados_sim$inter_inf<-as.numeric(substr(dados_sim$faixa_idade,1,2))
-dados_sim$inter_inf[which(is.na(dados_sim$inter_inf))]<-0
-dados_sim$inter_inf_dias<-dados_sim$inter_inf*365
-table(dados_sim$inter_inf)
-table(dados_sim$inter_inf_dias)
-
-dados_sim$tempo_vida_inter<-dados_sim$tempo_vida-dados_sim$inter_inf_dias
-
-# identificando a quantidade NA por ano
-table(dados_sim$ano[which(is.na(dados_sim$tempo_vida_inter))])
-
-tempo_vida <- dados_sim %>%
-  filter(!is.na(dados_sim$tempo_vida_inter))%>%
-  group_by(ano,faixa_idade) %>%
-  summarise(
-    k = mean(tempo_vida_inter)/365)
-
-# calcular a média móvel
-tempo_vida_long<-as.data.frame(tempo_vida)
-tempo_vida_long$k<-as.numeric(tempo_vida_long$k)
-
-tempo_vida_wide<-spread(as.data.frame(tempo_vida_long),faixa_idade,k)
-
-table4<-ts(tempo_vida_wide,start = 2000,frequency = 1)
-library(zoo)
-library(ggplot2)
-table4m<-rollmean(x = table4,k = 3)
-table4m<-as.data.frame(table4m)
-
-
-table4m<-table4m %>% gather(faixa_idade, k, -c(ano))
-tempo_vida<-merge(tempo_vida,table4m,by=c("ano","faixa_idade"),all.x = TRUE)
-
-write_xlsx(table4m,"Tabela  1h - Tempo de vida médio no intervalo etário.xlsx")
-
-# homens
-tempo_vida <- dados_sim %>%
-  filter(!is.na(dados_sim$tempo_vida_inter))%>%
-  filter(SEXO=="Masculino")%>%
-  group_by(ano,faixa_idade) %>%
-  summarise(
-    k = mean(tempo_vida_inter)/365)
-
-# calcular a média móvel
-tempo_vida_long<-as.data.frame(tempo_vida)
-tempo_vida_long$k<-as.numeric(tempo_vida_long$k)
-
-tempo_vida_wide<-spread(as.data.frame(tempo_vida_long),faixa_idade,k)
-
-table4<-ts(tempo_vida_wide,start = 2000,frequency = 1)
-library(zoo)
-library(ggplot2)
-table4m<-rollmean(x = table4,k = 3)
-table4m<-as.data.frame(table4m)
-
-
-table4m<-table4m %>% gather(faixa_idade, k, -c(ano))
-tempo_vida<-merge(tempo_vida,table4m,by=c("ano","faixa_idade"),all.x = TRUE)
-
-
-write_xlsx(table4m,"Tabela  1i - Tempo de vida médio no intervalo etário _homens.xlsx")
-
-# mulheres
-tempo_vida <- dados_sim %>%
-  filter(!is.na(dados_sim$tempo_vida_inter))%>%
-  filter(SEXO=="Feminino")%>%
-  group_by(ano,faixa_idade) %>%
-  summarise(
-    k = mean(tempo_vida_inter)/365)
-
-# calcular a média móvel
-tempo_vida_long<-as.data.frame(tempo_vida)
-tempo_vida_long$k<-as.numeric(tempo_vida_long$k)
-
-tempo_vida_wide<-spread(as.data.frame(tempo_vida_long),faixa_idade,k)
-
-table4<-ts(tempo_vida_wide,start = 2000,frequency = 1)
-library(zoo)
-library(ggplot2)
-table4m<-rollmean(x = table4,k = 3)
-table4m<-as.data.frame(table4m)
-
-
-table4m<-table4m %>% gather(faixa_idade, k, -c(ano))
-tempo_vida<-merge(tempo_vida,table4m,by=c("ano","faixa_idade"),all.x = TRUE)
-
-
-write_xlsx(table4m,"Tabela  1j - Tempo de vida médio no intervalo etário _mulheres.xlsx")
-
-
-install.packages("popPyramid")
-library(popPyramid)
-df <- popPyramid::popPER
-df <- dplyr::filter(df, Year==2021)
-library(popPyramid)
-plotPyramid(df=df, age="gAge", sex="Sex", pop="Population")
-
-df <- popPyramid::popPER
-df <- dplyr::filter(df, Year==2021)
-library(popPyramid)
-plotPyramid(df=df, age="gAge", sex="Sex", pop="Population",
-            labx="Personas", laby="Grupo de edad",
-            twocolors=c("steelblue","violetred3"),
-            rotation=45, n.breaks=15, value.labels=FALSE)
-df <- popPyramid::popPER
-df <- dplyr::filter(df, Year==2021)
-df <- percDF(df, "gAge", "Sex", "Population")
-library(popPyramid)
-plotPercPyramid(df=df, age="gAge", sex="Sex", perpop="perc_Population")
-```
