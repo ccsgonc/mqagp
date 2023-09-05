@@ -1,62 +1,74 @@
-# ---
-#   title: "Indicadores no R: registros de mortalidade e natalidade e as projeções populacionais"
-# author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
-# date: "30-agosto-2023"
-# ---
-  
-# O objetivo deste tutorial é realizar comparações entre os registros de óbitos e
-# nascimentos e as projeções desses dois componentes. Nesse caso trabalha-se com 
-# o nível geográfico UF.
+---
+title: "Indicadores no R: registros de mortalidade e as projeções populacionais"
+author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
+date: "23-agosto-2023"
+output:
+  html_document: 
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+O objetivo deste tutorial é realizar comparações entre os registros de óbitos e
+nascimentos e as projeções desses dois componentes. Nesse caso trabalha-se com
+o nível geográfico UF.
 
 # Contextualização
 
-# O Sistema de Informações da Mortalidade (SIM) e oSistema de Informações sobre 
-# Nascidos Vivos (SINASC) desempenha um papel relevante na captação e registro 
-# de dados sobre os óbitos e nascimentos do país. O sistema reune informações 
-# detalhadas sobre cada óbito como local de residência, data, sexo e sobre o 
-# recém-nascido, como local de nascimento, data, sexo, tipo de parto e 
-# características da mãe. Já as projeções populacionais realizadas pelo 
-# IBGE são essenciais para o planejamento de políticas públicas, alocação 
-# de recursos e desenvolvimento sustentável, uma vez que oferecem insights 
-# sobre as tendências demográficas futuras, permitindo que os governos e as 
-# instituições tomem decisões informadas para atender às necessidades em 
-# constante evolução das populações.
+O Sistema de Informações da Mortalidade (SIM) e oSistema de Informações sobre
+Nascidos Vivos (SINASC) desempenha um papel relevante na captação e registro
+de dados sobre os óbitos e nascimentos do país. O sistema reune informações
+detalhadas sobre cada óbito como local de residência, data, sexo e sobre o
+recém-nascido, como local de nascimento, data, sexo, tipo de parto e
+características da mãe. Já as projeções populacionais realizadas pelo
+IBGE são essenciais para o planejamento de políticas públicas, alocação
+de recursos e desenvolvimento sustentável, uma vez que oferecem insights
+sobre as tendências demográficas futuras, permitindo que os governos e as
+instituições tomem decisões informadas para atender às necessidades em
+constante evolução das populações.
 
 # Estatísticas vitais
 
 ## SIM
 
-# 1. Instale e carregue o pacote "microdatasus":
-
+ 1. Instale e carregue o pacote "microdatasus":
+```{r pacotes}
 library(remotes)
 if (!require("microdatasus")){
   install.packages("remotes")
   remotes::install_github("rfsaldanha/microdatasus")
   library(microdatasus)
 }
-
-# 2. Acesse os microdados de óbitos:
+```
+ 2. Acesse os microdados de óbitos:
   
   # Vamos supor que você queira acessar os microdados de registros de óbitos 
   # da dados_sim de dados "SIM-DO". Use o seguinte código para isso:
-  
+```{r daos sim}  
 dados_sim <- fetch_datasus(year_start = 2000, 
                            year_end = 2021, 
                            uf = "DF", 
                            information_system = "SIM-DO",
                            vars=c("DTOBITO","DTNASC","IDADE","SEXO","CODMUNRES"))
-
-# 3. Processa os dados
-
+```
+ 3. Processa os dados
+```{r processa sim}
 dados_sim <- process_sim(dados_sim)
+```
 
+```{r pacotes 2}
 # pacote [dataMaid](https://cran.r-project.org/web/packages/dataMaid/index.html)
 if (!require("dataMaid")){
   install.packages("dataMaid")
   library(dataMaid)
 }
 makeDataReport(dados_sim,replace = TRUE)
+```
 
+```{r criação variaveis}
 library(tidyverse)
 dados_sim<- dados_sim %>% mutate(
   obt = 1,
@@ -84,18 +96,21 @@ dados_sim<- dados_sim %>% mutate(
                                 "75 a 79 anos",
                                 "80 a 84 anos",
                                 "85 anos ou mais")))
+```
 
 
-
-
+```{r totais}
 # total de óbitos para DF
 aggregate(data=dados_sim,obt~ano, FUN= sum) # problema identificado com criação de NA em 2000
 
 # correção dos NA presente na dados_sim de 2000
 dados_sim$ano[which(is.na(dados_sim$ano))]<-2000
+
 # total de óbitos para DF
 aggregate(data=dados_sim,obt~ano, FUN= sum) # ok com http://tabnet.datasus.gov.br/cgi/tabcgi.exe?sim/cnv/obt10df.def
+```
 
+```{r tabelas}
 # tabela 1 - total de obitos e por sexo
 tab1 <-dados_sim  %>%
   group_by(ano) %>%
@@ -117,15 +132,18 @@ tab1b<-dados_sim  %>%
 tabela1<-merge(tabela1,tab1b,by="ano")
 rm(tab1b)
 tabela1
+```
 
+```{r tableas ajust}
 # ajuste com NA
 tabela1$obt_masc_ajust<-round(tabela1$obt_masc/(tabela1$obt_masc+tabela1$obt_fem)*tabela1$obt)
 tabela1$obt_fem_ajust<-round(tabela1$obt_fem/(tabela1$obt_masc+tabela1$obt_fem)*tabela1$obt)
 # verifica se a soma é verdadeira
 tabela1$obt_fem_ajust+tabela1$obt_masc_ajust==tabela1$obt
 tabela1
-
-# exportando tabelas
+```
+exportando tabelas
+```{r exportar tabelas}
 library(writexl)
 write_xlsx(tabela1,"Tabela  1a - Total de obitos.xlsx")
 
@@ -144,10 +162,13 @@ ggplot(as.data.frame(tabela1m), aes(x=ano, y=obt)) +
   ylab("Óbitos")+
   ggtitle("Total de obitos - DF - 2000-2020 ")
 
-# leitura dos pacotes utilizados
-library(readxl)
+```
+leitura dos pacotes utilizados
 
-# leitura da base
+
+leitura da base
+```{r projeções}
+library(readxl)
 proj_ibge<- read_excel("indicadores_projecoes_DF_IBGE.xlsx")
 
 # alterações para produzir gráficos
@@ -224,7 +245,6 @@ dev.off()
 write_xlsx(data2,"Tabela  1d - Taxa Bruta de Mortalidade por fontes.xlsx")
 
 
-
 # total de obitos para DF por faixa etaria
 tab2 <- dados_sim %>%
   group_by(ano,faixa_idade) %>%
@@ -271,7 +291,7 @@ tabela2
 tabela2$part<-tabela2$obt/tabela2$obt_sem_na
 tabela2$obt_ajust<-round(tabela2$part*tabela2$obt_total)
 
-#  arredondou para todos
+# arredondou para todos
 tabela2 %>%
   filter(!is.na(faixa_idade))%>%
   group_by(ano) %>%
@@ -299,7 +319,7 @@ tabela2<-merge(tabela2,pop_long,by=c("ano","faixa_idade"))
 tabela2 
 
 
-# Taxas Específicas de Mortalidade (TEM) por idade (nMx)
+## Taxas Específicas de Mortalidade (TEM) por idade (nMx)
 tabela2$tem<-tabela2$obt_ajust/tabela2$pop
 
 #fazendo a média móvel
@@ -340,7 +360,7 @@ dev.off()
 
 write_xlsx(tabela2,"Tabela  1e - Taxas Específicas de Mortalidade.xlsx")
 
-# população homens
+### população homens
 # traz dados de população por faixa etária
 pop_h<-read_excel("pop_faixa_etaria.xlsx",sheet="homens")
 colnames(pop_h)
@@ -352,7 +372,7 @@ pop_h_long <- pop_h_wide %>% gather(faixa_idade, pop_h, -c(ano)) # para fazer o 
 
 tabela2<-merge(tabela2,pop_h_long,by=c("ano","faixa_idade"))
 
-# Taxas Específicas de Mortalidade (TEM) masculina por idade (nMx)
+## Taxas Específicas de Mortalidade (TEM) masculina por idade (nMx)
 tabela2$tem_h<-tabela2$obt_h_ajust/tabela2$pop_h
 
 #fazendo a média móvel
@@ -403,7 +423,7 @@ pop_m_long <- pop_m_wide %>% gather(faixa_idade, pop_m, -c(ano)) # para fazer o 
 
 tabela2<-merge(tabela2,pop_m_long,by=c("ano","faixa_idade"))
 
-# Taxas Específicas de Mortalidade (TEM) feminina por idade (nMx)
+## Taxas Específicas de Mortalidade (TEM) feminina por idade (nMx)
 tabela2$tem_mu<-tabela2$obt_m_ajust/tabela2$pop_m
 
 #fazendo a média móvel
@@ -445,5 +465,4 @@ dev.off()
 
 
 write_xlsx(tabela2,"Tabela  1f - Taxas Específicas de Mortalidade por sexo.xlsx")
-
-
+```
