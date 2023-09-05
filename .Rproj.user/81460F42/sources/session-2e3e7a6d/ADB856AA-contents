@@ -1,5 +1,5 @@
 # ---
-#   title: "Indicadores no R: registros de mortalidade e natalidade e as projeções populacionais"
+#   title: "Indicadores no R: registros de mortalidade e as projeções populacionais"
 # author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
 # date: "30-agosto-2023"
 # ---
