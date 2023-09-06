@@ -1,7 +1,7 @@
 ---
-title: "Indicadores no R: informações de mortalidade e projeções - SIM"
+title: "Tábuas de vida"
 author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
-date: "05-setembro-2023"
+date: "13-setembro-2023"
 output:
   html_document: 
     toc: true
@@ -12,9 +12,15 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-O objetivo deste tutorial é realizar comparações entre os registros de óbitos e as projeções desse componente. Nesse caso trabalha-se com o nível geográfico UF.
+Qual é a probabilidade de que uma pessoa da idade x que está viva hoje ainda estará viva em 20 anos ? Ou, mais especificamente, de todas as pessoas que nascem, quantas chegarão à idade de 65 anos ? Ou, prevalecendo as condições atuais de mortalidade, qual é o número esperado de óbitos de mulheres entre 15-49 anos de idade, de uma coorte hipotética de 100.000 nascimentos ? (Grupo de Fox, xxxx, p. 297).
 
-# SIM
+O objetivo deste tutorial é produzir uma tábua de vida com base nos registros de óbitos e, assim, estimar a expectativa de vida.
+
+# Tábuas de vida
+
+O IBGE divulga anualmente as Tábuas Completas de Mortalidade, ou também chamada de tábua de vida, tabela de vida, tábua de mortalidade ou tabela de sobrevivência, para o total da população brasileira em 1o de julho do ano anterior. Isso se realizada até 1º de dezembro de cada ano em cumprimento ao disposto no Art. 2o do Decreto n. 3.266, de 29.11.1999. Conforme o [IBGE](https://www.ibge.gov.br/estatisticas/sociais/populacao/9126-tabuas-completas-de-mortalidade.html?=&t=sobre),"essas informações refletem a tendência de longo prazo da mortalidade no País e subsidiam o cálculo do fator previdenciário com vistas às aposentadorias dos trabalhadores que estão sob o Regime Geral de Previdência Social."
+
+As tábuas de vida podem ser completas (para idades 0, 1, 2, 3, 4, 5 etc.) ou abreviadas (para idades 0, 1, 5, 10, 15 etc.). As tábuas abreviadas são mais comuns. Devido às diferenças consideráveis que costumam existir entre a mortalidade masculina e feminina, as tábuas de vida normalmente são divididas por sexo.
 
 ## Leitura dos pacotes
 
@@ -35,10 +41,9 @@ library(tidyr)
 Acesse os microdados de óbitos especificando o período de análise e a UF a ser estudada:
 
 ```{r dados, echo=TRUE, warning=FALSE}
-dados_sim <- fetch_datasus(year_start = 2001, 
+dados_sim <- fetch_datasus(year_start = 2000, 
                            year_end = 2021, 
-                           uf = "GO", 
-                           vars=c("DTOBITO","DTNASC","SEXO"),
+                           uf = "MG", 
                            information_system = "SIM-DO")
 ```
 
@@ -57,9 +62,6 @@ dados_sim$infantil <- 1*(!is.na(dados_sim$IDADEminutos) |
                 !is.na(dados_sim$IDADEmeses))
 
 dados_sim$IDADEanos[which(dados_sim$infantil==1)]<-0
-
-
-
 
 dados_sim<- dados_sim %>% mutate(
   obt = 1,
@@ -89,20 +91,33 @@ dados_sim<- dados_sim %>% mutate(
                                 "85 anos ou mais")))
 ```
 
-# Projeções populacionais
+# Funções da tábua de vida
 
-Lendo os dados das projeções populacionais especialmente da Unidade da Federação escolhida. O arquivo auxiliar está disponível [aqui](https://github.com/ccsgonc/mqagp/blob/main/indicadores_projecoes_DF_IBGE.xlsx). Para todas as UFs, o arquivo do IBGE pode ser acessado [aqui](https://ftp.ibge.gov.br/Projecao_da_Populacao/Projecao_da_Populacao_2018/projecoes_2018_indicadores.xls).
+## nMx - Taxas Específicas de Mortalidade (TEMs)
 
-```{r proj, echo=TRUE}
-proj_ibge<- read_excel("indicadores_projecoes_DF_IBGE.xlsx")
+A maioria das tábuas de vida começa com uma sequência de TEMs nMx e deriva o resto da tábua a partir daí.
 
-proj_ibge<-ts(proj_ibge,start = 2010,frequency = 1)
-proj_ibge<-window(proj_ibge,start = 2010,end=2030,frequency = 1)
-```
+## nMx: A Taxa Específica de Mortalidade correspondente na população observada
 
-# Indicadores demográficos
+nqx: A probabilidade de morte do intervalo etário de x a x+n-1 anos completos, ou seja, a probabilidade de que uma pessoa de x anos exatos morra antes de alcançar a idade de x+n anos exatos.
 
-### Total de óbitos
+rata da relação entre número de eventos ocorridos (ou casos favoráveis) e número de pessoas expostas à ocorrência deste evento (ou casos possíveis), apresentando, portanto, valores entre 0 e 1.
+
+npx: O complemento de n qx , ou seja n px = 1 -- n qx, a probabilidade de sobrevivência do intervalo etário de x a x+n-1 anos completos.
+
+ℓx: O número de sobreviventes de uma coorte de ℓ0 nascidos vivos depois de x anos3. No caso onde ℓ0 = 1.
+
+ndx: O número de óbitos esperado entre uma coorte de ℓ0 nascidos vivos entre as idades de x e x+n-1 anos completos.
+
+nLx: O número de anos-pessoa vivido pela coorte de ℓ0 pessoas nascidas vivas e ainda vivas na idade de x anos no intervalo de x até x+n anos exatos. Se todo o mundo sobrevive dos x até os x+n anos, este número será simplesmente n ℓx , mas como algumas pessoas morrem durante o intervalo, o número efetivo será menor: n ℓx+n + n ax n dx , onde n ax é:
+
+nax: Um fator de separação (terminologia introduzida em (7.6)) que expressa o número médio de anos vividos entre as idades x e x+n por pessoas vivas em x, mas que morrem antes de x+n. Normalmente este número é aproximadamente n/2, mas pode se afastar deste valor se há variações fortes da intensidade da mortalidade ao longo do intervalo.
+
+nSx: A razão de sobrevivência do intervalo etário (x,x+n) ou seja a proporção de pessoas com idades entre x e x+n anos exatos na população estacionária que sobreviverão até o próximo intervalo: n Lx+n / n Lx .
+
+Tx: O número de anos-pessoa vivido pela coorte de ℓ0 pessoas nascidas vivas e ainda vivas na idade de x anos até a extinção completa da coorte, ou seja, até a morte do último sobrevivente.
+
+ex: O número médio de anos vividos a partir da idade exata x. Em particular, e0 simboliza a esperança de vida (também chamada expectativa de vida) ao nascer.
 
 Sintetize um total de óbitos para a Unidade da Federação escolhida:
 
@@ -149,115 +164,6 @@ tabela1
 
 # exportando tabelas
 write_xlsx(tabela1,"Tabela  1a - Total de obitos.xlsx")
-```
-
-Suavizando os dados com uma média móvel e plotando um gráfico:
-
-```{r dados6, echo=TRUE, warning=FALSE}
-# produzir gráfico
-tabela1<-ts(tabela1,start = 2000,frequency = 1)
-library(zoo)
-tabela1m<-rollmean(x = tabela1,k = 3)
-tabela1m
-
-write_xlsx(as.data.frame(tabela1m),"Tabela  1b - Total de obitos com ma.xlsx")
-
-ggplot(as.data.frame(tabela1m), aes(x=ano, y=obt)) +
-  geom_line( color="steelblue") +
-  geom_point() +
-  xlab("Ano")+
-  ylab("Obitos")+
-  ggtitle("Total de obitos - DF - 2000-2020 ")
-
-```
-
-Como você descreveria essa trajetória?
-
-Com os dados das Projeções Populacionais, qual o total de óbitos projetado até 2030?
-
-```{r dados7, echo=TRUE}
-ggplot(as.data.frame(proj_ibge), aes(x=ano, y=obt)) +
-  geom_line( color="steelblue") +
-  geom_point() +
-  xlab("Ano")+
-  ylab("Obitos")+
-  ggtitle("Total de obitos - DF - 2000-2020 ")
-
-```
-
-Comparando o total de óbitos por fontes, tem-se:
-
-```{r dados8, echo=TRUE}
-ano1<-2010:2030
-var1<-c(round(as.data.frame(tabela1)$obt[11:21]),rep(NA,10))
-var2<-c(round(as.data.frame(tabela1m)$obt[10:19]),rep(NA,11))
-var3<-as.data.frame(proj_ibge)$obt
-data1<-data.frame(ano1,var1,var2,var3)
-
-p1<-ggplot(data1, aes(x=ano1)) +
-  geom_line(aes(y=var1, col="SIM"),linetype=1) +
-  geom_line(aes(y=var2, col="SIM-média móvel"),linetype=1) +
-  geom_line(aes(y=var3, col="Proj. IBGE"),linetype=1) +
-  labs(title="Total de óbitos por fonte de dados - DF - 2010-2030", y="Total de óbitos",x=element_blank()) +
-  scale_color_manual(name="",
-                     values = c("SIM"="coral4",
-                                "SIM-média móvel"="coral3",
-                                "Proj. IBGE"="darkblue")) +
-  # ylim(0,NA)+
-  theme(legend.position="bottom",axis.text.x = element_text(angle = 90))+
-  scale_x_continuous(breaks=ano1, labels=ano1)
-p1
-
-png(filename = "Total de obitos por fonte de dados - DF - 2010-2030.png",
-    width = 15, height = 8,
-    units = "cm",res = 1200)
-p1
-dev.off()
-
-write_xlsx(data1,"Tabela  1c - Total de obitos por fontes.xlsx")
-
-```
-
-### Taxa Bruta de Mortalidade
-
-Calculando a Taxa Bruta de Mortalidade:
-
-```{r dados9, echo=TRUE}
-# taxa bruta de mortalidade
-ano2<-2010:2030
-var1<-c(round(as.data.frame(tabela1)$obt[11:21]),rep(NA,10))/
-  as.data.frame(proj_ibge)$pop_total*1000
-var2<-c(round(as.data.frame(tabela1m)$obt[10:19]),rep(NA,11))/
-  as.data.frame(proj_ibge)$pop_total*1000
-var3<-as.data.frame(proj_ibge)$tbm
-data2<-data.frame(ano2,var1,var2,var3)
-
-p2<-ggplot(data2, aes(x=ano2)) +
-  geom_line(aes(y=var1, col="SIM"),linetype=1,size=1.2) +
-  geom_line(aes(y=var2, col="SIM-média móvel"),linetype=1,size=1.2) +
-  geom_line(aes(y=var3, col="Proj. IBGE"),linetype=1,size=1.2) +
-  labs(title="Taxa Bruta de Mortalidade por fonte de dados - DF - 2010-2030",
-       y="TBM",x=element_blank()) +
-  scale_color_manual(name="",
-                     values = c("SIM"="coral4",
-                                "SIM-média móvel"="coral3",
-                                "Proj. IBGE"="darkblue")) +
-  # ylim(0,NA)+
-  theme(legend.position="bottom",axis.text.x = element_text(angle = 90))+
-  scale_x_continuous(breaks=ano2, labels=ano2)
-p2
-
-png(filename = "Taxa Bruta de Mortalidade por fonte de dados - DF - 2010-2030.png",
-    width = 15, height = 8,
-    units = "cm",res = 1200)
-p2
-dev.off()
-
-
-
-write_xlsx(data2,"Tabela  1d - Taxa Bruta de Mortalidade por fontes.xlsx")
-
-
 ```
 
 Calculando o total de óbitos por faixa etária. O arquivo auxiliar pode ser acessado [aqui](https://github.com/ccsgonc/mqagp/blob/main/pop_faixa_etaria.xlsx) e foi baseada nos dados disponíveis [aqui](https://ftp.ibge.gov.br/Projecao_da_Populacao/Projecao_da_Populacao_2018/projecoes_2018_indicadores.xls).

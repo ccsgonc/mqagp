@@ -1,139 +1,88 @@
----
-title: "Indicadores no R: informações de mortalidade e projeções - SIM"
-author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
-date: "05-setembro-2023"
-output:
-  html_document: 
-    toc: true
-    toc_float: true
----
+# Leitura de microdados do DataSus
+# sim
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+# especifica diretório
+setwd("G:\\.shortcut-targets-by-id\\1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz\\TR_Projecoes_2030\\Banco de dados\\Estatística\\SIM")
+# instala o pacote
+devtools::install_github("rfsaldanha/microdatasus")
 
-O objetivo deste tutorial é realizar comparações entre os registros de óbitos e as projeções desse componente. Nesse caso trabalha-se com o nível geográfico UF.
-
-# SIM
-
-## Leitura dos pacotes
-
-Carregue o pacote "microdatasus" e outros bibliotecas a serem usadas:
-
-```{r pacotes, echo=TRUE, warning=FALSE}
+# leitura de pacotes
 library(microdatasus)
+library(read.dbc)
 library(dplyr)
-library(readxl)
 library(writexl)
 library(zoo)
 library(ggplot2)
-library(tidyr)
-```
 
-## Microdados
+# leitura do nome dos arquivos
+lista_base<-list.files("Dados\\dbc") # todos os arquivos dbc estão nessa pasta
+lista_base<-lista_base[-c(1)] # retira um arquivo relacionado ao compartilhamento online
 
-Acesse os microdados de óbitos especificando o período de análise e a UF a ser estudada:
+# leitura dos dados
+sim_bruto<-sapply(lista_base, function(nome) read.dbc::read.dbc(paste("G:\\.shortcut-targets-by-id\\1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz\\TR_Projecoes_2030\\Banco de dados\\Estatística\\SIM\\Dados\\dbc\\",nome,sep="")))
 
-```{r dados, echo=TRUE, warning=FALSE}
-dados_sim <- fetch_datasus(year_start = 2001, 
-                           year_end = 2021, 
-                           uf = "GO", 
-                           vars=c("DTOBITO","DTNASC","SEXO"),
-                           information_system = "SIM-DO")
-```
+# alterações manuais necessárias
+# tratamento do sexo em 2014
+# sim_bruto[["DNDF2014.dbc"]]$SEXO2<-as.character(sim_bruto[["DNDF2014.dbc"]]$SEXO)
+# sim_bruto[["DNDF2014.dbc"]]$SEXO2[which(sim_bruto[["DNDF2014.dbc"]]$SEXO2=="M")]<-1
+# sim_bruto[["DNDF2014.dbc"]]$SEXO2[which(sim_bruto[["DNDF2014.dbc"]]$SEXO2=="F")]<-2
+# sim_bruto[["DNDF2014.dbc"]]$SEXO2[which(sim_bruto[["DNDF2014.dbc"]]$SEXO2=="I")]<-0
+# table(sim_bruto[["DNDF2014.dbc"]]$SEXO)
+# table(sim_bruto[["DNDF2014.dbc"]]$SEXO2)
+# sim_bruto[["DNDF2014.dbc"]]$SEXO<-as.factor(sim_bruto[["DNDF2014.dbc"]]$SEXO2)
 
-Processe os dados do SIM criando variáveis com a função *process_sim*
+# pré-processamento - função do paocte microdatasus com configurações pre-definidas de variáveis
+sim <- lapply(1:21,function(numero) process_sim(sim_bruto[[numero]]))
 
-```{r dados2, echo=TRUE, warning=FALSE}
-dados_sim <- process_sim(dados_sim)
-```
+# preservando apenas as variáveis de interesse
+vars<-c("DTOBITO","DTNASC","IDADEanos","SEXO")
 
-Crie a variável de faixa etária:
+sim<- lapply(1:21,function(numero) sim[[numero]][,vars])
 
-```{r dados3, echo=TRUE}
-dados_sim$infantil <- 1*(!is.na(dados_sim$IDADEminutos) |
-                !is.na(dados_sim$IDADEhoras)|
-                !is.na(dados_sim$IDADEdias)|
-                !is.na(dados_sim$IDADEmeses))
+base<-do.call(rbind.data.frame, sim)
 
-dados_sim$IDADEanos[which(dados_sim$infantil==1)]<-0
+# cria variável de faixa etária
+# resolvendo problema da variável idade_anos
+base$IDADEanos[which(is.na(base$IDADEanos))]<-0
 
-
-
-
-dados_sim<- dados_sim %>% mutate(
-  obt = 1,
-  ano = as.numeric(substr(DTOBITO,1,4)),
-  ano_nasc = as.numeric(substr(DTNASC,1,4)),
-  IDADEanos = as.numeric(IDADEanos),
-  faixa_idade =  cut(IDADEanos,c(-Inf,0,4,9,14,19,24,29,34,39,
-                                 44,49,54,59,64,69,74,79,84,Inf),
-                     labels = c("_menor que 1 ano",
-                                "01 a 04 anos",
-                                "05 a 09 anos",
-                                "10 a 14 anos",
-                                "15 a 19 anos",
-                                "20 a 24 anos",
-                                "25 a 29 anos",
-                                "30 a 34 anos",
-                                "35 a 39 anos",
-                                "40 a 44 anos",
-                                "45 a 49 anos",
-                                "50 a 54 anos",
-                                "55 a 59 anos",
-                                "60 a 64 anos",
-                                "65 a 69 anos",
-                                "70 a 74 anos",
-                                "75 a 79 anos",
-                                "80 a 84 anos",
-                                "85 anos ou mais")))
-```
-
-# Projeções populacionais
-
-Lendo os dados das projeções populacionais especialmente da Unidade da Federação escolhida. O arquivo auxiliar está disponível [aqui](https://github.com/ccsgonc/mqagp/blob/main/indicadores_projecoes_DF_IBGE.xlsx). Para todas as UFs, o arquivo do IBGE pode ser acessado [aqui](https://ftp.ibge.gov.br/Projecao_da_Populacao/Projecao_da_Populacao_2018/projecoes_2018_indicadores.xls).
-
-```{r proj, echo=TRUE}
-proj_ibge<- read_excel("indicadores_projecoes_DF_IBGE.xlsx")
-
-proj_ibge<-ts(proj_ibge,start = 2010,frequency = 1)
-proj_ibge<-window(proj_ibge,start = 2010,end=2030,frequency = 1)
-```
-
-# Indicadores demográficos
-
-### Total de óbitos
-
-Sintetize um total de óbitos para a Unidade da Federação escolhida:
-
-```{r dados4, echo=TRUE}
-# total de óbitos para DF
-aggregate(data=dados_sim,obt~ano, FUN= sum) # problema identificado com criação de NA em 2000
-
-# correção dos NA presente na dados_sim de 2000
-dados_sim$ano[which(is.na(dados_sim$ano))]<-2000
-# total de óbitos para DF
-aggregate(data=dados_sim,obt~ano, FUN= sum) # ok com http://tabnet.datasus.gov.br/cgi/tabcgi.exe?sim/cnv/obt10df.def
+base<- base %>% mutate(obt = 1,
+                       ano = as.numeric(substr(DTOBITO,1,4)),
+                       ano_nasc = as.numeric(substr(DTNASC,1,4)),
+                       faixa_idade = cut(IDADEanos,c(-Inf,0,4,9,14,19,24,29,34,39,
+                                                        44,49,54,59,64,69,74,79,84,Inf),
+                                             labels = c("_menor que 1 ano","01 a 04 anos","05 a 09 anos","10 a 14 anos",
+                                                        "15 a 19 anos","20 a 24 anos",
+                                                        "25 a 29 anos","30 a 34 anos","35 a 39 anos",
+                                                        "40 a 44 anos","45 a 49 anos","50 a 54 anos",
+                                                        "55 a 59 anos","60 a 64 anos","65 a 69 anos",
+                                                        "70 a 74 anos","75 a 79 anos","80 a 84 anos",
+                                                        "85 anos ou mais"))
+)
 
 
-```
 
-Organize uma table com o total de óbitos por sexo para a UF escolhida:
 
-```{r dados5, echo=TRUE, warning=FALSE}
-# tabela 1 - total de obitos e por sexo
-tab1 <-dados_sim  %>%
+# total de nascimentos para DF
+aggregate(data=base,obt~ano, FUN= sum) # problema identificado com criação de NA em 2000
+
+# correção dos NA presente na base de 2000
+base$ano[which(is.na(base$ano))]<-2000
+# total de nascimentos para DF
+aggregate(data=base,obt~ano, FUN= sum) # ok com http://tabnet.datasus.gov.br/cgi/tabcgi.exe?sim/cnv/obt10df.def
+
+# tabela 1 - total de nascimentos e por sexo
+tab1 <-base  %>%
   group_by(ano) %>%
   summarise(obt = n())
 
-tab1a<-dados_sim  %>%
+tab1a<-base  %>%
   filter(SEXO=="Masculino")%>%
   group_by(ano) %>%
   summarise(obt_masc = n())
 tabela1<-merge(tab1,tab1a,by="ano")
 rm(tab1,tab1a)
 
-tab1b<-dados_sim  %>%
+tab1b<-base  %>%
   filter(SEXO=="Feminino")%>%
   group_by(ano) %>%
   summarise(obt_fem = n())
@@ -147,47 +96,35 @@ tabela1$obt_fem_ajust<-round(tabela1$obt_fem/(tabela1$obt_masc+tabela1$obt_fem)*
 tabela1$obt_fem_ajust+tabela1$obt_masc_ajust==tabela1$obt
 tabela1
 
-# exportando tabelas
 write_xlsx(tabela1,"Tabela  1a - Total de obitos.xlsx")
-```
 
-Suavizando os dados com uma média móvel e plotando um gráfico:
 
-```{r dados6, echo=TRUE, warning=FALSE}
-# produzir gráfico
 tabela1<-ts(tabela1,start = 2000,frequency = 1)
-library(zoo)
-tabela1m<-rollmean(x = tabela1,k = 3)
-tabela1m
 
-write_xlsx(as.data.frame(tabela1m),"Tabela  1b - Total de obitos com ma.xlsx")
+tabela1m<-rollmean(x = tabela1,k = 3)
+
+write_xlsx(as.data.frame(tabela1m),"Tabela  1b - Total de obitos com média móvel.xlsx")
 
 ggplot(as.data.frame(tabela1m), aes(x=ano, y=obt)) +
   geom_line( color="steelblue") +
   geom_point() +
   xlab("Ano")+
-  ylab("Obitos")+
+  ylab("Nascimentos")+
   ggtitle("Total de obitos - DF - 2000-2020 ")
 
-```
 
-Como você descreveria essa trajetória?
+proj_ibge<-readRDS("G:\\.shortcut-targets-by-id\\1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz\\TR_Projecoes_2030\\Banco de dados\\Estatística\\Projecoes_IBGE\\projecoes_DF_IBGE.RDS")
 
-Com os dados das Projeções Populacionais, qual o total de óbitos projetado até 2030?
+proj_ibge<-ts(proj_ibge,start = 2010,frequency = 1)
+proj_ibge<-window(proj_ibge,start = 2010,end=2030,frequency = 1)
 
-```{r dados7, echo=TRUE}
 ggplot(as.data.frame(proj_ibge), aes(x=ano, y=obt)) +
   geom_line( color="steelblue") +
   geom_point() +
   xlab("Ano")+
-  ylab("Obitos")+
-  ggtitle("Total de obitos - DF - 2000-2020 ")
+  ylab("Nascimentos")+
+  ggtitle("Total de nascidos vivos - DF - 2000-2020 ")
 
-```
-
-Comparando o total de óbitos por fontes, tem-se:
-
-```{r dados8, echo=TRUE}
 ano1<-2010:2030
 var1<-c(round(as.data.frame(tabela1)$obt[11:21]),rep(NA,10))
 var2<-c(round(as.data.frame(tabela1m)$obt[10:19]),rep(NA,11))
@@ -195,9 +132,9 @@ var3<-as.data.frame(proj_ibge)$obt
 data1<-data.frame(ano1,var1,var2,var3)
 
 p1<-ggplot(data1, aes(x=ano1)) +
-  geom_line(aes(y=var1, col="SIM"),linetype=1) +
-  geom_line(aes(y=var2, col="SIM-média móvel"),linetype=1) +
-  geom_line(aes(y=var3, col="Proj. IBGE"),linetype=1) +
+  geom_line(aes(y=var1, col="SIM"),linetype=1,size=1.2) +
+  geom_line(aes(y=var2, col="SIM-média móvel"),linetype=1,size=1.2) +
+  geom_line(aes(y=var3, col="Proj. IBGE"),linetype=1,size=1.2) +
   labs(title="Total de óbitos por fonte de dados - DF - 2010-2030", y="Total de óbitos",x=element_blank()) +
   scale_color_manual(name="",
                      values = c("SIM"="coral4",
@@ -208,21 +145,14 @@ p1<-ggplot(data1, aes(x=ano1)) +
   scale_x_continuous(breaks=ano1, labels=ano1)
 p1
 
-png(filename = "Total de obitos por fonte de dados - DF - 2010-2030.png",
+png(filename = "Total de óbitos por fonte de dados - DF - 2010-2030.png",
     width = 15, height = 8,
     units = "cm",res = 1200)
 p1
 dev.off()
 
-write_xlsx(data1,"Tabela  1c - Total de obitos por fontes.xlsx")
+write_xlsx(data1,"Tabela  1c - Total de óbitos por fontes.xlsx")
 
-```
-
-### Taxa Bruta de Mortalidade
-
-Calculando a Taxa Bruta de Mortalidade:
-
-```{r dados9, echo=TRUE}
 # taxa bruta de mortalidade
 ano2<-2010:2030
 var1<-c(round(as.data.frame(tabela1)$obt[11:21]),rep(NA,10))/
@@ -258,18 +188,14 @@ dev.off()
 write_xlsx(data2,"Tabela  1d - Taxa Bruta de Mortalidade por fontes.xlsx")
 
 
-```
 
-Calculando o total de óbitos por faixa etária. O arquivo auxiliar pode ser acessado [aqui](https://github.com/ccsgonc/mqagp/blob/main/pop_faixa_etaria.xlsx) e foi baseada nos dados disponíveis [aqui](https://ftp.ibge.gov.br/Projecao_da_Populacao/Projecao_da_Populacao_2018/projecoes_2018_indicadores.xls).
-
-```{r dados11, echo=TRUE}
 # total de obitos para DF por faixa etaria
-tab2 <- dados_sim %>%
+tab2 <- base %>%
   group_by(ano,faixa_idade) %>%
   summarise(
     obt = n())
 
-tab2a <- dados_sim %>%
+tab2a <- base %>%
   filter(SEXO=="Masculino")%>%
   group_by(ano,faixa_idade) %>%
   summarise(
@@ -278,7 +204,7 @@ tab2a <- dados_sim %>%
 tabela2<-merge(tab2,tab2a,by=c("ano","faixa_idade"))
 rm(tab2,tab2a)
 
-tab2b <- dados_sim %>%
+tab2b <- base %>%
   filter(SEXO=="Feminino")%>%
   group_by(ano,faixa_idade) %>%
   summarise(
@@ -295,6 +221,7 @@ table1<-as.data.frame(tabela1[,c("ano","obt")])
 colnames(table1)<-c("ano","obt_total")
 tabela2<-merge(tabela2,table1,by=c("ano"))
 rm(table1)
+tabela2
 
 table2 <- tabela2 %>%
   filter(!is.na(faixa_idade))%>%
@@ -303,6 +230,7 @@ table2 <- tabela2 %>%
     obt_sem_na = sum(obt))
 
 tabela2<-merge(tabela2,table2,by=c("ano"))
+tabela2
 
 tabela2$part<-tabela2$obt/tabela2$obt_sem_na
 tabela2$obt_ajust<-round(tabela2$part*tabela2$obt_total)
@@ -314,28 +242,26 @@ tabela2 %>%
   summarise(
     obt_conf = sum(obt_ajust))
 
+tabela2
 tabela2$obt_h_ajust<-round(tabela2$obt_h/(tabela2$obt_h+tabela2$obt_m)*tabela2$obt_ajust)
 tabela2$obt_m_ajust<-round(tabela2$obt_m/(tabela2$obt_h+tabela2$obt_m)*tabela2$obt_ajust)
 # conferencia
 tabela2$obt_h_ajust+tabela2$obt_m_ajust==tabela2$obt_ajust
 
+tabela2
+
 # população geral
 # traz dados de população por faixa etária
-pop<-read_excel("pop_faixa_etaria.xlsx",sheet="total")
+pop<-read_excel("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/Projecoes_IBGE/pop_faixa_etaria.xlsx",sheet="total")
 colnames(pop)
 
+library(tidyr)
 pop_wide<-as.data.frame(pop)
 
-pop_long <- pop_wide %>% gather(faixa_idade, pop, -c(ano)) 
+pop_long <- pop_wide %>% gather(faixa_idade, pop, -c(ano)) # para fazer o merge coloca o nome faixa_idade_mae_15_49
+
 tabela2<-merge(tabela2,pop_long,by=c("ano","faixa_idade"))
 
-```
-
-### Taxas Específicas de Mortalidade
-
-Calculando as taxas específicas de mortalidade:
-
-```{r dados12, echo=TRUE}
 # Taxas Específicas de Mortalidade (TEM) por idade (nMx)
 tabela2$tem<-tabela2$obt_ajust/tabela2$pop
 
@@ -377,14 +303,12 @@ dev.off()
 
 write_xlsx(tabela2,"Tabela  1e - Taxas Específicas de Mortalidade.xlsx")
 
-```
+save.image("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/SIM/parcial.RData")
+load("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/SIM/parcial.RData")
 
-Fazendo em separado para homens e mulheres
-
-```{r dados13, echo=TRUE}
 # população homens
 # traz dados de população por faixa etária
-pop_h<-read_excel("pop_faixa_etaria.xlsx",sheet="homens")
+pop_h<-read_excel("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/Projecoes_IBGE/pop_faixa_etaria.xlsx",sheet="homens")
 colnames(pop_h)
 
 library(tidyr)
@@ -435,7 +359,7 @@ dev.off()
 # população mulheres
 library(readxl)
 # traz dados de população por faixa etária
-pop_m<-read_excel("pop_faixa_etaria.xlsx",sheet="mulheres")
+pop_m<-read_excel("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/Projecoes_IBGE/pop_faixa_etaria.xlsx",sheet="mulheres")
 colnames(pop_m)
 
 library(tidyr)
@@ -486,18 +410,15 @@ p4
 dev.off()
 
 
+
 write_xlsx(tabela2,"Tabela  1f - Taxas Específicas de Mortalidade por sexo.xlsx")
-```
 
-### Taxa de Mortalidade Infantil
 
-Calculando a taxa de mortalidade infantil:
-
-```{r dados14, echo=TRUE}
 # Taxa de Mortalidade Infantil (TMI)
 
 # trazer informação do total de nascidos vivos
-nascidos_vivos<- read_excel("Tabela  1b - Total de nascimentos com média móvel.xlsx")
+library(readxl)
+nascidos_vivos<- read_excel("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/SINASC/Tabela  1b - Total de nascimentos com média móvel.xlsx")
 
 subset(tabela2,faixa_idade=="_menor que 1 ano")
 
@@ -510,9 +431,9 @@ tabela3$tmi_h<-tabela3$obt_h_ajust_m/tabela3$nasc_masc_ajust
 tabela3$tmi_m<-tabela3$obt_m_ajust_m/tabela3$nasc_fem_ajust
 
 ano4<-2010:2030
-var1<-c(tabela3$tmi,rep(NA,9))*1000
-var2<-c(tabela3$tmi_h,rep(NA,9))*1000
-var3<-c(tabela3$tmi_m,rep(NA,9))*1000
+var1<-c(tabela3$tmi,rep(NA,10))*1000
+var2<-c(tabela3$tmi_h,rep(NA,10))*1000
+var3<-c(tabela3$tmi_m,rep(NA,10))*1000
 var4<-as.data.frame(proj_ibge)$mort_infantil_total
 var5<-as.data.frame(proj_ibge)$mort_infantil_homens
 var6<-as.data.frame(proj_ibge)$mort_infantil_mulheres
@@ -549,4 +470,105 @@ p5
 dev.off()
 
 write_xlsx(data4,"Tabela  1g - Taxa de Mortalidade Infantil por sexo e fontes.xlsx")
-```
+
+
+save.image("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/sim/sim_indicadores.RData")
+load("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/sim/sim_indicadores.RData")
+
+# tempo de vida
+base$tempo_vida<-base$DTOBITO-base$DTNASC
+base$inter_inf<-as.numeric(substr(base$faixa_idade,1,2))
+base$inter_inf[which(is.na(base$inter_inf))]<-0
+base$inter_inf_dias<-base$inter_inf*365
+table(base$inter_inf)
+table(base$inter_inf_dias)
+
+base$tempo_vida_inter<-base$tempo_vida-base$inter_inf_dias
+
+# identificando a quantidade NA por ano
+table(base$ano[which(is.na(base$tempo_vida_inter))])
+
+tempo_vida <- base %>%
+  filter(!is.na(base$tempo_vida_inter))%>%
+  group_by(ano,faixa_idade) %>%
+  summarise(
+    k = mean(tempo_vida_inter)/365)
+
+# calcular a média móvel
+tempo_vida_long<-as.data.frame(tempo_vida)
+tempo_vida_long$k<-as.numeric(tempo_vida_long$k)
+
+tempo_vida_wide<-spread(as.data.frame(tempo_vida_long),faixa_idade,k)
+
+table4<-ts(tempo_vida_wide,start = 2000,frequency = 1)
+library(zoo)
+library(ggplot2)
+table4m<-rollmean(x = table4,k = 3)
+table4m<-as.data.frame(table4m)
+
+
+table4m<-table4m %>% gather(faixa_idade, k, -c(ano))
+tempo_vida<-merge(tempo_vida,table4m,by=c("ano","faixa_idade"),all.x = TRUE)
+
+write_xlsx(table4m,"Tabela  1h - Tempo de vida médio no intervalo etário.xlsx")
+
+# homens
+tempo_vida <- base %>%
+  filter(!is.na(base$tempo_vida_inter))%>%
+  filter(SEXO=="Masculino")%>%
+  group_by(ano,faixa_idade) %>%
+  summarise(
+    k = mean(tempo_vida_inter)/365)
+
+# calcular a média móvel
+tempo_vida_long<-as.data.frame(tempo_vida)
+tempo_vida_long$k<-as.numeric(tempo_vida_long$k)
+
+tempo_vida_wide<-spread(as.data.frame(tempo_vida_long),faixa_idade,k)
+
+table4<-ts(tempo_vida_wide,start = 2000,frequency = 1)
+library(zoo)
+library(ggplot2)
+table4m<-rollmean(x = table4,k = 3)
+table4m<-as.data.frame(table4m)
+
+
+table4m<-table4m %>% gather(faixa_idade, k, -c(ano))
+tempo_vida<-merge(tempo_vida,table4m,by=c("ano","faixa_idade"),all.x = TRUE)
+
+
+write_xlsx(table4m,"Tabela  1i - Tempo de vida médio no intervalo etário _homens.xlsx")
+
+# mulheres
+tempo_vida <- base %>%
+  filter(!is.na(base$tempo_vida_inter))%>%
+  filter(SEXO=="Feminino")%>%
+  group_by(ano,faixa_idade) %>%
+  summarise(
+    k = mean(tempo_vida_inter)/365)
+
+# calcular a média móvel
+tempo_vida_long<-as.data.frame(tempo_vida)
+tempo_vida_long$k<-as.numeric(tempo_vida_long$k)
+
+tempo_vida_wide<-spread(as.data.frame(tempo_vida_long),faixa_idade,k)
+
+table4<-ts(tempo_vida_wide,start = 2000,frequency = 1)
+library(zoo)
+library(ggplot2)
+table4m<-rollmean(x = table4,k = 3)
+table4m<-as.data.frame(table4m)
+
+
+table4m<-table4m %>% gather(faixa_idade, k, -c(ano))
+tempo_vida<-merge(tempo_vida,table4m,by=c("ano","faixa_idade"),all.x = TRUE)
+
+
+write_xlsx(table4m,"Tabela  1j - Tempo de vida médio no intervalo etário _mulheres.xlsx")
+
+save.image("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/sim/sim_indicadores.RData")
+load("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/sim/sim_indicadores.RData")
+
+
+
+
