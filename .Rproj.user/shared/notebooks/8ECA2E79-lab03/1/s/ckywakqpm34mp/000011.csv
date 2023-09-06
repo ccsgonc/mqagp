@@ -1,7 +1,0 @@
-"0","ggplot(as.data.frame(proj_ibge), aes(x=ano, y=obt)) +"
-"0","  geom_line( color=""steelblue"") +"
-"0","  geom_point() +"
-"0","  xlab(""Ano"")+"
-"0","  ylab(""Óbitos"")+"
-"0","  ggtitle(""Total de óbitos - DF - 2000-2020 "")"
-"0",""

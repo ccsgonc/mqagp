@@ -1,0 +1,5 @@
+"0",""
+"0","# correção dos NA presente na dados_sim de 2000"
+"0","dados_sim$ano[which(is.na(dados_sim$ano))]<-2000"
+"0","# total de óbitos para DF"
+"0","aggregate(data=dados_sim,obt~ano, FUN= sum) # ok com http://tabnet.datasus.gov.br/cgi/tabcgi.exe?sim/cnv/obt10df.def"

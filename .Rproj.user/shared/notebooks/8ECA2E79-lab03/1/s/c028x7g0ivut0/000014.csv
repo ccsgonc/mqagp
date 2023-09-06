@@ -1,0 +1,6 @@
+"0","# Taxa de Mortalidade Infantil (TMI)"
+"0",""
+"0","# trazer informação do total de nascidos vivos"
+"0","nascidos_vivos<- read_excel(""Tabela  1b - Total de nascimentos com média móvel.xlsx"")"
+"0",""
+"0","subset(tabela2,faixa_idade==""_menor que 1 ano"")"
