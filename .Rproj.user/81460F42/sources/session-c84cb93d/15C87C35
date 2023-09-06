@@ -1,0 +1,32 @@
+{
+    "id": "15C87C35",
+    "path": "~/GitHub/mqagp/lab04.Rmd",
+    "project_path": "lab04.Rmd",
+    "type": "r_markdown",
+    "hash": "4007625255",
+    "contents": "",
+    "dirty": true,
+    "created": 1693678188011.0,
+    "source_on_save": false,
+    "relative_order": 4,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "235,0",
+        "scrollLine": "64",
+        "rmdVisualMode": "true",
+        "rmdVisualCollapsedChunks": "",
+        "rmdVisualModeLocation": "8139:9191",
+        "rmdVisualWrapConfigured": "true",
+        "docOutlineVisible": "1",
+        "last_setup_crc32": "c84cb93dbb338d19"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1693962604,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1693962973046,
+    "read_only": false,
+    "read_only_alternatives": []
+}

@@ -12,32 +12,443 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-O objetivo deste tutorial é identificar o nível geográfico mais desagregado considerado no Censo Demográfico e explorar as oportunidades analíticas relacionadas aos dados. O enfoque será direcionado a alguns indicadores demográficos, bem como às limitações inerentes ao cálculo dessas estatísticas em um nível altamente detalhado. As segmentações geográficas começarão por setores censitários e poderão se estender até a consolidação em nível municipal.
+O Sistema de Informações sobre Nascidos Vivos (SINASC) possui como objetivo de coletar dados sobre os nascimentos ocorridos em todo o território nacional e fornecer informações sobre natalidade para todos os níveis do Sistema de Saúde. O objetivo desse tutorial é coletar o total de nascimentos, calcular alguns indicadores relacionados e comparar com a natalidade nas projeções populacionais.
 
-# Contextualização
+# SINASC
 
-## Censo Demográfico
-O Censo Demográfico representa a operação estatística mais complexa conduzida por uma nação, pois abrange a análise das características de toda a população e dos domicílios de todo o território nacional.
+## Leitura dos pacotes
 
-Os Censos Demográficos desempenham o papel singular de investigar todos os domicílios do país, constituindo a fonte primordial para compreender as situações vivenciadas pela população em todos os municípios, incluindo divisões internas como distritos, subdistritos, bairros, bem como a classificação baseada na localização dos domicílios, como urbanos ou rurais.
+Carregue o pacote "microdatasus" e outros bibliotecas a serem usadas:
 
-Os registros desse conjunto de dados, organizados por setor censitário, englobam atributos dos domicílios e das pessoas pesquisadas para a totalidade da população, sendo convencionalmente denominados resultados do universo. 
-
-
-## Setores censitários
-
-O setor censitário constitui a menor unidade territorial, delimitada por uma área contígua que está completamente inserida em zonas urbanas ou rurais. Sua extensão é ajustada para facilitar a execução de pesquisas, e a coleção de todos esses setores abrange a totalidade do território nacional, garantindo, assim, a abrangência integral de todo o país.
-
-Cada setor censitário é distinguido por um número identificador, conhecido como geocódigo. Esse geocódigo é construído por meio da reunião da estrutura da hierarquia político-administrativa à qual o setor censitário pertence: os dois primeiros dígitos correspondem ao código do estado; os cinco subsequentes estão relacionados ao município; os dois seguintes indicam o distrito; os dois na sequência apontam o subdistrito; e, por último, os quatro dígitos finais identificam o setor censitário. Para mais informações detalhadas sobre a Malha de Setores Censitários, ver [aqui](https://www.ibge.gov.br/geociencias/organizacao-do-territorio/malhas-territoriais/26565-malhas-de-setores-censitarios-divisoes-intramunicipais.html?=&t=saiba-mais-edicao)
-
-![](pics/codigo_setor.png)
-
-## Identificando setores
-
-Escolha um setor em: https://censo2010.ibge.gov.br/painel/ e salve o número do setor escolhido no objeto `setor_escolhido`:
-
-```{r setor, echo=TRUE}
-setor_escolhido <- 310620005680043
+```{r pacotes, echo=TRUE, warning=FALSE}
+library(microdatasus)
+library(dplyr)
+library(readxl)
 ```
 
-![](pics/setor_fjp.png)
+## Microdados
+
+Acesse os microdados de nascimentos especificando o período de análise e a UF a ser estudada:
+
+```{r dados, echo=TRUE, warning=FALSE}
+dados_sinasc <- fetch_datasus(year_start = 2000, 
+                           year_end = 2021, 
+                           uf = "DF", 
+                           information_system = "SINASC",
+                           vars=c("DTNASC","IDADEMAE","SEXO"))
+```
+
+Processe os dados do SINASC criando variáveis com a função *process_sinasc:*
+
+```{r dados2, echo=TRUE, warning=FALSE}
+dados_sinasc  <- process_sinasc(dados_sinasc)
+```
+
+Crie a variável de faixa etária:
+
+```{r dados3, echo=TRUE}
+dados_sinasc<- dados_sinasc %>% mutate(nasc = 1,
+                      ano = as.numeric(substr(DTNASC,1,4)),
+                      faixa_idade_mae = cut(as.numeric(IDADEMAE),c(-Inf,4,9,14,19,24,29,34,39,
+                                                                    44,49,54,59,64,69,74,79,Inf),
+                                                                  labels = c("até 4 anos","5 a 9 anos","10 a 14 anos",
+                                                                             "15 a 19 anos","20 a 24 anos",
+                                                                             "25 a 29 anos","30 a 34 anos","35 a 39 anos",
+                                                                             "40 a 44 anos","45 a 49 anos","50 a 54 anos",
+                                                                             "55 a 59 anos","60 a 64 anos","65 a 69 anos",
+                                                                             "70 a 74 anos","75 a 79 anos","80 anos ou mais")),
+
+                      faixa_idade_mae_15_49 = cut(as.numeric(IDADEMAE),c(-Inf,19,
+                                                               24,29,34,
+                                                              39,44,49),
+                                                    labels = c("15 a 19 anos","20 a 24 anos",
+                                                              "25 a 29 anos","30 a 34 anos","35 a 39 anos",
+                                                              "40 a 44 anos","45 a 49 anos"))
+)
+
+```
+
+# Projeções populacionais
+
+Lendo os dados das projeções populacionais especialmente da Unidade da Federação escolhida. O arquivo auxiliar está disponível [aqui](https://github.com/ccsgonc/mqagp/blob/main/indicadores_projecoes_DF_IBGE.xlsx).
+
+```{r proj, echo=TRUE}
+proj_ibge<- read_excel("indicadores_projecoes_DF_IBGE.xlsx")
+
+proj_ibge<-ts(proj_ibge,start = 2010,frequency = 1)
+proj_ibge<-window(proj_ibge,start = 2010,end=2030,frequency = 1)
+```
+
+# Indicadores demográficos
+
+### Total de nascimentos
+
+Sintetize um total de nascimentos para a Unidade da Federação escolhida:
+
+```{r dados4, echo=TRUE}
+# total de nascimentos para DF
+aggregate(data=dados_sinasc,nasc~ano, FUN= sum) 
+
+```
+
+Organize uma table com o total de nascimentos por sexo para a UF escolhida:
+
+```{r dados5, echo=TRUE, warning=FALSE}
+# tabela 1 - total de nascimentos e por sexo
+tab1 <-dados_sinasc  %>%
+  group_by(ano) %>%
+  summarise(nasc = n())
+
+tab1a<-dados_sinasc  %>%
+  filter(SEXO=="Masculino")%>%
+  group_by(ano) %>%
+  summarise(nasc_masc = n())
+tabela1<-merge(tab1,tab1a,by="ano")
+rm(tab1,tab1a)
+
+tab1b<-dados_sinasc  %>%
+  filter(SEXO=="Feminino")%>%
+  group_by(ano) %>%
+  summarise(nasc_fem = n())
+tabela1<-merge(tabela1,tab1b,by="ano")
+rm(tab1b)
+
+# ajuste com NA
+tabela1$nasc_masc_ajust<-round(tabela1$nasc_masc/(tabela1$nasc_masc+tabela1$nasc_fem)*tabela1$nasc)
+tabela1$nasc_fem_ajust<-round(tabela1$nasc_fem/(tabela1$nasc_masc+tabela1$nasc_fem)*tabela1$nasc)
+# verifica se a soma é verdadeira
+tabela1$nasc_fem_ajust+tabela1$nasc_masc_ajust==tabela1$nasc
+tabela1
+
+library(writexl)
+write_xlsx(tabela1,"Tabela  1a - Total de nascimentos.xlsx")
+
+```
+
+Suavizando os dados com uma média móvel e plotando um gráfico:
+
+```{r dados6, echo=TRUE, warning=FALSE}
+tabela1<-ts(tabela1,start = 2000,frequency = 1)
+library(zoo)
+library(ggplot2)
+tabela1m<-rollmean(x = tabela1,k = 3)
+
+write_xlsx(as.data.frame(tabela1m),"Tabela  1b - Total de nascimentos com média móvel.xlsx")
+
+ggplot(as.data.frame(tabela1m), aes(x=ano, y=nasc)) +
+  geom_line( color="steelblue") +
+  geom_point() +
+  xlab("Ano")+
+  ylab("Nascimentos")+
+  ggtitle("Total de nascidos vivos - DF - 2000-2020 ")
+
+```
+
+Como você descreveria essa trajetória?
+
+Com os dados das Projeções Populacionais, qual o total de nascimentos projetado até 2030?
+
+```{r dados7, echo=TRUE}
+ggplot(as.data.frame(proj_ibge), aes(x=ano, y=nasc)) +
+  geom_line( color="steelblue") +
+  geom_point() +
+  xlab("Ano")+
+  ylab("Nascimentos")+
+  ggtitle("Total de nascidos vivos - DF - 2000-2020 ")
+
+
+```
+
+Comparando o total de nascimentos por fontes, tem-se:
+
+```{r dados8, echo=TRUE}
+ano1<-2010:2030
+var1<-c(round(as.data.frame(tabela1)$nasc[11:21]),rep(NA,10))
+var2<-c(round(as.data.frame(tabela1m)$nasc[10:19]),rep(NA,11))
+var3<-as.data.frame(proj_ibge)$nasc
+data1<-data.frame(ano1,var1,var2,var3)
+
+p1<-ggplot(data1, aes(x=ano1)) +
+  geom_line(aes(y=var1, col="SINASC"),linetype=1,size=1.2) +
+  geom_line(aes(y=var2, col="SINASC-média móvel"),linetype=1,size=1.2) +
+  geom_line(aes(y=var3, col="Proj. IBGE"),linetype=1,size=1.2) +
+  labs(title="Total de nascidos vivos por fonte de dados - DF - 2010-2030", y="Total de nascidos vivos",x=element_blank()) +
+  scale_color_manual(name="",
+                     values = c("SINASC"="coral4",
+                                "SINASC-média móvel"="coral3",
+                                "Proj. IBGE"="darkblue")) +
+  # ylim(0,NA)+
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 90))+
+  scale_x_continuous(breaks=ano1, labels=ano1)
+p1
+
+png(filename = "Total de nascidos vivos por fonte de dados - DF - 2010-2030.png",
+    width = 15, height = 8,
+    units = "cm",res = 1200)
+p1
+dev.off()
+
+write_xlsx(data1,"Tabela  1c - Total de nascimentos por fontes.xlsx")
+
+```
+
+### Taxa Bruta de Natalidade
+
+Calculando a Taxa Bruta de Natalidade:
+
+```{r dados9, echo=TRUE}
+# taxa bruta de natalidade
+ano2<-2010:2030
+var1<-c(round(as.data.frame(tabela1)$nasc[11:21]),rep(NA,10))/
+  as.data.frame(proj_ibge)$pop_total*1000
+var2<-c(round(as.data.frame(tabela1m)$nasc[10:19]),rep(NA,11))/
+  as.data.frame(proj_ibge)$pop_total*1000
+var3<-as.data.frame(proj_ibge)$tbn
+data2<-data.frame(ano2,var1,var2,var3)
+
+p2<-ggplot(data2, aes(x=ano2)) +
+  geom_line(aes(y=var1, col="SINASC"),linetype=1,size=1.2) +
+  geom_line(aes(y=var2, col="SINASC-média móvel"),linetype=1,size=1.2) +
+  geom_line(aes(y=var3, col="Proj. IBGE"),linetype=1,size=1.2) +
+  labs(title="Taxa Bruta de Natalidade por fonte de dados - DF - 2010-2030",
+       y="TBN",x=element_blank()) +
+  scale_color_manual(name="",
+                     values = c("SINASC"="coral4",
+                                "SINASC-média móvel"="coral3",
+                                "Proj. IBGE"="darkblue")) +
+  # ylim(0,NA)+
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 90))+
+  scale_x_continuous(breaks=ano2, labels=ano2)
+p2
+
+png(filename = "Taxa Bruta de Natalidade por fonte de dados - DF - 2010-2030.png",
+    width = 15, height = 8,
+    units = "cm",res = 1200)
+p2
+dev.off()
+
+write_xlsx(data2,"Tabela  1d - Taxa Bruta de Natalidade por fontes.xlsx")
+
+
+```
+
+### Taxa de Fecundidade Geral (TFG)
+
+Calculando a taxa de fecundidade geral:
+
+```{r dados10, echo=TRUE}
+# taxa de fecundidade geral
+library(readxl)
+pop_m_15_49 <- read_excel("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/Projecoes_IBGE/pop_m_15-49.xlsx")
+pop_m_15_49<-ts(pop_m_15_49,start = 2010,frequency = 1)
+pop_m_15_49<-window(pop_m_15_49,start=2010,end=2030)
+
+ano3<-2010:2030
+var1<-c(round(as.data.frame(tabela1)$nasc[11:21]),rep(NA,10))/
+  as.data.frame(pop_m_15_49)$pop_m_15_49*1000
+var2<-c(round(as.data.frame(tabela1m)$nasc[10:19]),rep(NA,11))/
+  as.data.frame(pop_m_15_49)$pop_m_15_49*1000
+var3<-as.data.frame(proj_ibge)$nasc/
+  as.data.frame(pop_m_15_49)$pop_m_15_49*1000
+data3<-data.frame(ano3,var1,var2,var3)
+
+p3<-ggplot(data3, aes(x=ano3)) +
+  geom_line(aes(y=var1, col="SINASC"),linetype=1,size=1.2) +
+  geom_line(aes(y=var2, col="SINASC-média móvel"),linetype=1,size=1.2) +
+  geom_line(aes(y=var3, col="Proj. IBGE"),linetype=1,size=1.2) +
+  labs(title="Taxa de Fecundidade Geral por fonte de dados - DF - 2010-2030",
+       y="TFG",x=element_blank()) +
+  scale_color_manual(name="",
+                     values = c("SINASC"="coral4",
+                                "SINASC-média móvel"="coral3",
+                                "Proj. IBGE"="darkblue")) +
+  # ylim(0,NA)+
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 90))+
+  scale_x_continuous(breaks=ano1, labels=ano1)
+
+
+p3
+
+png(filename = "Taxa de Fecundidade Geral por fonte de dados - DF - 2010-2030.png",
+    width = 15, height = 8,
+    units = "cm",res = 1200)
+p3
+dev.off()
+
+write_xlsx(data3,"Tabela  1e - Taxa de Fecundidade Geral por fontes.xlsx")
+
+```
+
+Calculando o total de nascimentos por faixa etária da mãe:
+
+```{r dados11, echo=TRUE}
+# total de nascimentos para DF por faixa etaria da mae
+tab2 <- dados_sinasc %>%
+  group_by(ano,faixa_idade_mae_15_49) %>%
+  summarise(
+    nasc = n())
+
+tab2a <- dados_sinasc %>%
+  filter(SEXO=="Masculino")%>%
+  group_by(ano,faixa_idade_mae_15_49) %>%
+  summarise(
+    nasc_h = n())
+
+tabela2<-merge(tab2,tab2a,by=c("ano","faixa_idade_mae_15_49"))
+rm(tab2,tab2a)
+
+tab2b <- dados_sinasc %>%
+  filter(SEXO=="Feminino")%>%
+  group_by(ano,faixa_idade_mae_15_49) %>%
+  summarise(
+    nasc_m = n())
+
+tabela2<-merge(tabela2,tab2b,by=c("ano","faixa_idade_mae_15_49"))
+rm(tab2b)
+
+subset(tabela2,ano==2019)
+subset(tabela2,ano==2020)
+
+# faz ajuste de NA - faixa da idade da mãe
+table1<-as.data.frame(tabela1[,c("ano","nasc")])
+colnames(table1)<-c("ano","nasc_total")
+tabela2<-merge(tabela2,table1,by=c("ano"))
+rm(table1)
+tabela2
+
+table2 <- tabela2 %>%
+  filter(!is.na(faixa_idade_mae_15_49))%>%
+  group_by(ano) %>%
+  summarise(
+    nasc_sem_na = sum(nasc))
+
+tabela2<-merge(tabela2,table2,by=c("ano"))
+tabela2
+
+tabela2$part<-tabela2$nasc/tabela2$nasc_sem_na
+tabela2$nasc_ajust<-round(tabela2$part*tabela2$nasc_total)
+
+# quase arredondou para todos
+tabela2 %>%
+  filter(!is.na(faixa_idade_mae_15_49))%>%
+  group_by(ano) %>%
+  summarise(
+    nasc_conf = sum(nasc_ajust))
+
+tabela2
+tabela2$nasc_h_ajust<-round(tabela2$nasc_h/(tabela2$nasc_h+tabela2$nasc_m)*tabela2$nasc_ajust)
+tabela2$nasc_m_ajust<-round(tabela2$nasc_m/(tabela2$nasc_h+tabela2$nasc_m)*tabela2$nasc_ajust)
+# conferencia
+tabela2$nasc_h_ajust+tabela2$nasc_m_ajust==tabela2$nasc_ajust
+
+tabela2
+# traz dados de população por faixa etária
+colnames(pop_m_15_49)
+
+library(tidyr)
+pop_m_wide<-as.data.frame(pop_m_15_49)
+colnames(pop_m_wide)<- c("ano","15 a 49 anos" ,"15 a 19 anos" ,"20 a 24 anos",
+                        "25 a 29 anos", "30 a 34 anos", "35 a 39 anos",
+                        "40 a 44 anos",
+                        "45 a 49 anos")
+pop_m_long <- pop_m_wide %>% gather(faixa_idade_mae_15_49, pop_m, -c(ano)) # para fazer o merge coloca o nome faixa_idade_mae_15_49
+
+tabela2<-merge(tabela2,pop_m_long,by=c("ano","faixa_idade_mae_15_49"))
+
+```
+
+### Taxas Específicas de Fecundidade
+
+Calculando as taxas específicas de fecundidade:
+
+```{r dados12, echo=TRUE}
+# Taxas Específicas de Fecundidade (TEFs) por idade (nfx)
+tabela2$tef<-tabela2$nasc_ajust/tabela2$pop_m
+
+#fazendo a média móvel
+tabela2[,c("ano","faixa_idade_mae_15_49","nasc_ajust")]
+
+table2<-spread(tabela2[,c("ano","faixa_idade_mae_15_49","nasc_ajust")],faixa_idade_mae_15_49,nasc_ajust)
+
+table2<-ts(table2,start = 2010,frequency = 1)
+library(zoo)
+library(ggplot2)
+table2m<-rollmean(x = table2,k = 3)
+
+table2m<-as.data.frame(table2m) %>% gather(faixa_idade_mae_15_49, nasc_ajust_m, -c(ano)) # para fazer o merge coloca o nome faixa_idade_mae_15_49
+tabela2<-merge(tabela2,table2m,by=c("ano","faixa_idade_mae_15_49"),all.x = TRUE)
+
+
+colnames(tabela2)
+tabela2$tef_m<-tabela2$nasc_ajust_m/tabela2$pop_m
+
+tabela2$ano<-as.character(tabela2$ano)
+
+data<-subset(tabela2,ano!=2010&ano!=2020)
+p4<-ggplot(data, aes(x=faixa_idade_mae_15_49, y=tef_m,group=ano,color=ano)) +
+  geom_line(linetype=1,size=1.2) +
+  labs(title="Taxas Específicas de Fecundidade por ano - DF - 2010-2020",
+       y="TEF",x=element_blank()) +
+  # ylim(0,NA)+
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 90))
+
+
+p4
+
+png(filename = "Taxas Específicas de Fecundidade por ano - DF - 2010-2020.png",
+    width = 15, height = 12,
+    units = "cm",res = 1200)
+p4
+dev.off()
+
+write_xlsx(tabela2,"Tabela  1f - Taxas Específicas de Fecundidade.xlsx")
+
+```
+
+### Taxa de Fecundidade Total
+
+Calculando a taxa de fecundidade total:
+
+```{r dados13, echo=TRUE}
+# Taxa de Fecundidade Total (TFT)
+tabela3<-tabela2 %>%
+  filter(!is.na(faixa_idade_mae_15_49))%>%
+  group_by(ano) %>%
+  summarise(
+    tft = 5*sum(tef),
+    tft_m = 5*sum(tef_m))
+
+
+ano4<-2010:2030
+var1<-c(tabela3$tft,rep(NA,10))
+var2<-c(tabela3$tft_m,rep(NA,10))
+var3<-as.data.frame(proj_ibge)$tft
+
+data4<-data.frame(ano4,var1,var2,var3)
+
+p5<- ggplot(data4, aes(x=ano4)) +
+  geom_line(aes(y=var1, col="SINASC"),linetype=1,size=1.2) +
+  geom_line(aes(y=var2, col="SINASC-média móvel"),linetype=1,size=1.2) +
+  geom_line(aes(y=var3, col="Proj. IBGE"),linetype=1,size=1.2) +
+  labs(title="Taxa de Fecundidade Total por fonte de dados - DF - 2010-2030",
+       y="TFT",x=element_blank()) +
+  scale_color_manual(name="",
+                     values = c(
+                       "SINASC"="coral4",
+                                "SINASC-média móvel"="coral3",
+                                "Proj. IBGE"="darkblue")) +
+  # ylim(0,NA)+
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 90))+
+  scale_x_continuous(breaks=ano4, labels=ano4)
+
+p5
+
+png(filename = "Taxa de Fecundidade Total por fonte de dados - DF - 2010-2030.png",
+    width = 15, height = 12,
+    units = "cm",res = 1200)
+p5
+dev.off()
+
+write_xlsx(data4,"Tabela  1g - Taxa de Fecundidade Total por fontes.xlsx")
+
+```
