@@ -1,7 +1,7 @@
 ---
 title: "Indicadores no R: informações de nascimento e projeções - SINASC"
 author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
-date: "01-setembro-2023"
+date: "05-setembro-2023"
 output:
   html_document: 
     toc: true
@@ -44,6 +44,8 @@ dados_sinasc <- fetch_datasus(year_start = 2000,
 Processe os dados do SINASC criando variáveis com a função *process_sinasc:*
 
 ```{r dados2, echo=TRUE, warning=FALSE}
+dados_sinasc$SEXO[which(dados_sinasc$SEXO=="M")] <- 1
+dados_sinasc$SEXO[which(dados_sinasc$SEXO=="F")] <- 2
 dados_sinasc  <- process_sinasc(dados_sinasc)
 ```
 
@@ -235,7 +237,7 @@ write_xlsx(data2,"Tabela  1d - Taxa Bruta de Natalidade por fontes.xlsx")
 
 ### Taxa de Fecundidade Geral (TFG)
 
-Para o cálculo a seguir, será necessário arquivo auxiliar com o total populacional das mulheres de 15 a 49 anos. Calculando a taxa de fecundidade geral:
+Para o cálculo a seguir, será necessário arquivo auxiliar com o total populacional das mulheres de 15 a 49 anos disponível [aqui](https://github.com/ccsgonc/mqagp/blob/main/pop_m_15-49.xlsx). Calculando a taxa de fecundidade geral:
 
 ```{r dados10, echo=TRUE}
 # taxa de fecundidade geral
@@ -282,6 +284,8 @@ write_xlsx(data3,"Tabela  1e - Taxa de Fecundidade Geral por fontes.xlsx")
 
 Calculando o total de nascimentos por faixa etária da mãe:
 
+tabela2
+
 ```{r dados11, echo=TRUE}
 # total de nascimentos para DF por faixa etaria da mae
 tab2 <- dados_sinasc %>%
@@ -307,15 +311,16 @@ tab2b <- dados_sinasc %>%
 tabela2<-merge(tabela2,tab2b,by=c("ano","faixa_idade_mae_15_49"))
 rm(tab2b)
 
+# visualizando para dois anos específicos
 subset(tabela2,ano==2019)
 subset(tabela2,ano==2020)
+subset(tabela2,ano==2021)
 
 # faz ajuste de NA - faixa da idade da mãe
 table1<-as.data.frame(tabela1[,c("ano","nasc")])
 colnames(table1)<-c("ano","nasc_total")
 tabela2<-merge(tabela2,table1,by=c("ano"))
 rm(table1)
-tabela2
 
 table2 <- tabela2 %>%
   filter(!is.na(faixa_idade_mae_15_49))%>%
@@ -324,7 +329,6 @@ table2 <- tabela2 %>%
     nasc_sem_na = sum(nasc))
 
 tabela2<-merge(tabela2,table2,by=c("ano"))
-tabela2
 
 tabela2$part<-tabela2$nasc/tabela2$nasc_sem_na
 tabela2$nasc_ajust<-round(tabela2$part*tabela2$nasc_total)
@@ -336,13 +340,11 @@ tabela2 %>%
   summarise(
     nasc_conf = sum(nasc_ajust))
 
-tabela2
 tabela2$nasc_h_ajust<-round(tabela2$nasc_h/(tabela2$nasc_h+tabela2$nasc_m)*tabela2$nasc_ajust)
 tabela2$nasc_m_ajust<-round(tabela2$nasc_m/(tabela2$nasc_h+tabela2$nasc_m)*tabela2$nasc_ajust)
 # conferencia
 tabela2$nasc_h_ajust+tabela2$nasc_m_ajust==tabela2$nasc_ajust
 
-tabela2
 # traz dados de população por faixa etária
 colnames(pop_m_15_49)
 
@@ -366,23 +368,16 @@ Calculando as taxas específicas de fecundidade:
 # Taxas Específicas de Fecundidade (TEFs) por idade (nfx)
 tabela2$tef<-tabela2$nasc_ajust/tabela2$pop_m
 
-#fazendo a média móvel
-tabela2[,c("ano","faixa_idade_mae_15_49","nasc_ajust")]
-
 table2<-spread(tabela2[,c("ano","faixa_idade_mae_15_49","nasc_ajust")],faixa_idade_mae_15_49,nasc_ajust)
 
 table2<-ts(table2,start = 2010,frequency = 1)
-library(zoo)
-library(ggplot2)
 table2m<-rollmean(x = table2,k = 3)
 
 table2m<-as.data.frame(table2m) %>% gather(faixa_idade_mae_15_49, nasc_ajust_m, -c(ano)) # para fazer o merge coloca o nome faixa_idade_mae_15_49
 tabela2<-merge(tabela2,table2m,by=c("ano","faixa_idade_mae_15_49"),all.x = TRUE)
 
 
-colnames(tabela2)
 tabela2$tef_m<-tabela2$nasc_ajust_m/tabela2$pop_m
-
 tabela2$ano<-as.character(tabela2$ano)
 
 data<-subset(tabela2,ano!=2010&ano!=2020)
@@ -421,8 +416,8 @@ tabela3<-tabela2 %>%
 
 
 ano4<-2010:2030
-var1<-c(tabela3$tft,rep(NA,10))
-var2<-c(tabela3$tft_m,rep(NA,10))
+var1<-c(tabela3$tft,rep(NA,9))
+var2<-c(tabela3$tft_m,rep(NA,9))
 var3<-as.data.frame(proj_ibge)$tft
 
 data4<-data.frame(ano4,var1,var2,var3)

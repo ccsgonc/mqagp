@@ -1,5 +1,0 @@
-"0","# Taxas Específicas de Fecundidade (TEFs) por idade (nfx)"
-"0","tabela2$tef<-tabela2$nasc_ajust/tabela2$pop_m"
-"0",""
-"0","#fazendo a média móvel"
-"0","tabela2[,c(""ano"",""faixa_idade_mae_15_49"",""nasc_ajust"")]"

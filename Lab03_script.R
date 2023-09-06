@@ -5,7 +5,7 @@
 # ---
   
 # O objetivo deste tutorial é realizar comparações entre os registros de óbitos e
-# nascimentos e as projeções desses dois componentes. Nesse caso trabalha-se com 
+# nascimentos e as projeções desses dois componentes. Nesse caso trabalha-se com
 # o nível geográfico UF.
 
 # Contextualização

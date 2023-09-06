@@ -1,7 +1,0 @@
-"0",""
-"0","# faz ajuste de NA - faixa da idade da mãe"
-"0","table1<-as.data.frame(tabela1[,c(""ano"",""nasc"")])"
-"0","colnames(table1)<-c(""ano"",""nasc_total"")"
-"0","tabela2<-merge(tabela2,table1,by=c(""ano""))"
-"0","rm(table1)"
-"0","tabela2"

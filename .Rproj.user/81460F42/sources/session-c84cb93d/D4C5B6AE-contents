@@ -1,0 +1,574 @@
+# Leitura de microdados do DataSus
+# sim
+
+# especifica diretório
+setwd("G:\\.shortcut-targets-by-id\\1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz\\TR_Projecoes_2030\\Banco de dados\\Estatística\\SIM")
+# instala o pacote
+devtools::install_github("rfsaldanha/microdatasus")
+
+# leitura de pacotes
+library(microdatasus)
+library(read.dbc)
+library(dplyr)
+library(writexl)
+library(zoo)
+library(ggplot2)
+
+# leitura do nome dos arquivos
+lista_base<-list.files("Dados\\dbc") # todos os arquivos dbc estão nessa pasta
+lista_base<-lista_base[-c(1)] # retira um arquivo relacionado ao compartilhamento online
+
+# leitura dos dados
+sim_bruto<-sapply(lista_base, function(nome) read.dbc::read.dbc(paste("G:\\.shortcut-targets-by-id\\1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz\\TR_Projecoes_2030\\Banco de dados\\Estatística\\SIM\\Dados\\dbc\\",nome,sep="")))
+
+# alterações manuais necessárias
+# tratamento do sexo em 2014
+# sim_bruto[["DNDF2014.dbc"]]$SEXO2<-as.character(sim_bruto[["DNDF2014.dbc"]]$SEXO)
+# sim_bruto[["DNDF2014.dbc"]]$SEXO2[which(sim_bruto[["DNDF2014.dbc"]]$SEXO2=="M")]<-1
+# sim_bruto[["DNDF2014.dbc"]]$SEXO2[which(sim_bruto[["DNDF2014.dbc"]]$SEXO2=="F")]<-2
+# sim_bruto[["DNDF2014.dbc"]]$SEXO2[which(sim_bruto[["DNDF2014.dbc"]]$SEXO2=="I")]<-0
+# table(sim_bruto[["DNDF2014.dbc"]]$SEXO)
+# table(sim_bruto[["DNDF2014.dbc"]]$SEXO2)
+# sim_bruto[["DNDF2014.dbc"]]$SEXO<-as.factor(sim_bruto[["DNDF2014.dbc"]]$SEXO2)
+
+# pré-processamento - função do paocte microdatasus com configurações pre-definidas de variáveis
+sim <- lapply(1:21,function(numero) process_sim(sim_bruto[[numero]]))
+
+# preservando apenas as variáveis de interesse
+vars<-c("DTOBITO","DTNASC","IDADEanos","SEXO")
+
+sim<- lapply(1:21,function(numero) sim[[numero]][,vars])
+
+base<-do.call(rbind.data.frame, sim)
+
+# cria variável de faixa etária
+# resolvendo problema da variável idade_anos
+base$IDADEanos[which(is.na(base$IDADEanos))]<-0
+
+base<- base %>% mutate(obt = 1,
+                       ano = as.numeric(substr(DTOBITO,1,4)),
+                       ano_nasc = as.numeric(substr(DTNASC,1,4)),
+                       faixa_idade = cut(IDADEanos,c(-Inf,0,4,9,14,19,24,29,34,39,
+                                                        44,49,54,59,64,69,74,79,84,Inf),
+                                             labels = c("_menor que 1 ano","01 a 04 anos","05 a 09 anos","10 a 14 anos",
+                                                        "15 a 19 anos","20 a 24 anos",
+                                                        "25 a 29 anos","30 a 34 anos","35 a 39 anos",
+                                                        "40 a 44 anos","45 a 49 anos","50 a 54 anos",
+                                                        "55 a 59 anos","60 a 64 anos","65 a 69 anos",
+                                                        "70 a 74 anos","75 a 79 anos","80 a 84 anos",
+                                                        "85 anos ou mais"))
+)
+
+
+
+
+# total de nascimentos para DF
+aggregate(data=base,obt~ano, FUN= sum) # problema identificado com criação de NA em 2000
+
+# correção dos NA presente na base de 2000
+base$ano[which(is.na(base$ano))]<-2000
+# total de nascimentos para DF
+aggregate(data=base,obt~ano, FUN= sum) # ok com http://tabnet.datasus.gov.br/cgi/tabcgi.exe?sim/cnv/obt10df.def
+
+# tabela 1 - total de nascimentos e por sexo
+tab1 <-base  %>%
+  group_by(ano) %>%
+  summarise(obt = n())
+
+tab1a<-base  %>%
+  filter(SEXO=="Masculino")%>%
+  group_by(ano) %>%
+  summarise(obt_masc = n())
+tabela1<-merge(tab1,tab1a,by="ano")
+rm(tab1,tab1a)
+
+tab1b<-base  %>%
+  filter(SEXO=="Feminino")%>%
+  group_by(ano) %>%
+  summarise(obt_fem = n())
+tabela1<-merge(tabela1,tab1b,by="ano")
+rm(tab1b)
+
+# ajuste com NA
+tabela1$obt_masc_ajust<-round(tabela1$obt_masc/(tabela1$obt_masc+tabela1$obt_fem)*tabela1$obt)
+tabela1$obt_fem_ajust<-round(tabela1$obt_fem/(tabela1$obt_masc+tabela1$obt_fem)*tabela1$obt)
+# verifica se a soma é verdadeira
+tabela1$obt_fem_ajust+tabela1$obt_masc_ajust==tabela1$obt
+tabela1
+
+write_xlsx(tabela1,"Tabela  1a - Total de obitos.xlsx")
+
+
+tabela1<-ts(tabela1,start = 2000,frequency = 1)
+
+tabela1m<-rollmean(x = tabela1,k = 3)
+
+write_xlsx(as.data.frame(tabela1m),"Tabela  1b - Total de obitos com média móvel.xlsx")
+
+ggplot(as.data.frame(tabela1m), aes(x=ano, y=obt)) +
+  geom_line( color="steelblue") +
+  geom_point() +
+  xlab("Ano")+
+  ylab("Nascimentos")+
+  ggtitle("Total de obitos - DF - 2000-2020 ")
+
+
+proj_ibge<-readRDS("G:\\.shortcut-targets-by-id\\1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz\\TR_Projecoes_2030\\Banco de dados\\Estatística\\Projecoes_IBGE\\projecoes_DF_IBGE.RDS")
+
+proj_ibge<-ts(proj_ibge,start = 2010,frequency = 1)
+proj_ibge<-window(proj_ibge,start = 2010,end=2030,frequency = 1)
+
+ggplot(as.data.frame(proj_ibge), aes(x=ano, y=obt)) +
+  geom_line( color="steelblue") +
+  geom_point() +
+  xlab("Ano")+
+  ylab("Nascimentos")+
+  ggtitle("Total de nascidos vivos - DF - 2000-2020 ")
+
+ano1<-2010:2030
+var1<-c(round(as.data.frame(tabela1)$obt[11:21]),rep(NA,10))
+var2<-c(round(as.data.frame(tabela1m)$obt[10:19]),rep(NA,11))
+var3<-as.data.frame(proj_ibge)$obt
+data1<-data.frame(ano1,var1,var2,var3)
+
+p1<-ggplot(data1, aes(x=ano1)) +
+  geom_line(aes(y=var1, col="SIM"),linetype=1,size=1.2) +
+  geom_line(aes(y=var2, col="SIM-média móvel"),linetype=1,size=1.2) +
+  geom_line(aes(y=var3, col="Proj. IBGE"),linetype=1,size=1.2) +
+  labs(title="Total de óbitos por fonte de dados - DF - 2010-2030", y="Total de óbitos",x=element_blank()) +
+  scale_color_manual(name="",
+                     values = c("SIM"="coral4",
+                                "SIM-média móvel"="coral3",
+                                "Proj. IBGE"="darkblue")) +
+  # ylim(0,NA)+
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 90))+
+  scale_x_continuous(breaks=ano1, labels=ano1)
+p1
+
+png(filename = "Total de óbitos por fonte de dados - DF - 2010-2030.png",
+    width = 15, height = 8,
+    units = "cm",res = 1200)
+p1
+dev.off()
+
+write_xlsx(data1,"Tabela  1c - Total de óbitos por fontes.xlsx")
+
+# taxa bruta de mortalidade
+ano2<-2010:2030
+var1<-c(round(as.data.frame(tabela1)$obt[11:21]),rep(NA,10))/
+  as.data.frame(proj_ibge)$pop_total*1000
+var2<-c(round(as.data.frame(tabela1m)$obt[10:19]),rep(NA,11))/
+  as.data.frame(proj_ibge)$pop_total*1000
+var3<-as.data.frame(proj_ibge)$tbm
+data2<-data.frame(ano2,var1,var2,var3)
+
+p2<-ggplot(data2, aes(x=ano2)) +
+  geom_line(aes(y=var1, col="SIM"),linetype=1,size=1.2) +
+  geom_line(aes(y=var2, col="SIM-média móvel"),linetype=1,size=1.2) +
+  geom_line(aes(y=var3, col="Proj. IBGE"),linetype=1,size=1.2) +
+  labs(title="Taxa Bruta de Mortalidade por fonte de dados - DF - 2010-2030",
+       y="TBM",x=element_blank()) +
+  scale_color_manual(name="",
+                     values = c("SIM"="coral4",
+                                "SIM-média móvel"="coral3",
+                                "Proj. IBGE"="darkblue")) +
+  # ylim(0,NA)+
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 90))+
+  scale_x_continuous(breaks=ano2, labels=ano2)
+p2
+
+png(filename = "Taxa Bruta de Mortalidade por fonte de dados - DF - 2010-2030.png",
+    width = 15, height = 8,
+    units = "cm",res = 1200)
+p2
+dev.off()
+
+
+
+write_xlsx(data2,"Tabela  1d - Taxa Bruta de Mortalidade por fontes.xlsx")
+
+
+
+# total de obitos para DF por faixa etaria
+tab2 <- base %>%
+  group_by(ano,faixa_idade) %>%
+  summarise(
+    obt = n())
+
+tab2a <- base %>%
+  filter(SEXO=="Masculino")%>%
+  group_by(ano,faixa_idade) %>%
+  summarise(
+    obt_h = n())
+
+tabela2<-merge(tab2,tab2a,by=c("ano","faixa_idade"))
+rm(tab2,tab2a)
+
+tab2b <- base %>%
+  filter(SEXO=="Feminino")%>%
+  group_by(ano,faixa_idade) %>%
+  summarise(
+    obt_m = n())
+
+tabela2<-merge(tabela2,tab2b,by=c("ano","faixa_idade"))
+rm(tab2b)
+
+subset(tabela2,ano==2019) # conferencia ok com http://tabnet.datasus.gov.br/cgi/tabcgi.exe?sim/cnv/obt10df.def
+subset(tabela2,ano==2020)
+
+# faz ajuste de NA - faixa da idade
+table1<-as.data.frame(tabela1[,c("ano","obt")])
+colnames(table1)<-c("ano","obt_total")
+tabela2<-merge(tabela2,table1,by=c("ano"))
+rm(table1)
+tabela2
+
+table2 <- tabela2 %>%
+  filter(!is.na(faixa_idade))%>%
+  group_by(ano) %>%
+  summarise(
+    obt_sem_na = sum(obt))
+
+tabela2<-merge(tabela2,table2,by=c("ano"))
+tabela2
+
+tabela2$part<-tabela2$obt/tabela2$obt_sem_na
+tabela2$obt_ajust<-round(tabela2$part*tabela2$obt_total)
+
+#  arredondou para todos
+tabela2 %>%
+  filter(!is.na(faixa_idade))%>%
+  group_by(ano) %>%
+  summarise(
+    obt_conf = sum(obt_ajust))
+
+tabela2
+tabela2$obt_h_ajust<-round(tabela2$obt_h/(tabela2$obt_h+tabela2$obt_m)*tabela2$obt_ajust)
+tabela2$obt_m_ajust<-round(tabela2$obt_m/(tabela2$obt_h+tabela2$obt_m)*tabela2$obt_ajust)
+# conferencia
+tabela2$obt_h_ajust+tabela2$obt_m_ajust==tabela2$obt_ajust
+
+tabela2
+
+# população geral
+# traz dados de população por faixa etária
+pop<-read_excel("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/Projecoes_IBGE/pop_faixa_etaria.xlsx",sheet="total")
+colnames(pop)
+
+library(tidyr)
+pop_wide<-as.data.frame(pop)
+
+pop_long <- pop_wide %>% gather(faixa_idade, pop, -c(ano)) # para fazer o merge coloca o nome faixa_idade_mae_15_49
+
+tabela2<-merge(tabela2,pop_long,by=c("ano","faixa_idade"))
+
+# Taxas Específicas de Mortalidade (TEM) por idade (nMx)
+tabela2$tem<-tabela2$obt_ajust/tabela2$pop
+
+#fazendo a média móvel
+tabela2[,c("ano","faixa_idade","obt_ajust")]
+
+table2<-spread(tabela2[,c("ano","faixa_idade","obt_ajust")],faixa_idade,obt_ajust)
+
+table2<-ts(table2,start = 2010,frequency = 1)
+library(zoo)
+library(ggplot2)
+table2m<-rollmean(x = table2,k = 3)
+
+table2m<-as.data.frame(table2m) %>% gather(faixa_idade, obt_ajust_m, -c(ano)) # para fazer o merge coloca o nome faixa_idade
+tabela2<-merge(tabela2,table2m,by=c("ano","faixa_idade"),all.x = TRUE)
+
+
+colnames(tabela2)
+tabela2$tem_m<-tabela2$obt_ajust_m/tabela2$pop
+
+tabela2$ano<-as.character(tabela2$ano)
+
+data<-subset(tabela2,ano!=2010&ano!=2020)
+p4<-ggplot(data, aes(x=faixa_idade, y=log(tem_m),group=ano,color=ano)) +
+  geom_line(linetype=1,size=1.2) +
+  labs(title="Taxas Específicas de Mortalidade por ano - DF - 2010-2020",
+       y="ln(TEM)",x=element_blank()) +
+  # ylim(0,NA)+
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 90))
+
+
+p4
+
+png(filename = "Taxas Específicas de Mortalidade por ano - DF - 2010-2020.png",
+    width = 15, height = 12,
+    units = "cm",res = 1200)
+p4
+dev.off()
+
+write_xlsx(tabela2,"Tabela  1e - Taxas Específicas de Mortalidade.xlsx")
+
+save.image("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/SIM/parcial.RData")
+load("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/SIM/parcial.RData")
+
+# população homens
+# traz dados de população por faixa etária
+pop_h<-read_excel("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/Projecoes_IBGE/pop_faixa_etaria.xlsx",sheet="homens")
+colnames(pop_h)
+
+library(tidyr)
+pop_h_wide<-as.data.frame(pop_h)
+
+pop_h_long <- pop_h_wide %>% gather(faixa_idade, pop_h, -c(ano)) # para fazer o merge coloca o nome faixa_idade_mae_15_49
+
+tabela2<-merge(tabela2,pop_h_long,by=c("ano","faixa_idade"))
+
+# Taxas Específicas de Mortalidade (TEM) masculina por idade (nMx)
+tabela2$tem_h<-tabela2$obt_h_ajust/tabela2$pop_h
+
+#fazendo a média móvel
+table2h<-spread(tabela2[,c("ano","faixa_idade","obt_h_ajust")],faixa_idade,obt_h_ajust)
+
+table2h$ano<-as.numeric(table2h$ano)
+table2h<-ts(table2h,start = 2010,frequency = 1)
+library(zoo)
+library(ggplot2)
+table2hm<-rollmean(x = table2h,k = 3)
+table2hm<-as.data.frame(table2hm)
+
+table2hm<-table2hm %>% gather(faixa_idade, obt_h_ajust_m, -c(ano)) # para fazer o merge coloca o nome faixa_idade
+tabela2<-merge(tabela2,table2hm,by=c("ano","faixa_idade"),all.x = TRUE)
+
+colnames(tabela2)
+tabela2$tem_h_m<-tabela2$obt_h_ajust_m/tabela2$pop_h
+
+tabela2$ano<-as.character(tabela2$ano)
+
+data<-subset(tabela2,ano!=2010&ano!=2020)
+p4<-ggplot(data, aes(x=faixa_idade, y=log(tem_h_m),group=ano,color=ano)) +
+  geom_line(linetype=1,size=1.2) +
+  labs(title="Taxas Específicas de Mortalidade dos homens por ano - DF - 2010-2020",
+       y="ln(TEM)",x=element_blank()) +
+  # ylim(0,NA)+
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 90))
+
+
+p4
+
+png(filename = "Taxas Específicas de Mortalidade dos homens por ano - DF - 2010-2020.png",
+    width = 15, height = 12,
+    units = "cm",res = 1200)
+p4
+dev.off()
+
+# população mulheres
+library(readxl)
+# traz dados de população por faixa etária
+pop_m<-read_excel("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/Projecoes_IBGE/pop_faixa_etaria.xlsx",sheet="mulheres")
+colnames(pop_m)
+
+library(tidyr)
+pop_m_wide<-as.data.frame(pop_m)
+
+pop_m_long <- pop_m_wide %>% gather(faixa_idade, pop_m, -c(ano)) # para fazer o merge coloca o nome faixa_idade_mae_15_49
+
+tabela2<-merge(tabela2,pop_m_long,by=c("ano","faixa_idade"))
+
+# Taxas Específicas de Mortalidade (TEM) feminina por idade (nMx)
+tabela2$tem_mu<-tabela2$obt_m_ajust/tabela2$pop_m
+
+#fazendo a média móvel
+table2<-spread(tabela2[,c("ano","faixa_idade","obt_m_ajust")],faixa_idade,obt_m_ajust)
+table2$ano<-as.numeric(table2$ano)
+
+table2<-ts(table2,start = 2010,frequency = 1)
+library(zoo)
+library(ggplot2)
+table2m<-rollmean(x = table2,k = 3)
+table2m<-as.data.frame(table2m)
+
+
+table2m<-table2m %>% gather(faixa_idade, obt_m_ajust_m, -c(ano)) # para fazer o merge coloca o nome faixa_idade
+tabela2<-merge(tabela2,table2m,by=c("ano","faixa_idade"),all.x = TRUE)
+
+
+colnames(tabela2)
+tabela2$tem_m_m<-tabela2$obt_m_ajust_m/tabela2$pop_m
+
+tabela2$ano<-as.character(tabela2$ano)
+
+data<-subset(tabela2,ano!=2010&ano!=2020)
+p4<-ggplot(data, aes(x=faixa_idade, y=log(tem_m_m),group=ano,color=ano)) +
+  geom_line(linetype=1,size=1.2) +
+  labs(title="Taxas Específicas de Mortalidade das mulheres por ano - DF - 2010-2020",
+       y="ln(TEM)",x=element_blank()) +
+  # ylim(0,NA)+
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 90))
+
+
+p4
+
+png(filename = "Taxas Específicas de Mortalidade das mulheres por ano - DF - 2010-2020.png",
+    width = 15, height = 12,
+    units = "cm",res = 1200)
+p4
+dev.off()
+
+
+
+write_xlsx(tabela2,"Tabela  1f - Taxas Específicas de Mortalidade por sexo.xlsx")
+
+
+# Taxa de Mortalidade Infantil (TMI)
+
+# trazer informação do total de nascidos vivos
+library(readxl)
+nascidos_vivos<- read_excel("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/SINASC/Tabela  1b - Total de nascimentos com média móvel.xlsx")
+
+subset(tabela2,faixa_idade=="_menor que 1 ano")
+
+tabela3<-subset(tabela2,faixa_idade=="_menor que 1 ano")
+
+tabela3<-merge(tabela3,nascidos_vivos,by=("ano"),all.x=TRUE)
+
+tabela3$tmi<-tabela3$obt_ajust_m/tabela3$nasc
+tabela3$tmi_h<-tabela3$obt_h_ajust_m/tabela3$nasc_masc_ajust
+tabela3$tmi_m<-tabela3$obt_m_ajust_m/tabela3$nasc_fem_ajust
+
+ano4<-2010:2030
+var1<-c(tabela3$tmi,rep(NA,10))*1000
+var2<-c(tabela3$tmi_h,rep(NA,10))*1000
+var3<-c(tabela3$tmi_m,rep(NA,10))*1000
+var4<-as.data.frame(proj_ibge)$mort_infantil_total
+var5<-as.data.frame(proj_ibge)$mort_infantil_homens
+var6<-as.data.frame(proj_ibge)$mort_infantil_mulheres
+
+data4<-data.frame(ano4,var1,var2,var3,var4,var5,var6)
+
+p5<- ggplot(data4, aes(x=ano4)) +
+  geom_line(aes(y=var1, col="SIM_geral"),linetype=1,size=1.2) +
+  geom_line(aes(y=var2, col="SIM_homens"),linetype=1,size=1.2) +
+  geom_line(aes(y=var3, col="SIM_mulheres"),linetype=1,size=1.2) +
+  geom_line(aes(y=var4, col="Proj. IBGE_geral"),linetype=1,size=1.2) +
+  geom_line(aes(y=var5, col="Proj. IBGE_homens"),linetype=1,size=1.2) +
+  geom_line(aes(y=var6, col="Proj. IBGE_mulheres"),linetype=1,size=1.2) +
+  labs(title="Taxa de Mortalidade Infantil por sexo e fonte de dados - DF - 2010-2030",
+       y="TMI",x=element_blank()) +
+  scale_linetype_manual(values = c(rep("solid", 3), rep("dashed", 3))) +
+  scale_color_manual(name="",
+                     values = c(
+                       "SIM_geral"="gray1",
+                       "SIM_homens"="gray20",
+                       "SIM_mulheres"="gray40",
+                       "Proj. IBGE_geral"="blue4",
+                       "Proj. IBGE_homens"="blue",
+                       "Proj. IBGE_mulheres"="deepskyblue1")) +
+  # ylim(0,NA)+
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 90))
+
+p5
+
+png(filename = "Taxa de Mortalidade Infantil por sexo e fonte de dados - DF - 2010-2030.png",
+    width = 15, height = 12,
+    units = "cm",res = 1200)
+p5
+dev.off()
+
+write_xlsx(data4,"Tabela  1g - Taxa de Mortalidade Infantil por sexo e fontes.xlsx")
+
+
+save.image("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/sim/sim_indicadores.RData")
+load("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/sim/sim_indicadores.RData")
+
+# tempo de vida
+base$tempo_vida<-base$DTOBITO-base$DTNASC
+base$inter_inf<-as.numeric(substr(base$faixa_idade,1,2))
+base$inter_inf[which(is.na(base$inter_inf))]<-0
+base$inter_inf_dias<-base$inter_inf*365
+table(base$inter_inf)
+table(base$inter_inf_dias)
+
+base$tempo_vida_inter<-base$tempo_vida-base$inter_inf_dias
+
+# identificando a quantidade NA por ano
+table(base$ano[which(is.na(base$tempo_vida_inter))])
+
+tempo_vida <- base %>%
+  filter(!is.na(base$tempo_vida_inter))%>%
+  group_by(ano,faixa_idade) %>%
+  summarise(
+    k = mean(tempo_vida_inter)/365)
+
+# calcular a média móvel
+tempo_vida_long<-as.data.frame(tempo_vida)
+tempo_vida_long$k<-as.numeric(tempo_vida_long$k)
+
+tempo_vida_wide<-spread(as.data.frame(tempo_vida_long),faixa_idade,k)
+
+table4<-ts(tempo_vida_wide,start = 2000,frequency = 1)
+library(zoo)
+library(ggplot2)
+table4m<-rollmean(x = table4,k = 3)
+table4m<-as.data.frame(table4m)
+
+
+table4m<-table4m %>% gather(faixa_idade, k, -c(ano))
+tempo_vida<-merge(tempo_vida,table4m,by=c("ano","faixa_idade"),all.x = TRUE)
+
+write_xlsx(table4m,"Tabela  1h - Tempo de vida médio no intervalo etário.xlsx")
+
+# homens
+tempo_vida <- base %>%
+  filter(!is.na(base$tempo_vida_inter))%>%
+  filter(SEXO=="Masculino")%>%
+  group_by(ano,faixa_idade) %>%
+  summarise(
+    k = mean(tempo_vida_inter)/365)
+
+# calcular a média móvel
+tempo_vida_long<-as.data.frame(tempo_vida)
+tempo_vida_long$k<-as.numeric(tempo_vida_long$k)
+
+tempo_vida_wide<-spread(as.data.frame(tempo_vida_long),faixa_idade,k)
+
+table4<-ts(tempo_vida_wide,start = 2000,frequency = 1)
+library(zoo)
+library(ggplot2)
+table4m<-rollmean(x = table4,k = 3)
+table4m<-as.data.frame(table4m)
+
+
+table4m<-table4m %>% gather(faixa_idade, k, -c(ano))
+tempo_vida<-merge(tempo_vida,table4m,by=c("ano","faixa_idade"),all.x = TRUE)
+
+
+write_xlsx(table4m,"Tabela  1i - Tempo de vida médio no intervalo etário _homens.xlsx")
+
+# mulheres
+tempo_vida <- base %>%
+  filter(!is.na(base$tempo_vida_inter))%>%
+  filter(SEXO=="Feminino")%>%
+  group_by(ano,faixa_idade) %>%
+  summarise(
+    k = mean(tempo_vida_inter)/365)
+
+# calcular a média móvel
+tempo_vida_long<-as.data.frame(tempo_vida)
+tempo_vida_long$k<-as.numeric(tempo_vida_long$k)
+
+tempo_vida_wide<-spread(as.data.frame(tempo_vida_long),faixa_idade,k)
+
+table4<-ts(tempo_vida_wide,start = 2000,frequency = 1)
+library(zoo)
+library(ggplot2)
+table4m<-rollmean(x = table4,k = 3)
+table4m<-as.data.frame(table4m)
+
+
+table4m<-table4m %>% gather(faixa_idade, k, -c(ano))
+tempo_vida<-merge(tempo_vida,table4m,by=c("ano","faixa_idade"),all.x = TRUE)
+
+
+write_xlsx(table4m,"Tabela  1j - Tempo de vida médio no intervalo etário _mulheres.xlsx")
+
+save.image("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/sim/sim_indicadores.RData")
+load("G:/.shortcut-targets-by-id/1q5zhH7F2EGGYSFqpV9B6vv6IAfBkEcDz/TR_Projecoes_2030/Banco de dados/Estatística/sim/sim_indicadores.RData")
+
+
+
+

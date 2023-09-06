@@ -1,6 +1,0 @@
-"0","ggplot(as.data.frame(proj_ibge), aes(x=ano, y=nasc)) +"
-"0","  geom_line( color=""steelblue"") +"
-"0","  geom_point() +"
-"0","  xlab(""Ano"")+"
-"0","  ylab(""Nascimentos"")+"
-"0","  ggtitle(""Total de nascidos vivos - DF - 2000-2020 "")"
