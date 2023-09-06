@@ -1564,7 +1564,8 @@ dados_sinasc  &lt;- process_sinasc(dados_sinasc)</code></pre>
 <div id="projeções-populacionais" class="section level1">
 <h1>Projeções populacionais</h1>
 <p>Lendo os dados das projeções populacionais especialmente da Unidade
-da Federação escolhida. O arquivo auxiliar está disponível <a href="https://github.com/ccsgonc/mqagp/blob/main/indicadores_projecoes_DF_IBGE.xlsx">aqui</a>.</p>
+da Federação escolhida. O arquivo auxiliar está disponível <a href="https://github.com/ccsgonc/mqagp/blob/main/indicadores_projecoes_DF_IBGE.xlsx">aqui</a>.
+Para todas as UFs, o arquivo do IBGE pode ser acessado <a href="https://ftp.ibge.gov.br/Projecao_da_Populacao/Projecao_da_Populacao_2018/projecoes_2018_indicadores.xls">aqui</a>.</p>
 <pre class="r"><code>proj_ibge&lt;- read_excel(&quot;indicadores_projecoes_DF_IBGE.xlsx&quot;)
 
 proj_ibge&lt;-ts(proj_ibge,start = 2010,frequency = 1)
@@ -1756,10 +1757,12 @@ p2</code></pre>
 ##   2</code></pre>
 <pre class="r"><code>write_xlsx(data2,&quot;Tabela  1d - Taxa Bruta de Natalidade por fontes.xlsx&quot;)</code></pre>
 </div>
-<div id="taxa-de-fecundidade-geral-tfg" class="section level3">
-<h3>Taxa de Fecundidade Geral (TFG)</h3>
+<div id="taxa-de-fecundidade-geral" class="section level3">
+<h3>Taxa de Fecundidade Geral</h3>
 <p>Para o cálculo a seguir, será necessário arquivo auxiliar com o total
 populacional das mulheres de 15 a 49 anos disponível <a href="https://github.com/ccsgonc/mqagp/blob/main/pop_m_15-49.xlsx">aqui</a>.
+O arquivo foi organizado a partir dos dados divulgados pelas Projeções
+Populacionais disponível <a href="https://ftp.ibge.gov.br/Projecao_da_Populacao/Projecao_da_Populacao_2018/projecoes_2018_populacao_2010_2060_20200406.xls">aqui</a>
 Calculando a taxa de fecundidade geral:</p>
 <pre class="r"><code># taxa de fecundidade geral
 library(readxl)
@@ -1806,7 +1809,6 @@ p3</code></pre>
 ##   2</code></pre>
 <pre class="r"><code>write_xlsx(data3,&quot;Tabela  1e - Taxa de Fecundidade Geral por fontes.xlsx&quot;)</code></pre>
 <p>Calculando o total de nascimentos por faixa etária da mãe:</p>
-<p>tabela2</p>
 <pre class="r"><code># total de nascimentos para DF por faixa etaria da mae
 tab2 &lt;- dados_sinasc %&gt;%
   group_by(ano,faixa_idade_mae_15_49) %&gt;%
