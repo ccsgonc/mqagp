@@ -134,7 +134,7 @@ library(plotly)
 
 ggplot_obj <- base_mapa %>%    
   ggplot() +   
-  geom_sf(data = base_mapa$geom, aes(fill = base_mapa$pib, text = paste("Município: ", base_mapa$nome_mun, "<br>PIB: ", pib))) +   scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8,                        name = 'PIB') +   theme(panel.grid = element_line(colour = "transparent"),         panel.background = element_blank(),         axis.text = element_blank(),         axis.ticks = element_blank()) +   labs(title = "PIB 2020 dos Municípios de MG",        subtitle = "",        caption = 'Fonte: Elaboração própria', size = 8)  
+  geom_sf(data = base_mapa$geom, aes(fill = base_mapa$pib, text = paste("Município: ", base_mapa$nome_mun, "<br>PIB: ", base_mapa$pib))) +   scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8,                        name = 'PIB') +   theme(panel.grid = element_line(colour = "transparent"),         panel.background = element_blank(),         axis.text = element_blank(),         axis.ticks = element_blank()) +   labs(title = "PIB 2020 dos Municípios de MG",        subtitle = "",        caption = 'Fonte: Elaboração própria', size = 8)  
 
 # Converter o gráfico ggplot para plotly com o hovertext 
 interactive_plot <- ggplotly(ggplot_obj, tooltip = "text")  

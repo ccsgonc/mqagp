@@ -95,7 +95,7 @@ df.m <- replace(df.m, is.na(df.m), 0)
 
 Para montar a pirâmide, é necessário montar o data.frame com as idades e sexo, totais populacionais e também a distribuição populacional:
 
-```{r variaveis2, echo=FALSE}
+```{r variaveis2, echo=TRUE}
 library(tidyselect)
 
 # Fazendo para os homens
