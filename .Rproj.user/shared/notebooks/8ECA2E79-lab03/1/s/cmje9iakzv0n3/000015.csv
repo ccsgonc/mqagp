@@ -1,0 +1,3 @@
+"0",""
+"0","# exportando tabelas"
+"0","write_xlsx(tabela1,""Tabela  1a - Total de obitos.xlsx"")"

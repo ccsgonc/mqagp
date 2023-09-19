@@ -1,0 +1,118 @@
+"0","dados_sim <- fetch_datasus(year_start = 2000, "
+"0","                           year_end = 2021, "
+"0","                           uf = ""MG"", "
+"0","                           information_system = ""SIM-DO"")"
+"2","Your local Internet connection seems to be ok.
+"
+"2","DataSUS FTP server seems to be up. Starting download...
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2000.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 4037365 bytes (3.9 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2001.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 4254131 bytes (4.1 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2002.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 4466610 bytes (4.3 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2003.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 4746979 bytes (4.5 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2004.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 6078650 bytes (5.8 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2005.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 4880333 bytes (4.7 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2006.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 6996256 bytes (6.7 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2007.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 7455605 bytes (7.1 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2008.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 7962165 bytes (7.6 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2009.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 7436000 bytes (7.1 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2010.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 8082843 bytes (7.7 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2011.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 7879963 bytes (7.5 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2012.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 8846787 bytes (8.4 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2013.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 8929781 bytes (8.5 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2014.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 13659392 bytes (13.0 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2015.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 12570107 bytes (12.0 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2016.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 14239932 bytes (13.6 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2017.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 13815307 bytes (13.2 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2018.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 10878541 bytes (10.4 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2019.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 11154853 bytes (10.6 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2020.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 12696936 bytes (12.1 MB)
+"
+"2","trying URL 'ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/DOMG2021.dbc'
+"
+"2","Content type 'unknown'"
+"2"," length 14923308 bytes (14.2 MB)
+"

@@ -1,0 +1,2 @@
+"0","# total de nascimentos para DF"
+"0","aggregate(data=dados_sinasc,nasc~ano, FUN= sum) "
