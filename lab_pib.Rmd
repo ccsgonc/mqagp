@@ -51,7 +51,7 @@ pib_mun <- read_excel("PIB dos Municípios - base de dados 2010-2020.xls")
 Ao visulizar a estrutura dos dados, o nomes das colunas não está na
 melhor forma para manipulação. Assim, é recomendado algumas alterações:
 
-```{r dados2, echo=TRUE}
+```{r dados2, include=FALSE}
 str(pib_mun)
 colnames(pib_mun) <- c("ano","cod_gr","nome_gr",
                             "cod_uf", "sigla_uf","nome_uf",
@@ -109,7 +109,10 @@ tentando responder as seguintes perguntas?
 
 ```{r manipulando, echo=TRUE}
 library(tidyverse)
-pib_mun_mg <- pib_mun %>%  filter(cod_uf == 31)
+pib_mun_mg <- pib_mun %>%  filter(cod_uf == 31) %>% 
+  mutate(
+    
+  )
 ```
 
 ```{r mapa, echo=TRUE}
@@ -120,103 +123,68 @@ mun <- read_municipality(code_muni = "MG", year = 2010)
 base_mapa<- left_join(pib_mun_mg, mun , by = 'code_muni')
 ```
 
-Agora, vamos plotar os resultados em um mapa interativo.
-
-```         
-```
+Agora, vamos plotar os resultados em um mapa estático e interativo.
 
 ```{r variaveis, echo=TRUE}
 # Carregar bibliotecas 
 library(ggplot2) 
 library(plotly)  
 
-# Criar o gráfico ggplot com o índice Gini como hovertext 
-
-ggplot_obj <- base_mapa %>%    
+# Criar o gráfico ggplot com o PIB 
+ggplot_obj_1 <- base_mapa %>% filter(ano==2020) %>%    
   ggplot() +   
-  geom_sf(data = base_mapa$geom, aes(fill = base_mapa$pib, text = paste("Município: ", base_mapa$nome_mun, "<br>PIB: ", base_mapa$pib))) +   scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8,                        name = 'PIB') +   theme(panel.grid = element_line(colour = "transparent"),         panel.background = element_blank(),         axis.text = element_blank(),         axis.ticks = element_blank()) +   labs(title = "PIB 2020 dos Municípios de MG",        subtitle = "",        caption = 'Fonte: Elaboração própria', size = 8)  
+  geom_sf(data = base_mapa$geom, aes(fill = base_mapa$pib, 
+                                     text = paste("Município: ", base_mapa$nome_mun, "<br>PIB: ", base_mapa$pib))) +   
+  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'PIB') +   
+  theme(panel.grid = element_line(colour = "transparent"),panel.background =  element_blank(),axis.text = element_blank(),axis.ticks = element_blank()) +   
+  labs(title = "PIB dos Municípios de MG - 2020", subtitle = "",caption = 'Fonte: Elaboração própria', size = 8)  
+ggplot_obj_1
 
 # Converter o gráfico ggplot para plotly com o hovertext 
-interactive_plot <- ggplotly(ggplot_obj, tooltip = "text")  
+interactive_plot_1 <- ggplotly(ggplot_obj_1, tooltip = "text")  
 # Exibir o gráfico interativo 
-interactive_plot
+interactive_plot_1
 ```
 
-Para montar a pirâmide, é necessário montar o data.frame com as idades e
-sexo, totais populacionais e também a distribuição populacional:
+hghh
 
-```{r variaveis2, echo=FALSE}
-library(tidyselect)
+```{r variaveis2, echo=TRUE}
+# Agropecuária
+ggplot_obj_2 <- base_mapa %>%    
+  ggplot() +   
+  geom_sf(data = base_mapa$geom, aes(fill = base_mapa$va_agro, 
+                                     text = paste("Município: ", base_mapa$nome_mun, "<br>PIB: ", base_mapa$va_agro))) +   
+  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'VA Agropecuária') +   
+  theme(panel.grid = element_line(colour = "transparent"),panel.background =  element_blank(),axis.text = element_blank(),axis.ticks = element_blank()) +   
+  labs(title = "VA da Agropecuária dos Municípios de MG - 2020", subtitle = "",caption = 'Fonte: Elaboração própria', size = 8)  
+ggplot_obj_2
 
-# Fazendo para os homens
-df.hh <- df.h %>% mutate(
-  x00_04= V022 + V035 + V036 + V037 + V038,
-  x05_09= V039 + V040 + V041 + V042 + V043,
-  x10_14= V044 + V045 + V046 + V047 + V048,
-  x15_19= V049 + V050 + V051 + V052 + V053,
-  x20_24= V054 + V055 + V056 + V057 + V058,
-  x25_29= V059 + V060 + V061 + V062 + V063,
-  x30_34= V064 + V065 + V066 + V067 + V068,
-  x35_39= V069 + V070 + V071 + V072 + V073,
-  x40_44= V074 + V075 + V076 + V077 + V078,
-  x45_49= V079 + V080 + V081 + V082 + V083,
-  x50_54= V084 + V085 + V086 + V087 + V088,
-  x55_59= V089 + V090 + V091 + V092 + V093,
-  x60_64= V094 + V095 + V096 + V097 + V098,
-  x65_69= V099 + V100 + V101 + V102 + V103,
-  x70_74= V104 + V105 + V106 + V107 + V108,
-  x75_79= V109 + V110 + V111 + V112 + V113,
-  x80_84= V114 + V115 + V116 + V117 + V118,
-  x85_mais= V119 + V120 + V121 + V122 + V123 +
-            V124 + V125 + V126 + V127 + V128 +
-            V129 + V130 + V131 + V132 + V133 + V134
-) %>% select(Cod_setor,Cod_municipio ,     
-  Nome_do_municipio,Cod_bairro ,        
-  Nome_do_bairro,Cod_subdistrito ,   
-  Nome_do_subdistrito,x00_04,  x05_09,             
-x10_14,              x15_19,             
-x20_24,              x25_29,             
-x30_34,              x35_39,             
-x40_44,              x45_49,             
-x50_54,              x55_59,             
-x60_64,              x65_69,             
-x70_74,              x75_79,             
-x80_84,              x85_mais)
+ggplot_obj_3 <- base_mapa %>%    
+  ggplot() +   
+  geom_sf(data = base_mapa$geom, aes(fill = base_mapa$va_ind, 
+                                     text = paste("Município: ", base_mapa$nome_mun, "<br>PIB: ", base_mapa$va_ind))) +   
+  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'VA Indústria') +   
+  theme(panel.grid = element_line(colour = "transparent"),panel.background =  element_blank(),axis.text = element_blank(),axis.ticks = element_blank()) +   
+  labs(title = "VA da Indústria dos Municípios de MG - 2020", subtitle = "",caption = 'Fonte: Elaboração própria', size = 8)  
+ggplot_obj_3
 
-# Fazendo para as mulheres
-df.mm <- df.m %>% mutate(
-  x00_04= V022 + V035 + V036 + V037 + V038,
-  x05_09= V039 + V040 + V041 + V042 + V043,
-  x10_14= V044 + V045 + V046 + V047 + V048,
-  x15_19= V049 + V050 + V051 + V052 + V053,
-  x20_24= V054 + V055 + V056 + V057 + V058,
-  x25_29= V059 + V060 + V061 + V062 + V063,
-  x30_34= V064 + V065 + V066 + V067 + V068,
-  x35_39= V069 + V070 + V071 + V072 + V073,
-  x40_44= V074 + V075 + V076 + V077 + V078,
-  x45_49= V079 + V080 + V081 + V082 + V083,
-  x50_54= V084 + V085 + V086 + V087 + V088,
-  x55_59= V089 + V090 + V091 + V092 + V093,
-  x60_64= V094 + V095 + V096 + V097 + V098,
-  x65_69= V099 + V100 + V101 + V102 + V103,
-  x70_74= V104 + V105 + V106 + V107 + V108,
-  x75_79= V109 + V110 + V111 + V112 + V113,
-  x80_84= V114 + V115 + V116 + V117 + V118,
-  x85_mais= V119 + V120 + V121 + V122 + V123 +
-            V124 + V125 + V126 + V127 + V128 +
-            V129 + V130 + V131 + V132 + V133 + V134
-) %>% select(Cod_setor,Cod_municipio ,     
-  Nome_do_municipio,Cod_bairro ,        
-  Nome_do_bairro,Cod_subdistrito ,   
-  Nome_do_subdistrito,x00_04,  x05_09,             
-x10_14,              x15_19,             
-x20_24,              x25_29,             
-x30_34,              x35_39,             
-x40_44,              x45_49,             
-x50_54,              x55_59,             
-x60_64,              x65_69,             
-x70_74,              x75_79,             
-x80_84,              x85_mais)
+ggplot_obj_4 <- base_mapa %>%    
+  ggplot() +   
+  geom_sf(data = base_mapa$geom, aes(fill = base_mapa$va_serv, 
+                                     text = paste("Município: ", base_mapa$nome_mun, "<br>PIB: ", base_mapa$va_serv))) +   
+  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'VA Agropecuária') +   
+  theme(panel.grid = element_line(colour = "transparent"),panel.background =  element_blank(),axis.text = element_blank(),axis.ticks = element_blank()) +   
+  labs(title = "VA dos Serviços dos Municípios de MG - 2020", subtitle = "",caption = 'Fonte: Elaboração própria', size = 8)  
+ggplot_obj_4
+
+ggplot_obj_5 <- base_mapa %>%    
+  ggplot() +   
+  geom_sf(data = base_mapa$geom, aes(fill = base_mapa$va_admin, 
+                                     text = paste("Município: ", base_mapa$nome_mun, "<br>PIB: ", base_mapa$va_admin))) +   
+  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'VA Agropecuária') +   
+  theme(panel.grid = element_line(colour = "transparent"),panel.background =  element_blank(),axis.text = element_blank(),axis.ticks = element_blank()) +   
+  labs(title = "VA da Administração Pública dos Municípios de MG - 2020", subtitle = "",caption = 'Fonte: Elaboração própria', size = 8)  
+ggplot_obj_5
 ```
 
 # Preparando os dados para a pirâmide
