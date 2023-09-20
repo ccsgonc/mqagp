@@ -1,0 +1,2 @@
+"0","# total de óbitos para DF"
+"0","aggregate(data=dados_sim,obt~ano, FUN= sum) # problema identificado com criação de NA em 2000"

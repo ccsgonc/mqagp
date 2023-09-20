@@ -1,0 +1,6 @@
+"0",""
+"0","# Gráfico de dispersão"
+"0","ggplot(base3, aes(x=log(pib_pc), y=e0)) +"
+"0","    geom_point()"
+"2","Error in loadNamespace(x) : there is no package called ‘farver’
+"

@@ -1,0 +1,854 @@
+ibge7;Município;2010
+3100104;Abadia dos Dourados;75,35
+3100203;Abaeté;75,90
+3100302;Abre Campo;74,36
+3100401;Acaiaca;74,36
+3100500;Açucena;75,66
+3100609;Água Boa;72,94
+3100708;Água Comprida;76,58
+3100807;Aguanil;75,70
+3100906;Águas Formosas;73,63
+3101003;Águas Vermelhas;73,46
+3101102;Aimorés;73,58
+3101201;Aiuruoca;77,23
+3101300;Alagoa;74,93
+3101409;Albertina;73,76
+3101508;Além Paraíba;76,43
+3101607;Alfenas;75,45
+3101631;Alfredo Vasconcelos;75,01
+3101706;Almenara;73,18
+3101805;Alpercata;74,43
+3101904;Alpinópolis;76,71
+3102001;Alterosa;75,83
+3102050;Alto Caparaó;75,54
+3153509;Alto Jequitibá;72,21
+3102100;Alto Rio Doce;74,70
+3102209;Alvarenga;72,85
+3102308;Alvinópolis;74,34
+3102407;Alvorada de Minas;72,65
+3102506;Amparo da Serra;73,63
+3102605;Andradas;77,69
+3102803;Andrelândia;74,06
+3102852;Angelândia;70,36
+3102902;Antônio Carlos;75,30
+3103009;Antônio Dias;75,93
+3103108;Antônio Prado de Minas;74,79
+3103207;Araçaí;73,28
+3103306;Aracitaba;74,37
+3103405;Araçuaí;74,27
+3103504;Araguari;77,28
+3103603;Arantina;75,05
+3103702;Araponga;70,60
+3103751;Araporã;73,78
+3103801;Arapuá;77,27
+3103900;Araújos;76,27
+3104007;Araxá;76,49
+3104106;Arceburgo;73,61
+3104205;Arcos;77,43
+3104304;Areado;75,84
+3104403;Argirita;74,00
+3104452;Aricanduva;72,22
+3104502;Arinos;73,88
+3104601;Astolfo Dutra;76,50
+3104700;Ataléia;73,77
+3104809;Augusto de Lima;73,90
+3104908;Baependi;74,97
+3105004;Baldim;72,21
+3105103;Bambuí;77,20
+3105202;Bandeira;73,64
+3105301;Bandeira do Sul;73,14
+3105400;Barão de Cocais;76,46
+3105509;Barão do Monte Alto;74,64
+3105608;Barbacena;77,88
+3105707;Barra Longa;74,36
+3105905;Barroso;76,84
+3106002;Bela Vista de Minas;72,72
+3106101;Belmiro Braga;74,81
+3106200;Belo Horizonte;76,37
+3106309;Belo Oriente;73,77
+3106408;Belo Vale;73,86
+3106507;Berilo;73,97
+3106655;Berizal;70,41
+3106606;Bertópolis;72,96
+3106705;Betim;76,82
+3106804;Bias Fortes;72,75
+3106903;Bicas;75,99
+3107000;Biquinhas;76,40
+3107109;Boa Esperança;76,28
+3107208;Bocaina de Minas;75,87
+3107307;Bocaiúva;74,29
+3107406;Bom Despacho;76,66
+3107505;Bom Jardim de Minas;74,34
+3107604;Bom Jesus da Penha;76,74
+3107703;Bom Jesus do Amparo;75,01
+3107802;Bom Jesus do Galho;73,01
+3107901;Bom Repouso;74,25
+3108008;Bom Sucesso;73,49
+3108107;Bonfim;75,01
+3108206;Bonfinópolis de Minas;72,73
+3108255;Bonito de Minas;71,57
+3108305;Borda da Mata;76,92
+3108404;Botelhos;77,07
+3108503;Botumirim;71,94
+3108552;Brasilândia de Minas;75,87
+3108602;Brasília de Minas;73,78
+3108701;Brás Pires;73,03
+3108800;Braúnas;73,10
+3108909;Brazópolis;75,45
+3109006;Brumadinho;76,39
+3109105;Bueno Brandão;75,90
+3109204;Buenópolis;72,74
+3109253;Bugre;73,01
+3109303;Buritis;73,88
+3109402;Buritizeiro;71,06
+3109451;Cabeceira Grande;72,25
+3109501;Cabo Verde;75,82
+3109600;Cachoeira da Prata;75,02
+3109709;Cachoeira de Minas;74,25
+3102704;Cachoeira de Pajeú;71,25
+3109808;Cachoeira Dourada;76,02
+3109907;Caetanópolis;75,71
+3110004;Caeté;75,62
+3110103;Caiana;74,98
+3110202;Cajuri;73,26
+3110301;Caldas;77,35
+3110400;Camacho;75,38
+3110509;Camanducaia;75,22
+3110608;Cambuí;77,33
+3110707;Cambuquira;76,34
+3110806;Campanário;74,85
+3110905;Campanha;75,93
+3111002;Campestre;75,59
+3111101;Campina Verde;77,06
+3111150;Campo Azul;72,96
+3111200;Campo Belo;77,10
+3111309;Campo do Meio;74,61
+3111408;Campo Florido;76,46
+3111507;Campos Altos;76,62
+3111606;Campos Gerais;74,27
+3111705;Canaã;72,88
+3111804;Canápolis;77,32
+3111903;Cana Verde;74,25
+3112000;Candeias;74,81
+3112059;Cantagalo;73,94
+3112109;Caparaó;75,16
+3112208;Capela Nova;72,84
+3112307;Capelinha;74,41
+3112406;Capetinga;75,88
+3112505;Capim Branco;75,19
+3112604;Capinópolis;75,47
+3112653;Capitão Andrade;73,28
+3112703;Capitão Enéas;73,37
+3112802;Capitólio;74,51
+3112901;Caputira;73,53
+3113008;Caraí;71,88
+3113107;Caranaíba;73,44
+3113206;Carandaí;74,27
+3113305;Carangola;75,19
+3113404;Caratinga;75,16
+3113503;Carbonita;72,74
+3113602;Careaçu;74,41
+3113701;Carlos Chagas;74,55
+3113800;Carmésia;73,28
+3113909;Carmo da Cachoeira;73,03
+3114006;Carmo da Mata;75,41
+3114105;Carmo de Minas;75,71
+3114204;Carmo do Cajuru;76,16
+3114303;Carmo do Paranaíba;76,63
+3114402;Carmo do Rio Claro;76,01
+3114501;Carmópolis de Minas;75,99
+3114550;Carneirinho;77,37
+3114600;Carrancas;77,59
+3114709;Carvalhópolis;75,98
+3114808;Carvalhos;74,20
+3114907;Casa Grande;74,39
+3115003;Cascalho Rico;75,72
+3115102;Cássia;75,22
+3115300;Cataguases;76,68
+3115359;Catas Altas;74,65
+3115409;Catas Altas da Noruega;72,96
+3115458;Catuji;71,23
+3115474;Catuti;71,38
+3115508;Caxambu;75,85
+3115607;Cedro do Abaeté;73,04
+3115706;Central de Minas;74,37
+3115805;Centralina;76,19
+3115904;Chácara;77,66
+3116001;Chalé;72,21
+3116100;Chapada do Norte;72,86
+3116159;Chapada Gaúcha;74,22
+3116209;Chiador;77,05
+3116308;Cipotânea;69,97
+3116407;Claraval;75,88
+3116506;Claro dos Poções;72,96
+3116605;Cláudio;75,75
+3116704;Coimbra;74,49
+3116803;Coluna;71,91
+3116902;Comendador Gomes;76,01
+3117009;Comercinho;72,83
+3117108;Conceição da Aparecida;75,83
+3115201;Conceição da Barra de Minas;73,91
+3117306;Conceição das Alagoas;76,72
+3117207;Conceição das Pedras;74,25
+3117405;Conceição de Ipanema;74,51
+3117504;Conceição do Mato Dentro;72,65
+3117603;Conceição do Pará;75,97
+3117702;Conceição do Rio Verde;75,01
+3117801;Conceição dos Ouros;75,49
+3117836;Cônego Marinho;72,96
+3117876;Confins;74,79
+3117900;Congonhal;75,81
+3118007;Congonhas;77,59
+3118106;Congonhas do Norte;69,74
+3118205;Conquista;77,59
+3118304;Conselheiro Lafaiete;76,62
+3118403;Conselheiro Pena;75,24
+3118502;Consolação;73,36
+3118601;Contagem;74,94
+3118700;Coqueiral;75,26
+3118809;Coração de Jesus;73,48
+3118908;Cordisburgo;72,17
+3119005;Cordislândia;73,39
+3119104;Corinto;75,49
+3119203;Coroaci;73,64
+3119302;Coromandel;76,57
+3119401;Coronel Fabriciano;76,88
+3119500;Coronel Murta;72,05
+3119609;Coronel Pacheco;72,36
+3119708;Coronel Xavier Chaves;74,40
+3119807;Córrego Danta;75,61
+3119906;Córrego do Bom Jesus;75,40
+3119955;Córrego Fundo;72,67
+3120003;Córrego Novo;73,32
+3120102;Couto de Magalhães de Minas;73,40
+3120151;Crisólita;72,96
+3120201;Cristais;76,54
+3120300;Cristália;72,71
+3120409;Cristiano Otoni;74,39
+3120508;Cristina;75,53
+3120607;Crucilândia;73,97
+3120706;Cruzeiro da Fortaleza;74,94
+3120805;Cruzília;76,17
+3120839;Cuparaque;72,85
+3120870;Curral de Dentro;70,51
+3120904;Curvelo;76,05
+3121001;Datas;70,36
+3121100;Delfim Moreira;75,20
+3121209;Delfinópolis;77,31
+3121258;Delta;73,46
+3121308;Descoberto;72,85
+3121407;Desterro de Entre Rios;73,14
+3121506;Desterro do Melo;73,53
+3121605;Diamantina;75,33
+3121704;Diogo de Vasconcelos;73,63
+3121803;Dionísio;74,24
+3121902;Divinésia;72,11
+3122009;Divino;74,36
+3122108;Divino das Laranjeiras;73,64
+3122207;Divinolândia de Minas;73,72
+3122306;Divinópolis;75,63
+3122355;Divisa Alegre;68,39
+3122405;Divisa Nova;73,03
+3122454;Divisópolis;73,10
+3122470;Dom Bosco;73,88
+3122504;Dom Cavati;72,03
+3122603;Dom Joaquim;74,12
+3122702;Dom Silvério;75,80
+3122801;Dom Viçoso;74,12
+3122900;Dona Euzébia;75,45
+3123007;Dores de Campos;74,40
+3123106;Dores de Guanhães;74,26
+3123205;Dores do Indaiá;75,40
+3123304;Dores do Turvo;74,75
+3123403;Doresópolis;77,11
+3123502;Douradoquara;75,84
+3123528;Durandé;75,54
+3123601;Elói Mendes;75,26
+3123700;Engenheiro Caldas;73,91
+3123809;Engenheiro Navarro;72,44
+3123858;Entre Folhas;72,50
+3123908;Entre Rios de Minas;73,14
+3124005;Ervália;74,70
+3124104;Esmeraldas;74,31
+3124203;Espera Feliz;75,77
+3124302;Espinosa;73,26
+3124401;Espírito Santo do Dourado;75,81
+3124500;Estiva;75,90
+3124609;Estrela D' Alva;77,04
+3124708;Estrela do Indaiá;77,49
+3124807;Estrela do Sul;75,40
+3124906;Eugenópolis;75,77
+3125002;Ewbank da Câmara;74,37
+3125101;Extrema;75,95
+3125200;Fama;76,77
+3125309;Faria Lemos;73,00
+3125408;Felício dos Santos;72,61
+3125606;Felisburgo;69,66
+3125705;Felixlândia;73,90
+3125804;Fernandes Tourinho;73,43
+3125903;Ferros;74,24
+3125952;Fervedouro;72,73
+3126000;Florestal;75,69
+3126109;Formiga;77,43
+3126208;Formoso;75,04
+3126307;Fortaleza de Minas;73,31
+3126406;Fortuna de Minas;75,70
+3126505;Francisco Badaró;72,57
+3126604;Francisco Dumont;72,80
+3126752;Franciscópolis;73,14
+3126703;Francisco Sá;73,48
+3126802;Frei Gaspar;72,96
+3126901;Frei Inocêncio;71,72
+3126950;Frei Lagonegro;69,96
+3127008;Fronteira;77,28
+3127057;Fronteira dos Vales;73,80
+3127073;Fruta de Leite;72,50
+3127107;Frutal;76,92
+3127206;Funilândia;75,66
+3127305;Galiléia;72,71
+3127339;Gameleiras;72,74
+3127354;Glaucilândia;73,72
+3127370;Goiabeira;72,91
+3127388;Goianá;75,10
+3127404;Gonçalves;74,96
+3127503;Gonzaga;71,44
+3127602;Gouveia;74,98
+3127701;Governador Valadares;75,06
+3127800;Grão Mogol;72,44
+3127909;Grupiara;75,64
+3128006;Guanhães;74,22
+3128105;Guapé;74,86
+3128204;Guaraciaba;72,61
+3128253;Guaraciama;73,40
+3128303;Guaranésia;75,70
+3128402;Guarani;75,96
+3128501;Guarará;73,10
+3128600;Guarda-Mor;74,76
+3128709;Guaxupé;77,81
+3128808;Guidoval;75,22
+3128907;Guimarânia;74,51
+3129004;Guiricema;73,74
+3129103;Gurinhatã;76,88
+3129202;Heliodora;74,29
+3129301;Iapu;74,12
+3129400;Ibertioga;75,01
+3129509;Ibiá;77,62
+3129608;Ibiaí;72,71
+3129657;Ibiracatu;72,17
+3129707;Ibiraci;76,28
+3129806;Ibirité;75,41
+3129905;Ibitiúra de Minas;73,14
+3130002;Ibituruna;74,39
+3130051;Icaraí de Minas;72,96
+3130101;Igarapé;75,63
+3130200;Igaratinga;75,54
+3130309;Iguatama;74,51
+3130408;Ijaci;75,37
+3130507;Ilicínea;74,61
+3130556;Imbé de Minas;69,66
+3130606;Inconfidentes;75,59
+3130655;Indaiabira;73,26
+3130705;Indianópolis;75,06
+3130804;Ingaí;76,45
+3130903;Inhapim;74,72
+3131000;Inhaúma;75,71
+3131109;Inimutaba;73,61
+3131158;Ipaba;74,72
+3131208;Ipanema;75,87
+3131307;Ipatinga;76,85
+3131406;Ipiaçu;73,82
+3131505;Ipuiúna;76,98
+3131604;Iraí de Minas;75,84
+3131703;Itabira;77,37
+3131802;Itabirinha;75,30
+3131901;Itabirito;74,68
+3132008;Itacambira;72,44
+3132107;Itacarambi;72,22
+3132206;Itaguara;75,14
+3132305;Itaipé;70,52
+3132404;Itajubá;78,06
+3132503;Itamarandiba;72,86
+3132602;Itamarati de Minas;75,45
+3132701;Itambacuri;72,05
+3132800;Itambé do Mato Dentro;74,39
+3132909;Itamogi;73,61
+3133006;Itamonte;76,17
+3133105;Itanhandu;77,23
+3133204;Itanhomi;74,85
+3133303;Itaobim;72,19
+3133402;Itapagipe;76,64
+3133501;Itapecerica;75,73
+3133600;Itapeva;77,69
+3133709;Itatiaiuçu;75,00
+3133758;Itaú de Minas;76,74
+3133808;Itaúna;76,02
+3133907;Itaverava;73,63
+3134004;Itinga;72,83
+3134103;Itueta;74,51
+3134202;Ituiutaba;75,37
+3134301;Itumirim;75,39
+3134400;Iturama;75,88
+3134509;Itutinga;77,67
+3134608;Jaboticatubas;75,19
+3134707;Jacinto;73,40
+3134806;Jacuí;73,61
+3134905;Jacutinga;76,82
+3135001;Jaguaraçu;76,35
+3135050;Jaíba;72,33
+3135076;Jampruca;71,86
+3135100;Janaúba;72,74
+3135209;Januária;74,22
+3135308;Japaraíba;75,62
+3135357;Japonvar;72,17
+3135407;Jeceaba;75,66
+3135456;Jenipapo de Minas;72,59
+3135506;Jequeri;72,61
+3135605;Jequitaí;72,79
+3135704;Jequitibá;76,26
+3135803;Jequitinhonha;73,99
+3135902;Jesuânia;74,88
+3136009;Joaíma;72,36
+3136108;Joanésia;73,20
+3136207;João Monlevade;75,93
+3136306;João Pinheiro;72,25
+3136405;Joaquim Felício;74,44
+3136504;Jordânia;72,82
+3136520;José Gonçalves de Minas;70,81
+3136579;Josenópolis;71,94
+3136553;José Raydan;72,94
+3136652;Juatuba;75,94
+3136702;Juiz de Fora;75,65
+3136801;Juramento;73,48
+3136900;Juruaia;76,61
+3136959;Juvenília;71,57
+3137007;Ladainha;70,26
+3137106;Lagamar;75,31
+3137205;Lagoa da Prata;74,89
+3137304;Lagoa dos Patos;71,36
+3137403;Lagoa Dourada;74,68
+3137502;Lagoa Formosa;74,91
+3137536;Lagoa Grande;73,72
+3137601;Lagoa Santa;76,43
+3137700;Lajinha;73,60
+3137809;Lambari;77,23
+3137908;Lamim;74,70
+3138005;Laranjal;76,42
+3138104;Lassance;72,71
+3138203;Lavras;77,80
+3138302;Leandro ferreira;77,49
+3138351;Leme do Prado;71,73
+3138401;Leopoldina;77,04
+3138500;Liberdade;75,01
+3138609;Lima Duarte;76,68
+3138625;Limeira do Oeste;75,04
+3138658;Lontra;72,61
+3138674;Luisburgo;73,53
+3138682;Luislândia;72,96
+3138708;Luminárias;74,27
+3138807;Luz;75,00
+3139003;Machado;75,90
+3139102;Madre de Deus de Minas;76,38
+3139201;Malacacheta;71,05
+3139250;Mamonas;71,73
+3139300;Manga;72,96
+3139409;Manhuaçu;75,35
+3139508;Manhumirim;75,74
+3139607;Mantena;73,16
+3139706;Maravilhas;75,70
+3139805;Mar de Espanha;74,51
+3139904;Maria da Fé;75,53
+3140001;Mariana;77,43
+3140100;Marilac;71,86
+3140159;Mário Campos;74,99
+3140209;Maripá de Minas;75,84
+3140308;Marliéria;75,29
+3140407;Marmelópolis;73,36
+3140506;Martinho Campos;75,61
+3140530;Martins Soares;73,53
+3140555;Mata Verde;69,92
+3140605;Materlândia;71,16
+3140704;Mateus Leme;75,36
+3171501;Mathias Lobato;72,71
+3140803;Matias Barbosa;76,73
+3140852;Matias Cardoso;72,96
+3140902;Matipó;71,80
+3141009;Mato Verde;72,33
+3141108;Matozinhos;76,82
+3141207;Matutina;76,53
+3138906;Maxacalis;71,96
+3141306;Medeiros;76,04
+3141405;Medina;74,27
+3141504;Mendes Pimentel;71,09
+3141603;Mercês;74,85
+3141702;Mesquita;72,76
+3141801;Minas Novas;73,14
+3141900;Minduri;73,32
+3142007;Mirabela;72,61
+3142106;Miradouro;74,64
+3142205;Miraí;75,19
+3142254;Miravânia;71,88
+3142304;Moeda;73,01
+3142403;Moema;75,87
+3142502;Monjolos;74,16
+3142601;Monsenhor Paulo;75,32
+3142700;Montalvânia;72,96
+3142809;Monte Alegre de Minas;75,86
+3142908;Monte Azul;73,63
+3143005;Monte Belo;75,82
+3143104;Monte Carmelo;77,10
+3143153;Monte Formoso;70,92
+3143203;Monte Santo de Minas;77,46
+3143302;Montes Claros;77,07
+3143401;Monte Sião;77,69
+3143450;Montezuma;73,55
+3143500;Morada Nova de Minas;74,79
+3143609;Morro da Garça;73,97
+3143708;Morro do Pilar;73,55
+3143807;Munhoz;74,25
+3143906;Muriaé;76,18
+3144003;Mutum;74,30
+3144102;Muzambinho;76,51
+3144201;Nacip Raydan;74,85
+3144300;Nanuque;76,02
+3144359;Naque;74,32
+3144375;Natalândia;75,78
+3144409;Natércia;73,28
+3144508;Nazareno;74,82
+3144607;Nepomuceno;74,30
+3144656;Ninheira;72,01
+3144672;Nova Belém;71,06
+3144706;Nova Era;74,48
+3144805;Nova Lima;78,10
+3144904;Nova Módica;71,72
+3145000;Nova Ponte;75,08
+3145059;Nova Porteirinha;73,63
+3145109;Nova Resende;75,33
+3145208;Nova Serrana;76,82
+3136603;Nova União;74,06
+3145307;Novo Cruzeiro;72,83
+3145356;Novo Oriente de Minas;70,26
+3145372;Novorizonte;73,26
+3145406;Olaria;74,37
+3145455;Olhos D' Água;73,72
+3145505;Olímpio Noronha;73,56
+3145604;Oliveira;75,51
+3145703;Oliveira Fortes;72,61
+3145802;Onça do Pitangui;73,33
+3145851;Oratórios;74,42
+3145877;Orizânia;71,67
+3145901;Ouro Branco;77,31
+3146008;Ouro Fino;76,66
+3146107;Ouro Preto;75,03
+3146206;Ouro Verde de Minas;72,35
+3146255;Padre Carvalho;72,71
+3146305;Padre Paraíso;72,83
+3146404;Paineiras;74,41
+3146503;Pains;77,43
+3146552;Pai Pedro;70,62
+3146602;Paiva;75,72
+3146701;Palma;75,45
+3146750;Palmópolis;69,29
+3146909;Papagaios;74,96
+3147006;Paracatu;76,22
+3147105;Pará de Minas;75,87
+3147204;Paraguaçu;75,98
+3147303;Paraisópolis;76,11
+3147402;Paraopeba;72,55
+3147501;Passabém;72,23
+3147600;Passa Quatro;76,59
+3147709;Passa Tempo;73,46
+3147808;Passa Vinte;73,53
+3147907;Passos;78,15
+3147956;Patis;72,23
+3148004;Patos de Minas;76,31
+3148103;Patrocínio;76,14
+3148202;Patrocínio do Muriaé;72,78
+3148301;Paula Cândido;74,38
+3148400;Paulistas;72,44
+3148509;Pavão;73,77
+3148608;Peçanha;72,23
+3148707;Pedra Azul;72,79
+3148756;Pedra Bonita;69,41
+3148806;Pedra do Anta;74,26
+3148905;Pedra do Indaiá;75,60
+3149002;Pedra Dourada;74,64
+3149101;Pedralva;73,39
+3149150;Pedras de Maria da Cruz;72,22
+3149200;Pedrinópolis;76,29
+3149309;Pedro Leopoldo;76,33
+3149408;Pedro Teixeira;72,61
+3149507;Pequeri;77,05
+3149606;Pequi;73,47
+3149705;Perdigão;75,60
+3149804;Perdizes;77,80
+3149903;Perdões;77,69
+3149952;Periquito;75,34
+3150000;Pescador;74,85
+3150109;Piau;74,42
+3150158;Piedade de Caratinga;71,37
+3150208;Piedade de Ponte Nova;73,14
+3150307;Piedade do Rio Grande;74,22
+3150406;Piedade dos Gerais;75,42
+3150505;Pimenta;74,93
+3150539;Pingo D' Água;69,63
+3150570;Pintópolis;72,96
+3150604;Piracema;73,54
+3150703;Pirajuba;76,46
+3150802;Piranga;72,96
+3150901;Piranguçu;73,36
+3151008;Piranguinho;75,45
+3151107;Pirapetinga;75,45
+3151206;Pirapora;74,65
+3151305;Piraúba;75,56
+3151404;Pitangui;77,22
+3151503;Piumhi;77,70
+3151602;Planura;76,10
+3151701;Poço Fundo;76,95
+3151800;Poços de Caldas;77,31
+3151909;Pocrane;72,91
+3152006;Pompéu;75,05
+3152105;Ponte Nova;75,90
+3152131;Ponto Chique;72,81
+3152170;Ponto dos Volantes;71,88
+3152204;Porteirinha;72,74
+3152303;Porto Firme;73,26
+3152402;Poté;73,52
+3152501;Pouso Alegre;77,33
+3152600;Pouso Alto;75,81
+3152709;Prados;76,89
+3152808;Prata;76,12
+3152907;Pratápolis;76,74
+3153004;Pratinha;77,24
+3153103;Presidente Bernardes;73,23
+3153202;Presidente Juscelino;72,74
+3153301;Presidente Kubitschek;72,22
+3153400;Presidente Olegário;74,88
+3153608;Prudente de Morais;72,70
+3153707;Quartel Geral;75,74
+3153806;Queluzito;74,39
+3153905;Raposos;74,90
+3154002;Raul Soares;74,36
+3154101;Recreio;75,45
+3154150;Reduto;73,08
+3154200;Resende Costa;74,40
+3154309;Resplendor;74,99
+3154408;Ressaquinha;75,01
+3154457;Riachinho;72,71
+3154507;Riacho dos Machados;73,45
+3154606;Ribeirão das Neves;74,31
+3154705;Ribeirão Vermelho;76,01
+3154804;Rio Acima;77,22
+3154903;Rio Casca;73,79
+3155009;Rio Doce;73,07
+3155108;Rio do Prado;73,40
+3155207;Rio Espera;73,03
+3155306;Rio Manso;73,11
+3155405;Rio Novo;75,07
+3155504;Rio Paranaíba;76,28
+3155603;Rio Pardo de Minas;72,85
+3155702;Rio Piracicaba;72,63
+3155801;Rio Pomba;76,77
+3155900;Rio Preto;75,84
+3156007;Rio Vermelho;72,23
+3156106;Ritápolis;73,91
+3156205;Rochedo de Minas;75,92
+3156304;Rodeiro;72,84
+3156403;Romaria;73,78
+3156452;Rosário da Limeira;73,69
+3156502;Rubelita;73,46
+3156601;Rubim;73,99
+3156700;Sabará;74,99
+3156809;Sabinópolis;73,71
+3156908;Sacramento;77,25
+3157005;Salinas;73,90
+3157104;Salto da Divisa;75,74
+3157203;Santa Bárbara;73,97
+3157252;Santa Bárbara do Leste;73,01
+3157278;Santa Bárbara do Monte Verde;74,37
+3157302;Santa Bárbara do Tugúrio;73,57
+3157336;Santa Cruz de Minas;75,35
+3157377;Santa Cruz de Salinas;70,41
+3157401;Santa Cruz do Escalvado;73,91
+3157500;Santa Efigênia de Minas;72,57
+3157609;Santa Fé de Minas;73,26
+3157658;Santa Helena de Minas;68,37
+3157708;Santa Juliana;77,06
+3157807;Santa Luzia;76,52
+3157906;Santa Margarida;72,07
+3158003;Santa Maria de Itabira;74,24
+3158102;Santa Maria do Salto;70,92
+3158201;Santa Maria do Suaçuí;74,03
+3158300;Santana da Vargem;75,98
+3158409;Santana de Cataguases;72,58
+3158508;Santana de Pirapama;73,93
+3158607;Santana do Deserto;75,93
+3158706;Santana do Garambéu;74,32
+3158805;Santana do Jacaré;72,37
+3158904;Santana do Manhuaçu;73,53
+3158953;Santana do paraíso;77,66
+3159001;Santana do Riacho;75,02
+3159100;Santana dos Montes;73,04
+3159209;Santa Rita de Caldas;74,36
+3159308;Santa Rita de Jacutinga;74,58
+3159357;Santa Rita de Minas;72,48
+3159407;Santa Rita do Ibitipoca;72,60
+3159506;Santa Rita do Itueto;71,76
+3159605;Santa Rita do Sapucaí;74,80
+3159704;Santa Rosa da Serra;76,95
+3159803;Santa Vitória;76,88
+3159902;Santo Antônio do Amparo;74,39
+3160009;Santo Antônio do Aventureiro;75,45
+3160108;Santo Antônio do Grama;74,36
+3160207;Santo Antônio do Itambé;72,65
+3160306;Santo Antônio do Jacinto;71,33
+3160405;Santo Antônio do Monte;75,37
+3160454;Santo Antônio do Retiro;72,03
+3160504;Santo Antônio do Rio Abaixo;74,39
+3160603;Santo Hipólito;74,44
+3160702;Santos Dumont;75,84
+3160801;São Bento Abade;73,03
+3160900;São Brás do Suaçuí;73,04
+3160959;São Domingos das Dores;73,01
+3161007;São Domingos do Prata;74,36
+3161056;São Félix de Minas;72,68
+3161106;São Francisco;73,26
+3161205;São Francisco de Paula;73,69
+3161304;São Francisco de Sales;77,01
+3161403;São Francisco do Glória;74,96
+3161502;São Geraldo;74,85
+3161601;São Geraldo da Piedade;71,43
+3161650;São Geraldo do Baixio;74,43
+3161700;São Gonçalo do Abaeté;72,75
+3161809;São Gonçalo do Pará;75,53
+3161908;São Gonçalo do Rio Abaixo;72,52
+3125507;São Gonçalo do Rio Preto;73,91
+3162005;São Gonçalo do Sapucaí;75,99
+3162104;São Gotardo;76,27
+3162203;São João Batista do Glória;75,69
+3162252;São João da Lagoa;73,78
+3162302;São João da Mata;74,29
+3162401;São João da Ponte;72,17
+3162450;São João das Missões;71,57
+3162500;São João Del Rei;76,57
+3162559;São João do Manhuaçu;75,16
+3162575;São João do Manteninha;73,30
+3162609;São João do Oriente;73,32
+3162658;São João do Pacuí;72,85
+3162708;São João do Paraíso;73,46
+3162807;São João Evangelista;73,37
+3162906;São João Nepomuceno;75,98
+3162922;São Joaquim de Bicas;75,62
+3162948;São José da Barra;77,56
+3162955;São José da Lapa;75,63
+3163003;São José da Safira;70,91
+3163102;São José da Varginha;76,41
+3163201;São José do Alegre;75,20
+3163300;São José do Divino;71,70
+3163409;São José do Goiabal;73,83
+3163508;São José do Jacuri;69,96
+3163607;São José do Mantimento;74,36
+3163706;São Lourenço;77,28
+3163805;São Miguel do Anta;74,70
+3163904;São Pedro da União;75,16
+3164001;São Pedro dos Ferros;72,34
+3164100;São Pedro do Suaçuí;72,08
+3164209;São Romão;72,22
+3164308;São Roque de Minas;75,27
+3164407;São Sebastião da Bela Vista;75,87
+3164431;São Sebastião da Vargem Alegre;74,64
+3164472;São Sebastião do Anta;70,98
+3164506;São Sebastião do Maranhão;73,94
+3164605;São Sebastião do Oeste;74,90
+3164704;São Sebastião do Paraíso;75,15
+3164803;São Sebastião do Rio Preto;73,55
+3164902;São Sebastião do Rio Verde;75,71
+3165008;São Tiago;74,48
+3165107;São Tomás de Aquino;77,46
+3165206;São Tomé das Letras;73,03
+3165305;São Vicente de Minas;75,72
+3165404;Sapucaí Mirim;75,49
+3165503;Sardoá;73,71
+3165537;Sarzedo;77,28
+3165560;Sem-Peixe;74,57
+3165578;Senador Amaral;74,25
+3165602;Senador Cortês;75,05
+3165701;Senador Firmino;74,75
+3165800;Senador José Bento;74,41
+3165909;Senador Modestino Gonçalves;71,94
+3166006;Senhora de Oliveira;73,03
+3166105;Senhora do Porto;73,10
+3166204;Senhora dos Remédios;71,56
+3166303;Sericita;71,56
+3166402;Seritinga;76,17
+3166501;Serra Azul de Minas;73,55
+3166600;Serra da Saudade;76,78
+3166709;Serra dos Aimorés;72,06
+3166808;Serra do Salitre;76,11
+3166907;Serrania;75,00
+3166956;Serranópolis de Minas;71,38
+3167004;Serranos;75,05
+3167103;Serro;75,01
+3167202;Sete Lagoas;75,37
+3165552;Setubinha;69,60
+3167301;Silveirânia;75,45
+3167400;Silvianópolis;76,87
+3167509;Simão Pereira;75,57
+3167608;Simonésia;74,36
+3167707;Sobrália;73,28
+3167806;Soledade de Minas;74,88
+3167905;Tabuleiro;74,27
+3168002;Taiobeiras;73,90
+3168051;Taparuba;72,91
+3168101;Tapira;75,80
+3168200;Tapiraí;75,84
+3168309;Taquaraçu de Minas;74,06
+3168408;Tarumirim;74,72
+3168507;Teixeiras;73,26
+3168606;Teófilo Otoni;74,45
+3168705;Timóteo;75,14
+3168804;Tiradentes;78,10
+3168903;Tiros;76,13
+3169000;Tocantins;72,99
+3169059;Tocos do Moji;73,49
+3169109;Toledo;73,14
+3169208;Tombos;77,23
+3169307;Três Corações;76,28
+3169356;Três Marias;76,93
+3169406;Três Pontas;75,98
+3169505;Tumiritinga;74,63
+3169604;Tupaciguara;76,78
+3169703;Turmalina;73,98
+3169802;Turvolândia;74,71
+3169901;Ubá;75,45
+3170008;Ubaí;72,22
+3170057;Ubaporanga;73,32
+3170107;Uberaba;75,71
+3170206;Uberlândia;78,09
+3170305;Umburatiba;73,88
+3170404;Unaí;75,83
+3170438;União de Minas;74,73
+3170479;Uruana de Minas;72,60
+3170503;Urucânia;73,67
+3170529;Urucuia;71,88
+3170578;Vargem Alegre;74,12
+3170602;Vargem Bonita;75,80
+3170651;Vargem Grande do Rio Pardo;73,63
+3170701;Varginha;77,49
+3170750;Varjão de Minas;75,79
+3170800;Várzea da Palma;73,83
+3170909;Varzelândia;73,37
+3171006;Vazante;76,96
+3171030;Verdelândia;72,81
+3171071;Veredinha;72,11
+3171105;Veríssimo;77,16
+3171154;Vermelho Novo;72,37
+3171204;Vespasiano;73,65
+3171303;Viçosa;77,96
+3171402;Vieiras;73,47
+3171600;Virgem da Lapa;72,83
+3171709;Virgínia;74,73
+3171808;Virginópolis;74,86
+3171907;Virgolândia;72,71
+3172004;Visconde do Rio Branco;75,97
+3172103;Volta Grande;75,45
+3172202;Wenceslau Braz;75,53

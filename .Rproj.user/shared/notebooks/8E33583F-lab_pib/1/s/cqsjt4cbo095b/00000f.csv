@@ -1,0 +1,7 @@
+"0","library(tidyr)"
+"0",""
+"0","# organiza base com os dados necessários e calcula a diferença"
+"0","base2 <- pib_mun_mg %>%  select(ano,code_muni, nome_mun,p.agro,p.ind,p.serv,p.admin) %>% filter(ano==2020) "
+"0",""
+"0","# organiza tabela com os dez municípios em que agropecuária é mais importante"
+"0","arrange(base2,desc(base2$p.agro))[1:10,c(""code_muni"",""nome_mun"",""p.agro"")]"

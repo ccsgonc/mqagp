@@ -1,0 +1,4 @@
+"0","proj_ibge<- read_excel(""indicadores_projecoes_DF_IBGE.xlsx"")"
+"0",""
+"0","proj_ibge<-ts(proj_ibge,start = 2010,frequency = 1)"
+"0","proj_ibge<-window(proj_ibge,start = 2010,end=2030,frequency = 1)"

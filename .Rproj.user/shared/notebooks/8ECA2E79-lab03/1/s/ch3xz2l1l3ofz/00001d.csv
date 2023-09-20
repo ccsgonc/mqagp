@@ -1,0 +1,5 @@
+"0","# Taxas Específicas de Mortalidade (TEM) por idade (nMx)"
+"0","tabela2$tem<-tabela2$obt_ajust/tabela2$pop"
+"0",""
+"0","#fazendo a média móvel"
+"0","tabela2[,c(""ano"",""faixa_idade"",""obt_ajust"")]"

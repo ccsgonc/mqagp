@@ -1,0 +1,3 @@
+"0","dados_sim <- process_sim(dados_sim)"
+"2","Error in strptime(x, format, tz = ""GMT"") : input string is too long
+"

@@ -1,0 +1,7 @@
+"0",""
+"0","esperanca <- read_excel(""esperanca_vida_nascer_mg.xlsx"", "
+"0","     col_types = c(""numeric"", ""text"", ""numeric""))"
+"0","colnames(esperanca) <- c(""code_muni"",""Município"",""e0"")"
+"0",""
+"0","# organiza tabela com os dez municípios com maiores PIB percapita e aqueles os 10 menores"
+"0","arrange(esperanca,desc(esperanca$e0))[1:10,c(""code_muni"", ""Município"",""e0"")]"
