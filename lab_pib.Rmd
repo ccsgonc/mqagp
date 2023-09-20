@@ -16,19 +16,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 O objetivo deste tutorial é explorar os dados do produto interno bruto
-dos municípios.
+dos municípios com apresentações em mapas, bem como revisar regressão linear.
 
 # Contextualização
 
 ## Produto Interno Bruto (PIB)
-
-PIB representa o total dos bens e serviços produzidos pelas unidades
-produtoras residentes destinados aos usos finais, sendo, portanto,
-equivalente à soma dos valores adicionados pelas diversas atividades
-econômicas acrescida dos impostos, líquidos de subsídios, sobre produtos
-( PIB pela ótica da produção).
-
-## Produto Interno Bruto dos Municípios
 
 PIB representa o total dos bens e serviços produzidos pelas unidades
 produtoras residentes destinados aos usos finais, sendo, portanto,
@@ -43,7 +35,8 @@ econômicas acrescida dos impostos, líquidos de subsídios, sobre produtos
 Defina o diretório para o local onde está a base de dados e importe a
 bse completa:
 
-```{r dados, echo=TRUE}
+```{r dados, echo=TRUE, warning=FALSE}
+options(scipen = 999) # opção para não exibir números científicos
 library(readxl)
 pib_mun <- read_excel("PIB dos Municípios - base de dados 2010-2020.xls")
 ```
@@ -51,7 +44,7 @@ pib_mun <- read_excel("PIB dos Municípios - base de dados 2010-2020.xls")
 Ao visulizar a estrutura dos dados, o nomes das colunas não está na
 melhor forma para manipulação. Assim, é recomendado algumas alterações:
 
-```{r dados2, include=FALSE}
+```{r dados2, warning=FALSE, include=FALSE}
 str(pib_mun)
 colnames(pib_mun) <- c("ano","cod_gr","nome_gr",
                             "cod_uf", "sigla_uf","nome_uf",
@@ -95,7 +88,7 @@ makeDataReport(pib_mun,replace = TRUE)
 
 O que foi possível verificar com o relatório produzido anteriormente?
 
-## Indicadores
+## Perguntas
 
 O principal indicador, PIB e o valor adicionado por atividades já foi
 calculado, assim vamos pensar na apresentação e análise desses dados
@@ -103,237 +96,332 @@ tentando responder as seguintes perguntas?
 
 1.  Quais os dez municípios que mais ganharam participação no PIB entre
     os anos de 2010 e 2019? E os dez que mais perderam?
-2.  Quais os municípios mais relevantes para a produção agropecuária? E
-    para a indústria?
+2.  Quais os municípios que possuem a produção agropecuária como mais
+    importante para sua economia local? E para a indústria e os
+    Serviços? Quais possuem a Administração Pública como principal
+    atividade?
 3.  Qual a relação entre PIB percapita e Expectativa de Vida?
 
 ```{r manipulando, echo=TRUE}
 library(tidyverse)
 pib_mun_mg <- pib_mun %>%  filter(cod_uf == 31) %>% 
-  mutate(
-    
-  )
+  mutate(p.agro = va_agro/va *100,
+         p.ind = va_ind/va*100,
+         p.serv = va_serv/va*100,
+         p.admin = va_admin/va*100
+  ) %>% group_by(ano) %>% mutate(p.pib = pib/sum(pib)*100)
 ```
 
-```{r mapa, echo=TRUE}
+# Participação no PIB
+
+```{r partic, echo=TRUE}
+library(tidyr)
+
+# organiza base com os dados necessários e calcula a diferença
+base1 <- pib_mun_mg %>%  select(ano,code_muni, nome_mun,p.pib) %>% spread(.,ano,p.pib) %>% mutate(dif_2019_2010 = round(`2019`-`2010`,2))
+
+# organiza tabela com os dez municípios que mais ganharam participação
+arrange(base1,desc(base1$dif_2019_2010))[1:10,c("code_muni","nome_mun","dif_2019_2010")]
+
+# organiza tabela com os dez municípios que mais perderam participação
+arrange(base1,base1$dif_2019_2010)[1:10,c("code_muni","nome_mun","dif_2019_2010")]
+
+```
+
+Fazendo um mapa dos que ganharam mais participação e aqueles que mais
+perderam:
+
+```{r mapa, message=FALSE, warning=FALSE}
 library(geobr)  
-mun <- read_municipality(code_muni = "MG", year = 2010)  
+mun <- read_municipality(code_muni = "MG", year = 2019,showProgress = FALSE)  
 
 #Juntar coordenadas para criar o mapa 
-base_mapa<- left_join(pib_mun_mg, mun , by = 'code_muni')
+base_mapa<- left_join(base1, mun , by = 'code_muni')
 ```
 
-Agora, vamos plotar os resultados em um mapa estático e interativo.
+Agora, vamos plotar os resultados em um mapa estático e um interativo.
 
-```{r variaveis, echo=TRUE}
+```{r variaveis, echo=TRUE, warning=FALSE}
 # Carregar bibliotecas 
 library(ggplot2) 
 library(plotly)  
+library(ggspatial)
 
 # Criar o gráfico ggplot com o PIB 
-ggplot_obj_1 <- base_mapa %>% filter(ano==2020) %>%    
+ggplot_obj_1 <- base_mapa %>% 
   ggplot() +   
-  geom_sf(data = base_mapa$geom, aes(fill = base_mapa$pib, 
-                                     text = paste("Município: ", base_mapa$nome_mun, "<br>PIB: ", base_mapa$pib))) +   
-  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'PIB') +   
+  geom_sf(data = base_mapa$geom, aes(fill = base_mapa$dif_2019_2010, 
+                                     text = paste("Município: ", base_mapa$nome_mun, "<br>Diferença participação: ", base_mapa$dif_2019_2010, "%"))) +   
+  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'Diferença part.') +
+  annotation_scale(location = "bl", width_hint = 0.3) + 
+  annotation_north_arrow(location = "bl", which_north = "true", 
+        pad_x = unit(0.3, "in"), pad_y = unit(0.3, "in"),
+        style = north_arrow_fancy_orienteering) +
   theme(panel.grid = element_line(colour = "transparent"),panel.background =  element_blank(),axis.text = element_blank(),axis.ticks = element_blank()) +   
-  labs(title = "PIB dos Municípios de MG - 2020", subtitle = "",caption = 'Fonte: Elaboração própria', size = 8)  
+  labs(title = "Diferença de participação do PIB dos Municípios de MG - 2019-2010 (%)", subtitle = "",caption = 'Fonte: IBGE. Elaboração própria', size = 8)  
 ggplot_obj_1
+```
 
+Fazendo uma versão interativa:
+
+```{r variaveis2, echo=TRUE, warning=FALSE}
 # Converter o gráfico ggplot para plotly com o hovertext 
-interactive_plot_1 <- ggplotly(ggplot_obj_1, tooltip = "text")  
+interactive_plot_1 <- ggplotly(ggplot_obj_1, tooltip = "text")
 # Exibir o gráfico interativo 
 interactive_plot_1
 ```
 
-hghh
+# Atividades mais importantes
 
-```{r variaveis2, echo=TRUE}
+```{r imp, echo=TRUE, warning=FALSE}
+library(tidyr)
+
+# organiza base com os dados necessários e calcula a diferença
+base2 <- pib_mun_mg %>%  select(ano,code_muni, nome_mun,p.agro,p.ind,p.serv,p.admin) %>% filter(ano==2020) 
+
+# organiza tabela com os dez municípios em que agropecuária é mais importante
+arrange(base2,desc(base2$p.agro))[1:10,c("code_muni","nome_mun","p.agro")]
+
+# organiza tabela com os dez municípios em que a industria é mais importante
+arrange(base2,desc(base2$p.ind))[1:10,c("code_muni","nome_mun","p.ind")]
+
+# organiza tabela com os dez municípios em que os serviços é mais importante
+arrange(base2,desc(base2$p.serv))[1:10,c("code_muni","nome_mun","p.serv")]
+
+# organiza tabela com os dez municípios em que a administração pública é mais importante
+arrange(base2,desc(base2$p.admin))[1:10,c("code_muni","nome_mun","p.admin")]
+```
+
+Representando em mapas:
+
+```{r imp2, echo=TRUE, warning=FALSE}
+#Juntar coordenadas para criar o mapa 
+base_mapa2<- left_join(base2, mun , by = 'code_muni')
+
+
 # Agropecuária
-ggplot_obj_2 <- base_mapa %>%    
+ggplot_obj_2 <- base_mapa2 %>% 
   ggplot() +   
-  geom_sf(data = base_mapa$geom, aes(fill = base_mapa$va_agro, 
-                                     text = paste("Município: ", base_mapa$nome_mun, "<br>PIB: ", base_mapa$va_agro))) +   
-  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'VA Agropecuária') +   
+  geom_sf(data = base_mapa2$geom, aes(fill = base_mapa2$p.agro, 
+                                     text = paste("Município: ", base_mapa2$nome_mun, "<br>Part. Agropecuária: ", base_mapa2$p.agro, "%"))) +   
+  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'Part. Agropecuária') +
+  annotation_scale(location = "bl", width_hint = 0.3) + 
+  annotation_north_arrow(location = "bl", which_north = "true", 
+        pad_x = unit(0.3, "in"), pad_y = unit(0.3, "in"),
+        style = north_arrow_fancy_orienteering) +
   theme(panel.grid = element_line(colour = "transparent"),panel.background =  element_blank(),axis.text = element_blank(),axis.ticks = element_blank()) +   
-  labs(title = "VA da Agropecuária dos Municípios de MG - 2020", subtitle = "",caption = 'Fonte: Elaboração própria', size = 8)  
+  labs(title = "Participação da Agropecuária no VA total municipal - 2020 (%)", subtitle = "",caption = 'Fonte: IBGE. Elaboração própria', size = 8)  
 ggplot_obj_2
 
-ggplot_obj_3 <- base_mapa %>%    
+# Indústria
+ggplot_obj_3 <- base_mapa2 %>% 
   ggplot() +   
-  geom_sf(data = base_mapa$geom, aes(fill = base_mapa$va_ind, 
-                                     text = paste("Município: ", base_mapa$nome_mun, "<br>PIB: ", base_mapa$va_ind))) +   
-  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'VA Indústria') +   
+  geom_sf(data = base_mapa2$geom, aes(fill = base_mapa2$p.ind, 
+                                     text = paste("Município: ", base_mapa2$nome_mun, "<br>Part. Indústria: ", base_mapa2$p.ind, "%"))) +   
+  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'Part. Indústria') +
+  annotation_scale(location = "bl", width_hint = 0.3) + 
+  annotation_north_arrow(location = "bl", which_north = "true", 
+        pad_x = unit(0.3, "in"), pad_y = unit(0.3, "in"),
+        style = north_arrow_fancy_orienteering) +
   theme(panel.grid = element_line(colour = "transparent"),panel.background =  element_blank(),axis.text = element_blank(),axis.ticks = element_blank()) +   
-  labs(title = "VA da Indústria dos Municípios de MG - 2020", subtitle = "",caption = 'Fonte: Elaboração própria', size = 8)  
+  labs(title = "Participação da Indústria no VA total municipal - 2020 (%)", subtitle = "",caption = 'Fonte: IBGE. Elaboração própria', size = 8)  
 ggplot_obj_3
 
-ggplot_obj_4 <- base_mapa %>%    
+# Serviços
+ggplot_obj_4 <- base_mapa2 %>% 
   ggplot() +   
-  geom_sf(data = base_mapa$geom, aes(fill = base_mapa$va_serv, 
-                                     text = paste("Município: ", base_mapa$nome_mun, "<br>PIB: ", base_mapa$va_serv))) +   
-  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'VA Agropecuária') +   
+  geom_sf(data = base_mapa2$geom, aes(fill = base_mapa2$p.serv, 
+                                     text = paste("Município: ", base_mapa2$nome_mun, "<br>Part. Serviços: ", base_mapa2$p.serv, "%"))) +   
+  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'Part. Serviços') +
+  annotation_scale(location = "bl", width_hint = 0.3) + 
+  annotation_north_arrow(location = "bl", which_north = "true", 
+        pad_x = unit(0.3, "in"), pad_y = unit(0.3, "in"),
+        style = north_arrow_fancy_orienteering) +
   theme(panel.grid = element_line(colour = "transparent"),panel.background =  element_blank(),axis.text = element_blank(),axis.ticks = element_blank()) +   
-  labs(title = "VA dos Serviços dos Municípios de MG - 2020", subtitle = "",caption = 'Fonte: Elaboração própria', size = 8)  
+  labs(title = "Participação dos Serviços no VA total municipal - 2020 (%)", subtitle = "",caption = 'Fonte: IBGE. Elaboração própria', size = 8)  
 ggplot_obj_4
 
-ggplot_obj_5 <- base_mapa %>%    
+# Admnistração Pública
+ggplot_obj_5 <- base_mapa2 %>% 
   ggplot() +   
-  geom_sf(data = base_mapa$geom, aes(fill = base_mapa$va_admin, 
-                                     text = paste("Município: ", base_mapa$nome_mun, "<br>PIB: ", base_mapa$va_admin))) +   
-  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'VA Agropecuária') +   
+  geom_sf(data = base_mapa2$geom, aes(fill = base_mapa2$p.admin, 
+                                     text = paste("Município: ", base_mapa2$nome_mun, "<br>Part. Adm. Pública: ", base_mapa2$p.admin, "%"))) +   
+  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'Part. Adm. Publica') +
+  annotation_scale(location = "bl", width_hint = 0.3) + 
+  annotation_north_arrow(location = "bl", which_north = "true", 
+        pad_x = unit(0.3, "in"), pad_y = unit(0.3, "in"),
+        style = north_arrow_fancy_orienteering) +
   theme(panel.grid = element_line(colour = "transparent"),panel.background =  element_blank(),axis.text = element_blank(),axis.ticks = element_blank()) +   
-  labs(title = "VA da Administração Pública dos Municípios de MG - 2020", subtitle = "",caption = 'Fonte: Elaboração própria', size = 8)  
+  labs(title = "Participação da Admin. Pública no VA total municipal- 2020 (%)", subtitle = "",caption = 'Fonte: IBGE. Elaboração própria', size = 8)  
 ggplot_obj_5
 ```
 
-# Preparando os dados para a pirâmide
+# PIB per capita x Expectativa de Vida
 
-```{r tamanho, echo=TRUE}
+Vamos investigar se existe uma relação linear entre PIB per capita e
+expectativa de vida ao nascer, ou seja, os municípios com os maiores PIB
+percapita são aqueles onde as expectativas de vida ao nascer é maior?
+
+## Montando a base de dados
+
+```{r exp, echo=TRUE, warning=FALSE}
 library(tidyr)
-df.h_long <- gather(df.hh, faixas, t.pop, x00_04:x85_mais) %>% mutate(Sex = "homem")
-df.m_long <- gather(df.mm, faixas, t.pop, x00_04:x85_mais) %>% mutate(Sex = "mulher")
-df.long <- rbind(df.h_long,df.m_long)
-rm(df.h_long,df.m_long)
 
-df.long <- df.long %>% 
- group_by(Cod_setor, Cod_municipio,
-          Nome_do_municipio, Cod_bairro,
-          Nome_do_bairro, Cod_subdistrito,
-          Nome_do_subdistrito) %>%
-  mutate(p.pop = t.pop/sum(t.pop)*100)
-                                                            
-```
+# organiza base com os dados necessários e calcula a diferença
+base3 <- pib_mun_mg %>%  select(ano,code_muni, nome_mun,pib_pc) %>% filter(ano==2010) 
 
-# Análise dos dados
+# organiza tabela com os dez municípios com maiores PIB percapita e aqueles os 10 menores
+arrange(base3,desc(base3$pib_pc))[1:10,c("code_muni","nome_mun","pib_pc")]
+arrange(base3,base3$pib_pc)[1:10,c("code_muni","nome_mun","pib_pc")]
 
-## Pirâmides etárias
+esperanca <- read_excel("esperanca_vida_nascer_mg.xlsx", 
+     col_types = c("numeric", "text", "numeric"))
+colnames(esperanca) <- c("code_muni","Município","e0")
 
-As pirâmides etárias estão representadas em três recortes geográficos:
-setor, bairro e município. Reflita sobre a questão do tamanho
-populacional e seu impacto no desenho da pirâmide etária.
-
-```{r distribuição, echo=TRUE}
-library(DescTools)
-
-# setor censitário escolhido
-df.piramide01 <- filter(df.long, Cod_setor==setor_escolhido)
-
-h.pop<- subset(df.piramide01,df.piramide01$Sex=="homem")$p.pop
-m.pop<- subset(df.piramide01,df.piramide01$Sex=="mulher")$p.pop
-age <- c("0-4","5-9","10-14","15-19","20-24","25-29",
-         "30-34","35-39","40-44","45-49","50-54",
-         "55-59","60-64","65-69","70-74","75-79","80-44","85+")
-
-PlotPyramid(h.pop, 
-            m.pop,
-            ylab = age, space = 0, col = c("cornflowerblue", "indianred"),
-            xlim=c(-5,5),
-            main="Pirâmide etária",
-            lxlab="Homem", rxlab="Mulher", gapwidth=0, ylab.x=-5 )
-
-# bairro escolhido
-bairro_escolhido <- df.h$Nome_do_bairro[df.h$Cod_setor==setor_escolhido]
-df.piramide02 <- df.long%>% filter(Nome_do_bairro==bairro_escolhido) %>%
-  group_by(Nome_do_bairro, faixas ,Sex) %>% summarise(total.pop = sum(t.pop)) %>%
-  group_by(Nome_do_bairro) %>% mutate(p.pop = total.pop/sum(total.pop)*100)
-
-h.pop<- subset(df.piramide02,df.piramide02$Sex=="homem")$p.pop
-m.pop<- subset(df.piramide02,df.piramide02$Sex=="mulher")$p.pop
-age <- c("0-4","5-9","10-14","15-19","20-24","25-29",
-         "30-34","35-39","40-44","45-49","50-54",
-         "55-59","60-64","65-69","70-74","75-79","80-44","85+")
-
-PlotPyramid(h.pop, 
-            m.pop,
-            ylab = age, space = 0, col = c("cornflowerblue", "indianred"),
-            xlim=c(-5,5),
-            main="Pirâmide etária",
-            lxlab="Homem", rxlab="Mulher", gapwidth=0, ylab.x=-5 )
-
-# município escolhido
-municipio_escolhido <- df.h$Nome_do_municipio[df.h$Cod_setor==setor_escolhido]
-df.piramide03 <- df.long%>% filter(Nome_do_municipio==municipio_escolhido) %>%
-  group_by(Nome_do_municipio, faixas ,Sex) %>% summarise(total.pop = sum(t.pop)) %>%
-  group_by(Nome_do_municipio) %>% mutate(p.pop = total.pop/sum(total.pop)*100)
-
-h.pop<- subset(df.piramide03,df.piramide03$Sex=="homem")$p.pop
-m.pop<- subset(df.piramide03,df.piramide03$Sex=="mulher")$p.pop
-age <- c("0-4","5-9","10-14","15-19","20-24","25-29",
-         "30-34","35-39","40-44","45-49","50-54",
-         "55-59","60-64","65-69","70-74","75-79","80-44","85+")
-
-PlotPyramid(h.pop, 
-            m.pop,
-            ylab = age, space = 0, col = c("cornflowerblue", "indianred"),
-            xlim=c(-5,5),
-            main="Pirâmide etária",
-            lxlab="Homem", rxlab="Mulher", gapwidth=0, ylab.x=-5 )
+# organiza tabela com os dez municípios com maiores PIB percapita e aqueles os 10 menores
+arrange(esperanca,desc(esperanca$e0))[1:10,c("code_muni", "Município","e0")]
+arrange(esperanca,esperanca$e0)[1:10,c("code_muni", "Município","e0")]
+base3 <- merge(base3,esperanca)
 
 ```
 
-Como você classificaria essas pirâmides etárias: 1. Base alargada
-População "jovem" e crescimento populacional rápido.
+## Análise descritiva
 
-2.  Centro alargado População em transição e crescimento populacional
-    mais lento.
+```{r exp2, echo=TRUE, warning=FALSE}
+# Esperança de vida ao nascer
+summary(base3$e0)
+hist(base3$e0)
+boxplot(base3$e0)
 
-3.  Topo alargado População envelhecida e crescimento populacional nulo
-    ou negativo.
+# Relembrando
+knitr::include_graphics("pics/boxplot.png") 
 
-## Proporção por grupo etário, razão de dependência e índice de envelhecimento
+# PIB per capita
+summary(base3$pib_pc)
+hist(base3$pib_pc)
+boxplot(base3$pib_pc)
 
-Razão de dependência mostra a relação entre as pessoas que são
-dependentes (muito jovens e idosos) e aquelas que supostamente deveriam
-sustentá-las. Pode ser dividido entre razão de dependência das crianças
-e razão de dependência dos idosos. Já o índice de envelhecimento é a
-razão entreo número de pessoas idosas e o número de crianças.
+# Transformação logarítmica do PIB per capita
+summary(log(base3$pib_pc))
+hist(log(base3$pib_pc))
+boxplot(log(base3$pib_pc))
 
-Por se tratar de um novo agrupamento, cria-se uma nova variável:
+# Gráfico de dispersão
+ggplot(base3, aes(x=log(pib_pc), y=e0)) +
+    geom_point()
 
-```{r variaveis3, echo=TRUE}
-df.long <- df.long %>% mutate(grupos = case_when(faixas=="x00_04" | faixas=="x05_09" | faixas=="x10_14" ~ "0_crianças",
-faixas=="x15_19" | faixas=="x20_24"| faixas=="x25_29" | faixas=="x30_34"| faixas=="x35_39" | faixas=="x40_44"| faixas=="x45_49"| faixas=="x50_54" | faixas=="x55_59" ~ "1_adultos",
-faixas=="x60_64" | faixas=="x65_69" | faixas=="x70_74" | faixas=="x75_79"| faixas=="x80_84" | faixas=="x85_mais" ~ "2_idosos"))
+# Correlação linear entre as variáveis
+cor(log(base3$pib_pc),base3$e0)
 
-# setor censitário escolhido
-df.01 <- filter(df.long, Cod_setor==setor_escolhido) %>% group_by(grupos) %>% 
-  summarise(t.pop=sum(t.pop)) %>% mutate(p.pop = t.pop/sum(t.pop)*100)
-
-r.dep.crian <- df.01$t.pop[df.01$grupos=="0_crianças"]/df.01$t.pop[df.01$grupos=="1_adultos"]*100
-r.dep.idos  <- df.01$t.pop[df.01$grupos=="2_idosos"]/df.01$t.pop[df.01$grupos=="1_adultos"]*100
-r.dep.total <-(df.01$t.pop[df.01$grupos=="0_crianças"]+df.01$t.pop[df.01$grupos=="2_idosos"])/df.01$t.pop[df.01$grupos=="1_adultos"]*100
-ind.envelh <- df.01$t.pop[df.01$grupos=="2_idosos"]/df.01$t.pop[df.01$grupos=="0_crianças"]*100
-
-# bairro escolhido
-bairro_escolhido <- df.h$Nome_do_bairro[df.h$Cod_setor==setor_escolhido]
-df.02 <- df.long %>% filter(Nome_do_bairro==bairro_escolhido) %>%
-  group_by(grupos) %>% summarise(t.pop = sum(t.pop))  %>% mutate(p.pop = t.pop/sum(t.pop)*100)
-
-r.dep.crian <- df.02$t.pop[df.02$grupos=="0_crianças"]/df.02$t.pop[df.02$grupos=="1_adultos"]*100
-r.dep.idos  <- df.02$t.pop[df.02$grupos=="2_idosos"]/df.02$t.pop[df.02$grupos=="1_adultos"]*100
-r.dep.total <-(df.02$t.pop[df.02$grupos=="0_crianças"]+df.02$t.pop[df.02$grupos=="2_idosos"])/df.02$t.pop[df.02$grupos=="1_adultos"]*100
-ind.envelh <- df.02$t.pop[df.02$grupos=="2_idosos"]/df.02$t.pop[df.02$grupos=="0_crianças"]*100
-
-# município escolhido
-municipio_escolhido <- df.h$Nome_do_municipio[df.h$Cod_setor==setor_escolhido]
-df.03 <- df.long %>% filter(Nome_do_municipio==municipio_escolhido) %>%
-  group_by(grupos) %>% summarise(t.pop = sum(t.pop)) %>%
-   mutate(p.pop = t.pop/sum(t.pop)*100)
-
-r.dep.crian <- df.02$t.pop[df.02$grupos=="0_crianças"]/df.02$t.pop[df.02$grupos=="1_adultos"]*100
-r.dep.idos  <- df.02$t.pop[df.02$grupos=="2_idosos"]/df.02$t.pop[df.02$grupos=="1_adultos"]*100
-r.dep.total <-(df.02$t.pop[df.02$grupos=="0_crianças"]+df.02$t.pop[df.02$grupos=="2_idosos"])/df.02$t.pop[df.02$grupos=="1_adultos"]*100
-ind.envelh <- df.02$t.pop[df.02$grupos=="2_idosos"]/df.02$t.pop[df.02$grupos=="0_crianças"]*100
+# Teste de correlação
+cor.test(log(base3$pib_pc),base3$e0)
 
 ```
 
-Para refletir: poderia ser usada uma outra classificação de idosos:
+## Regressão linear
 
-# Considerações finais
+Uma regressão linear é uma técnica estatística que é usada para modelar a relação entre uma variável dependente (ou resposta) e uma ou mais variáveis independentes (ou preditoras) através de uma equação linear. O objetivo principal da regressão linear é entender e prever como as mudanças nas variáveis independentes afetam a variável dependente.
 
-Produzir dados mais desagregados é algo requisitado para conhecer
-realidades locais, porém é necessário ter cautela nos cálculos dos
-indicadores dado que com populações pequenas, alguns deles não informam
-o que deveriam informam e perdem sentido. Ficar atento a esse tipo de
-situação.
+Aqui estão os principais elementos de uma regressão linear:
+
+1. **Variável Dependente (Y)**: A variável que estamos tentando prever ou explicar é chamada de variável dependente. É representada como "Y" na equação de regressão.
+
+2. **Variáveis Independentes (X)**: São as variáveis que usamos para prever a variável dependente. Podemos ter uma ou várias variáveis independentes, representadas como "X1", "X2", ..., "Xn" na equação.
+
+3. **Equação de Regressão**: A equação de regressão linear é uma expressão matemática que descreve como as variáveis independentes estão relacionadas à variável dependente. Em sua forma mais simples, a equação de regressão linear é:
+
+   \[Y = \beta_0 + \beta_1X_1 + \beta_2X_2 + \ldots + \beta_nX_n + \epsilon\]
+
+   - \(Y\) é a variável dependente.
+   - \(\beta_0\) é o intercepto, que representa o valor esperado de \(Y\) quando todas as variáveis independentes são iguais a zero.
+   - \(\beta_1, \beta_2, \ldots, \beta_n\) são os coeficientes de regressão, que representam como uma mudança em cada variável independente afeta \(Y\).
+   - \(\epsilon\) é o termo de erro, que representa a variação não explicada pelo modelo.
+
+4. **Objetivo da Regressão**: O objetivo principal da regressão linear é estimar os valores dos coeficientes (\(\beta\)) de forma que a equação de regressão se ajuste melhor aos dados observados. Isso é feito minimizando a soma dos quadrados dos resíduos (diferença entre os valores observados e os valores previstos pelo modelo).
+
+5. **Avaliação do Modelo**: A qualidade do ajuste do modelo é avaliada usando várias estatísticas, como o coeficiente de determinação (\(R^2\)), que mede a proporção da variação na variável dependente explicada pelas variáveis independentes.
+
+6. **Teste de Hipóteses**: Testes de hipóteses são usados para determinar se os coeficientes de regressão são estatisticamente significativos. Os testes t ou F são comuns para avaliar a significância dos coeficientes e a adequação global do modelo.
+
+7. **Previsão**: Uma vez que o modelo é ajustado e avaliado, ele pode ser usado para fazer previsões. Você pode inserir valores para as variáveis independentes na equação de regressão para prever o valor da variável dependente.
+
+A regressão linear é uma ferramenta poderosa para analisar dados e entender as relações entre variáveis. Ela é amplamente utilizada em diversas áreas, como economia, ciências sociais, engenharia e ciências naturais, para fazer previsões e tomar decisões com base em dados observados. Existem várias extensões da regressão linear, como a regressão linear múltipla, que envolve várias variáveis independentes, e a regressão linear ponderada, que lida com dados ponderados.
+
+```{r regressao, echo=TRUE, warning=FALSE}
+# Regressão linear
+model1 <- lm(e0 ~ log(pib_pc), data = base3)
+summary(model1)
+```
+
+Para calcular o coeficiente de determinação (R²) em um modelo de
+regressão linear no R, você pode usar a função **`summary()`** após
+ajustar o modelo usando a função **`lm()`**. O R² é uma medida que
+indica a proporção da variabilidade na variável de resposta que é
+explicada pelo modelo.
+
+O teste individual dos parâmetros, também conhecido como teste de
+hipótese para coeficientes individuais, é uma parte fundamental da
+análise de regressão. Esse teste é usado para determinar se cada
+coeficiente estimado no modelo de regressão é estatisticamente
+significativo, ou seja, se ele contribui de forma significativa para
+explicar a variação na variável dependente. Vou explicar os passos
+envolvidos em um teste individual dos parâmetros:
+
+1.  **Formulação das Hipóteses**:
+    -   **Hipótese Nula (H0)**: A hipótese nula assume que o coeficiente
+        do parâmetro é igual a zero, o que significa que a variável
+        independente correspondente não tem efeito sobre a variável
+        dependente.
+    -   **Hipótese Alternativa (Ha)**: A hipótese alternativa afirma que
+        o coeficiente do parâmetro é diferente de zero, o que significa
+        que a variável independente tem um efeito significativo sobre a
+        variável dependente.
+2.  **Cálculo da Estatística de Teste**:
+    -   A estatística de teste depende do tipo de teste de hipótese
+        usado. Em uma regressão linear comum, o teste t é frequentemente
+        usado. A estatística de teste t para um coeficiente específico é
+        calculada da seguinte forma:
+
+        $$
+        t = \frac{\text{Estimativa do Coeficiente}}{\text{Erro Padrão do Coeficiente}}
+        $$
+3.  **Determinação do Grau de Liberdade**:
+    -   O grau de liberdade do teste t é igual ao número de observações
+        menos o número de parâmetros estimados no modelo.
+4.  **Cálculo do Valor-p**:
+    -   Usando a estatística de teste t e o grau de liberdade, é
+        possível calcular o valor-p associado ao coeficiente do
+        parâmetro. O valor-p é a probabilidade de observar um valor tão
+        extremo quanto o valor observado da estatística de teste t,
+        assumindo que a hipótese nula seja verdadeira.
+5.  **Tomada de Decisão**:
+    -   Com base no valor-p calculado, você toma uma decisão
+        estatística. Se o valor-p for menor que um nível de
+        significância pré-determinado (geralmente 0,05), você rejeita a
+        hipótese nula e conclui que o coeficiente do parâmetro é
+        estatisticamente significativo. Caso contrário, se o valor-p for
+        maior que o nível de significância, você não rejeita a hipótese
+        nula e conclui que o coeficiente do parâmetro não é
+        estatisticamente significativo.
+6.  **Interpretação dos Resultados**:
+    -   Se você rejeitar a hipótese nula, isso significa que a variável
+        independente correspondente tem um efeito estatisticamente
+        significativo sobre a variável dependente. Se você não rejeitar
+        a hipótese nula, isso sugere que a variável independente não tem
+        um efeito estatisticamente significativo.
+
+O teste individual dos parâmetros é útil para identificar quais
+variáveis independentes são importantes para o modelo e merecem ser
+mantidas na análise. Isso ajuda a simplificar o modelo, removendo
+variáveis que não contribuem significativamente para explicar a variação
+na variável dependente. No entanto, lembre-se de que a interpretação dos
+resultados também deve levar em consideração o contexto do problema e a
+teoria subjacente.
+
+```{r regressao2, echo=TRUE, warning=FALSE}
+# Regressão múltipla
+base3$log_pib_pc_2 <- log(base3$pib_pc)^2
+
+model2 <- lm(e0 ~ log(pib_pc) + log_pib_pc_2, data = base3)
+summary(model2)
+```
