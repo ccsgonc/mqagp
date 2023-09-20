@@ -345,10 +345,10 @@ df.03 <- df.long %>% filter(Nome_do_municipio==municipio_escolhido) %>%
   mutate(p.pop = t.pop/sum(t.pop)*100)
 df.03
 
-r.dep.crian <- df.02$t.pop[df.02$grupos=="0_crianças"]/df.02$t.pop[df.02$grupos=="1_adultos"]*100
-r.dep.idos  <- df.02$t.pop[df.02$grupos=="2_idosos"]/df.02$t.pop[df.02$grupos=="1_adultos"]*100
-r.dep.total <-(df.02$t.pop[df.02$grupos=="0_crianças"]+df.02$t.pop[df.02$grupos=="2_idosos"])/df.02$t.pop[df.02$grupos=="1_adultos"]*100
-ind.envelh <- df.02$t.pop[df.02$grupos=="2_idosos"]/df.02$t.pop[df.02$grupos=="0_crianças"]*100
+r.dep.crian <- df.03$t.pop[df.03$grupos=="0_crianças"]/df.03$t.pop[df.03$grupos=="1_adultos"]*100
+r.dep.idos  <- df.03$t.pop[df.03$grupos=="2_idosos"]/df.03$t.pop[df.03$grupos=="1_adultos"]*100
+r.dep.total <-(df.03$t.pop[df.03$grupos=="0_crianças"]+df.03$t.pop[df.03$grupos=="2_idosos"])/df.03$t.pop[df.03$grupos=="1_adultos"]*100
+ind.envelh <- df.03$t.pop[df.03$grupos=="2_idosos"]/df.03$t.pop[df.03$grupos=="0_crianças"]*100
 r.dep.crian
 r.dep.idos
 r.dep.total

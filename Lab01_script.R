@@ -77,6 +77,8 @@ setor_escolhido <- 310620005680043
 # interesse em variáveis disponíveis nessas duas bases de dados. Em sequência 
 # organiza-se em um único dataframe *df*.
 
+setwd("C:/Users/aluno/Documents/GitHub/mqagp/")
+
 library(readxl)
 library(tidyverse)
 df.basico <- read_excel("Basico-MG.xls") %>% select("Cod_setor","Cod_municipio",
