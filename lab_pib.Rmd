@@ -27,7 +27,7 @@ PIB representa o total dos bens e serviços produzidos pelas unidades
 produtoras residentes destinados aos usos finais, sendo, portanto,
 equivalente à soma dos valores adicionados pelas diversas atividades
 econômicas acrescida dos impostos, líquidos de subsídios, sobre produtos
-( PIB pela ótica da produção).
+(PIB pela ótica da produção).
 
 # Base de dados
 
@@ -166,7 +166,7 @@ ggplot_obj_1
 Fazendo uma versão interativa:
 
 ```{r variaveis2, echo=TRUE, warning=FALSE}
-# Converter o gráfico ggplot para plotly com o hovertext 
+# Converter o gráfico ggplot para plotly
 interactive_plot_1 <- ggplotly(ggplot_obj_1, tooltip = "text")
 # Exibir o gráfico interativo 
 interactive_plot_1
@@ -198,7 +198,6 @@ Representando em mapas:
 ```{r imp2, echo=TRUE, warning=FALSE}
 #Juntar coordenadas para criar o mapa 
 base_mapa2<- left_join(base2, mun , by = 'code_muni')
-
 
 # Agropecuária
 ggplot_obj_2 <- base_mapa2 %>% 
@@ -279,7 +278,7 @@ esperanca <- read_excel("esperanca_vida_nascer_mg.xlsx",
      col_types = c("numeric", "text", "numeric"))
 colnames(esperanca) <- c("code_muni","Município","e0")
 
-# organiza tabela com os dez municípios com maiores PIB percapita e aqueles os 10 menores
+# organiza tabela com os dez municípios com maiores expectativas de vida e aqueles os 10 menores
 arrange(esperanca,desc(esperanca$e0))[1:10,c("code_muni", "Município","e0")]
 arrange(esperanca,esperanca$e0)[1:10,c("code_muni", "Município","e0")]
 base3 <- merge(base3,esperanca)
