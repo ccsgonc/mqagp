@@ -1,7 +1,0 @@
-"0","library(tidyr)"
-"0",""
-"0","# organiza base com os dados necessários e calcula a diferença"
-"0","base1 <- pib_mun_mg %>%  select(ano,code_muni, nome_mun,p.pib) %>% spread(ano,p.pib) %>% mutate(dif_2019_2010 = round(`2019`-`2010`,2))"
-"0",""
-"0","# organiza tabela com os dez municípios que mais ganharam participação"
-"0","arrange(base1,desc(base1$dif_2019_2010))[1:10,c(""code_muni"",""nome_mun"",""dif_2019_2010"")]"

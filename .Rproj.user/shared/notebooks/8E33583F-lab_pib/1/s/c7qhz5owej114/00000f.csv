@@ -1,3 +1,0 @@
-"0","options(scipen = 999) # opção para não exibir números científicos"
-"0","library(readxl)"
-"0","pib_mun <- read_excel(""PIB dos Municípios - base de dados 2010-2020.xls"")"

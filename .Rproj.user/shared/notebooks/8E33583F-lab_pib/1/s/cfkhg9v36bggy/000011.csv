@@ -1,7 +1,0 @@
-"0","library(tidyverse)"
-"0","pib_mun_mg <- pib_mun %>%  filter(cod_uf == 31) %>% "
-"0","  mutate(p.agro = va_agro/va *100,"
-"0","         p.ind = va_ind/va*100,"
-"0","         p.serv = va_serv/va*100,"
-"0","         p.admin = va_admin/va*100"
-"0","  ) %>% group_by(ano) %>% mutate(p.pib = pib/sum(pib)*100)"
