@@ -1,0 +1,5 @@
+"0","library(geobr)  "
+"0","mun <- read_municipality(code_muni = ""MG"", year = 2019,showProgress = FALSE)  "
+"0",""
+"0","#Juntar coordenadas para criar o mapa "
+"0","base_mapa<- left_join(base1, mun , by = 'code_muni')"

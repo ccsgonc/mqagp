@@ -1,0 +1,3 @@
+"0",""
+"0","# organiza tabela com os dez municípios em que a industria é mais importante"
+"0","arrange(base2,desc(base2$p.ind))[1:10,c(""code_muni"",""nome_mun"",""p.ind"")]"

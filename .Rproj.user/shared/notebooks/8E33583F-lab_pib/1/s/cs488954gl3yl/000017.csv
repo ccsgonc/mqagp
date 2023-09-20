@@ -1,0 +1,7 @@
+"0","library(tidyr)"
+"0",""
+"0","# organiza base com os dados necessários e calcula a diferença"
+"0","base3 <- pib_mun_mg %>%  select(ano,code_muni, nome_mun,pib_pc) %>% filter(ano==2010) "
+"0",""
+"0","# organiza tabela com os dez municípios com maiores PIB percapita e aqueles os 10 menores"
+"0","arrange(base3,desc(base3$pib_pc))[1:10,c(""code_muni"",""nome_mun"",""pib_pc"")]"
