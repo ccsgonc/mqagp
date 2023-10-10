@@ -1,0 +1,513 @@
+# Variable list
+## Bairros SP
+
+* The variable is a key (distinct values for each observation).
+ 
+ * The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Bairros Fortaleza
+
+* The variable is a key (distinct values for each observation).
+ 
+ * The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Bairros RJ
+
+* The variable is a key (distinct values for each observation).
+ 
+ * The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Causa Afastamento 1
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Causa Afastamento 2
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Causa Afastamento 3
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Motivo Desligamento
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## CBO Ocupação 2002
+
+* The variable is a key (distinct values for each observation).
+ 
+ * The variable only takes one value: \"NA\".
+
+
+
+---
+
+## CNAE 2.0 Classe
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## CNAE 95 Classe
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Distritos SP
+
+* The variable is a key (distinct values for each observation).
+ 
+ * The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Vínculo Ativo 31/12
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Faixa Etária
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Faixa Hora Contrat
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Faixa Remun Dezem (SM)
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Faixa Remun Média (SM)
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Faixa Tempo Emprego
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Escolaridade após 2005
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Qtd Hora Contr
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Idade
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Ind CEI Vinculado
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Ind Simples
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Mês Admissão
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Mês Desligamento
+
+* The variable is a key (distinct values for each observation).
+ 
+ * The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Mun Trab
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Município
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Nacionalidade
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Natureza Jurídica
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Ind Portador Defic
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Qtd Dias Afastamento
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Raça Cor
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Regiões Adm DF
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Vl Remun Dezembro Nom
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Vl Remun Dezembro (SM)
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Vl Remun Média Nom
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Vl Remun Média (SM)
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## CNAE 2.0 Subclasse
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Sexo Trabalhador
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Tamanho Estabelecimento
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Tempo Emprego
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Tipo Admissão
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Tipo Estab
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Tipo Estab\_2
+
+* The variable is a key (distinct values for each observation).
+ 
+ * The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Tipo Defic
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Tipo Vínculo
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## IBGE Subsetor
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Vl Rem Janeiro SC
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Vl Rem Fevereiro SC
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Vl Rem Março SC
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Vl Rem Abril SC
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Vl Rem Maio SC
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Vl Rem Junho SC
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Vl Rem Julho SC
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Vl Rem Agosto SC
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Vl Rem Setembro SC
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Vl Rem Outubro SC
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Vl Rem Novembro SC
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Ano Chegada Brasil
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Ind Trab Intermitente
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## Ind Trab Parcial
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## one
+
+* The variable only takes one value: \"NA\".
+
+
+
+---
+
+## UF
+
+* The variable is a key (distinct values for each observation).
+ 
+ * The variable only takes one value: \"NA\".
+
+
+
+---
+
