@@ -61,7 +61,9 @@ Defina o diretório para o local onde está a base de dados:
 ```
 
 Importe a de dados fornecida. Todos os dados estão disponíveis no Atlas
-do Desenvolvimento Humano: <http://www.atlasbrasil.org.br/>
+do Desenvolvimento Humano: <http://www.atlasbrasil.org.br/>. Uma versão
+organizada dos dados está disponível
+[aqui](https://github.com/ccsgonc/mqagp/blob/main/atlas_mg.xlsx).
 
 ```{r dados, echo=TRUE, warning=FALSE}
 options(scipen = 999) # opção para não exibir números científicos
