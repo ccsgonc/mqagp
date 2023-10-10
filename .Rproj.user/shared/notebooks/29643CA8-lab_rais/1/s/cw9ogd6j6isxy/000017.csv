@@ -1,0 +1,7 @@
+"0",""
+"0","# total por municípios"
+"0","tabela02 <- base.vinc %>%  group_by(Município) %>% "
+"0","  summarise(t.vinc = sum(one)) %>% "
+"0","  mutate(p.vinc = round(t.vinc/sum(t.vinc)*100,2))"
+"0",""
+"0","arrange(tabela02,desc(tabela02$t.vinc))[1:10,]"

@@ -1,0 +1,237 @@
+---
+title: "Indicadores no R: Índice de Desenvolvimento Humano Municipal - IDHM"
+author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
+date: "11-outubro-2023"
+output:
+  html_document: 
+    toc: true
+    toc_float: true
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+O objetivo deste tutorial é reproduzir o IDHM compreendendo as etapas de
+aglutinação presentes no índice.
+
+# Contextualização
+
+## Desenvolvimento Humano
+
+Desenvolvimento humano é o processo de ampliação das liberdades das
+pessoas com relação às suas capacidades e oportunidades. Pode ser
+compreendido como o desenvolvimento das pessoas por meio da construção
+de capacidades humanas, com a participação ativa dos indivíduos no
+centro dos processos que possibilitam a valorização e a melhora da
+qualidade de suas vidas.
+
+A abordagem do desenvolvimento humano coloca as pessoas no centro da
+análise do bem-estar, perspectiva oposta ao que sugere a ideia de
+desenvolvimento ancorada no crescimento econômico, redefinindo a maneira
+como pensamos e lidamos com o desenvolvimento em diferentes escalas
+territoriais. A popularização desta abordagem se deu com a criação e
+adoção do Índice de Desenvolvimento Humano (IDH) como medida do grau de
+desenvolvimento humano de um país, em alternativa ao Produto Interno
+Bruto (PIB), que à época era a principal medida de desenvolvimento.
+
+O crescimento econômico de uma sociedade, de forma isolada, não se
+traduz automaticamente em qualidade de vida e, muitas vezes, o que se
+observa é um reforço das desigualdades. É preciso que este crescimento
+seja entendido como parte do processo de expansão das liberdades e
+transformado em conquistas concretas para as pessoas: crianças mais
+saudáveis, educação universal e de qualidade, ampliação da participação
+política dos cidadãos, preservação ambiental, equilíbrio da renda e
+oportunidades para todas as pessoas, maior liberdade de expressão, entre
+outras.
+
+Fonte: Atlas do Desenvolvimento Humano
+
+# Base de dados
+
+## Leitura dos dados
+
+Defina o diretório para o local onde está a base de dados:
+
+```{r diretorio, echo=TRUE, warning=FALSE}
+# setwd("insira o caminho")
+```
+
+Importe a de dados fornecida. Todos os dados estão disponíveis no Atlas
+do Desenvolvimento Humano: <http://www.atlasbrasil.org.br/>
+
+```{r dados, echo=TRUE, warning=FALSE}
+options(scipen = 999) # opção para não exibir números científicos
+
+# leitura das bibliotecas
+library(readxl)
+library(dplyr)
+# leitura dos dados
+atlas_mg <- read_excel("atlas_mg.xlsx")
+```
+
+## Verificando variáveis
+
+O pacote
+[DataMaid](https://cran.r-project.org/web/packages/dataMaid/index.html)
+é uma ferramenta valiosa no ambiente R para a verificação, limpeza e
+organização eficiente de conjuntos de dados. Desenvolvido com o objetivo
+de aprimorar a qualidade e confiabilidade dos dados, o DataMaid oferece
+funcionalidades que auxiliam na identificação de valores ausentes, erros
+de digitação, inconsistências e outras anomalias nos dados. Além disso,
+permite a criação de relatórios detalhados, facilitando a compreensão
+das estruturas e conteúdo dos datasets, promovendo assim uma exploração
+mais assertiva. Com suas capacidades automatizadas de geração de
+sumários e gráficos descritivos, o DataMaid é uma ferramenta para
+cientistas de dados e analistas que desejam garantir a qualidade e
+integridade dos seus dados, tornando todo o processo de análise mais
+eficiente e confiável.
+
+```{r verificação, echo=TRUE, warning=FALSE}
+library(dataMaid)
+makeDataReport(atlas_mg,replace = TRUE)
+```
+
+# Calculando o índice
+
+## Dimensão longevidade
+
+```{r dados1, echo=TRUE, warning=FALSE}
+atlas_mg$i.longev <- (atlas_mg$`Esperança de vida ao nascer 2010`-25)/(85-25)
+
+# Apresentando ranking
+arrange(atlas_mg,desc(atlas_mg$i.longev))[1:10,c("Nome do Município","i.longev")]
+arrange(atlas_mg,(atlas_mg$i.longev))[1:10,c("Nome do Município","i.longev")]
+```
+
+Fazendo um mapa dessa dimensão.
+
+```{r mapa, message=FALSE, warning=FALSE}
+library(geobr)  
+mun <- read_municipality(code_muni = "MG", year = 2010,showProgress = FALSE)  
+
+#Juntar coordenadas para criar o mapa 
+base_mapa<- left_join(atlas_mg, mun , by = 'code_muni')
+```
+
+Agora, vamos plotar os resultados em um mapa estático.
+
+```{r variaveis, echo=TRUE, warning=FALSE}
+# Carregar bibliotecas 
+library(ggplot2) 
+library(plotly)  
+library(ggspatial)
+
+# Criar o gráfico ggplot   
+ggplot_obj_1 <- base_mapa %>% 
+  ggplot() +   
+  geom_sf(data = base_mapa$geom, aes(fill = base_mapa$i.longev, 
+                                     text = paste("Município: ", base_mapa$nome_mun, "<br>IDHM Longevidade: ", base_mapa$i.longev))) +   
+  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'IDHM Longevidade', direction = -1) +
+  annotation_scale(location = "bl", width_hint = 0.3) + 
+  annotation_north_arrow(location = "bl", which_north = "true", 
+        pad_x = unit(0.3, "in"), pad_y = unit(0.3, "in"),
+        style = north_arrow_fancy_orienteering) +
+  theme(panel.grid = element_line(colour = "transparent"),panel.background =  element_blank(),axis.text = element_blank(),axis.ticks = element_blank()) +   
+  labs(title = "IDHM - Longevidade - municípios de Minas Gerais - 2010", subtitle = "",caption = 'Fonte: FJP/IPEA/PNUD. Elaboração própria', size = 8)  
+ggplot_obj_1
+```
+
+## Dimensão educação
+
+```{r dados2, echo=TRUE, warning=FALSE}
+# Construindo o primeiro sub-índice
+atlas_mg$si.escol <- (atlas_mg$`% de 18 anos ou mais de idade com ensino fundamental completo 2010`-0)/(100-0)
+
+# Calculando o segundo sub-índice com uma média aritmética
+atlas_mg$si.fluxo <- rowMeans(atlas_mg[,9:12])/100
+
+# Aglutinando os dois sub-índices com uma média geométrica (peso 2 para o indicador de fluxo 1 para o de escolaridade)
+atlas_mg$i.educ <- (atlas_mg$si.escol * atlas_mg$si.fluxo^2)^(1/3)
+
+# Apresentando ranking
+arrange(atlas_mg,desc(atlas_mg$i.educ))[1:10,c("Nome do Município","i.educ")]
+arrange(atlas_mg,(atlas_mg$i.educ))[1:10,c("Nome do Município","i.educ")]
+
+#Juntar coordenadas para criar o mapa 
+library(dplyr)
+base_mapa2<- left_join(atlas_mg, mun , by = 'code_muni')
+
+# Criar o gráfico ggplot   
+ggplot_obj_2 <- base_mapa2 %>% 
+  ggplot() +   
+  geom_sf(data = base_mapa2$geom, aes(fill = base_mapa2$i.educ, 
+                                     text = paste("Município: ", base_mapa2$nome_mun, "<br>IDHM Educação: ", base_mapa2$i.educ))) +   
+  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'IDHM Educação', direction = -1) +
+  annotation_scale(location = "bl", width_hint = 0.3) + 
+  annotation_north_arrow(location = "bl", which_north = "true", 
+        pad_x = unit(0.3, "in"), pad_y = unit(0.3, "in"),
+        style = north_arrow_fancy_orienteering) +
+  theme(panel.grid = element_line(colour = "transparent"),panel.background =  element_blank(),axis.text = element_blank(),axis.ticks = element_blank()) +   
+  labs(title = "IDHM - Educação - municípios de Minas Gerais - 2010", subtitle = "",caption = 'Fonte: FJP/IPEA/PNUD. Elaboração própria', size = 8)  
+ggplot_obj_2
+
+```
+
+## Dimensão renda
+
+```{r dados3, echo=TRUE, warning=FALSE}
+atlas_mg$i.renda <- (log(atlas_mg$`Renda per capita 2010`)-log(8))/(log(4033)-(log(8))) # usa o logaritmo!!!
+
+# Apresentando ranking
+arrange(atlas_mg,desc(atlas_mg$i.renda))[1:10,c("Nome do Município","i.renda")]
+arrange(atlas_mg,(atlas_mg$i.renda))[1:10,c("Nome do Município","i.renda")]
+
+#Juntar coordenadas para criar o mapa 
+library(dplyr)
+base_mapa3<- left_join(atlas_mg, mun , by = 'code_muni')
+
+# Criar o gráfico ggplot   
+ggplot_obj_3 <- base_mapa3 %>% 
+  ggplot() +   
+  geom_sf(data = base_mapa3$geom, aes(fill = base_mapa3$i.renda , 
+                                     text = paste("Município: ", base_mapa3$nome_mun, "<br>IDHM Renda: ", base_mapa3$i.renda ))) +   
+  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'IDHM Renda', direction = -1) +
+  annotation_scale(location = "bl", width_hint = 0.3) + 
+  annotation_north_arrow(location = "bl", which_north = "true", 
+        pad_x = unit(0.3, "in"), pad_y = unit(0.3, "in"),
+        style = north_arrow_fancy_orienteering) +
+  theme(panel.grid = element_line(colour = "transparent"),panel.background =  element_blank(),axis.text = element_blank(),axis.ticks = element_blank()) +   
+  labs(title = "IDHM - Renda - municípios de Minas Gerais - 2010", subtitle = "",caption = 'Fonte: FJP/IPEA/PNUD. Elaboração própria', size = 8)  
+ggplot_obj_3
+
+```
+
+## IDHM
+
+```{r dados4, echo=TRUE, warning=FALSE}
+atlas_mg$idhm <- (atlas_mg$i.longev * atlas_mg$i.educ * atlas_mg$i.renda)^(1/3)
+
+# Apresentando ranking
+arrange(atlas_mg,desc(atlas_mg$idhm))[1:10,c("Nome do Município","idhm")]
+arrange(atlas_mg,(atlas_mg$idhm))[1:10,c("Nome do Município","idhm")]
+
+#Juntar coordenadas para criar o mapa 
+library(dplyr)
+base_mapa4<- left_join(atlas_mg, mun , by = 'code_muni')
+
+# Criar o gráfico ggplot   
+ggplot_obj_4 <- base_mapa4 %>% 
+  ggplot() +   
+  geom_sf(data = base_mapa4$geom, aes(fill = base_mapa4$idhm , 
+                                     text = paste("Município: ", base_mapa4$nome_mun, "<br>IDHM: ", base_mapa4$idhm ))) +   
+  scale_fill_viridis_c(option = 15, begin = 0.2, end = 0.8, name = 'IDHM', direction = -1) +
+  annotation_scale(location = "bl", width_hint = 0.3) + 
+  annotation_north_arrow(location = "bl", which_north = "true", 
+        pad_x = unit(0.3, "in"), pad_y = unit(0.3, "in"),
+        style = north_arrow_fancy_orienteering) +
+  theme(panel.grid = element_line(colour = "transparent"),panel.background =  element_blank(),axis.text = element_blank(),axis.ticks = element_blank()) +   
+  labs(title = "IDHM - municípios de Minas Gerais - 2010", subtitle = "",caption = 'Fonte: FJP/IPEA/PNUD. Elaboração própria', size = 8)  
+ggplot_obj_4
+
+
+
+```

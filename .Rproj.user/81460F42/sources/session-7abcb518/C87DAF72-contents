@@ -1,0 +1,1040 @@
+# leitura dos dados
+# preparação base dos 853 municípios
+
+library(tidyverse)
+library(beepr)
+library(data.table)
+setwd("G:\\Drives compartilhados\\Chamada UFMG_Turismo_Brumadinho\\Base de dados\\ME_Rais")
+
+########
+#2010
+MG2010 <- read.csv2("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2010.txt")
+beep(1)
+MG2010 <- MG2010[,c('Vínculo.Ativo.31.12','Município','Vl.Remun.Média.Nom',
+                         'CNAE.2.0.Subclasse','Tamanho.Estabelecimento')]
+colnames(MG2010)<-c("vinc_ativo","cod_mun","rem_med","subclasse","tam_estab")
+
+MG2010<- subset(MG2010,vinc_ativo==1)
+MG2010<- MG2010 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                         (subclasse==4922101)|
+                                         (subclasse==4922102)|
+                                         (subclasse==4922103)|
+                                         (subclasse==4923001)|
+                                         (subclasse==4923002)|
+                                         (subclasse==4929902)|
+                                         (subclasse==4929904)|
+                                         (subclasse==4929999)|
+                                         (subclasse==4950700),1,0),
+                            g2=ifelse((subclasse==5011402)|
+                                                   (subclasse==5012202)|
+                                                   (subclasse==5022002)|
+                                                   (subclasse==5091202)|
+                                                   (subclasse==5099801)|
+                                                   (subclasse==5099899),1,0),
+                            g3=ifelse((subclasse==5111100)|
+                                                   (subclasse==5112901)|
+                                                   (subclasse==5112999),1,0),
+                            g4=ifelse((subclasse== 5222200)|
+                                                   (subclasse==5229001)|
+                                                   (subclasse==5229099)|
+                                                   (subclasse==5240101)|
+                                                   (subclasse==5240199),1,0),
+                            g5=ifelse((subclasse==5510801)|
+                                                   (subclasse==5510802)|
+                                                   (subclasse==5590601)|
+                                                   (subclasse==5590602)|
+                                                   (subclasse==5590603)|
+                                                   (subclasse==5590699),1,0),
+                            g6=ifelse((subclasse==5611201)|
+                                                   (subclasse==5611202)|
+                                                   (subclasse==5611204)|
+                                                   (subclasse==5611205)|
+                                                   (subclasse==5611203)|
+                                                   (subclasse==5612100),1,0),
+                            g7=ifelse((subclasse==7711000)|
+                                                   (subclasse==7721700),1,0),
+                            g8=ifelse((subclasse==7911200)|
+                                                   (subclasse==7912100)|
+                                                   (subclasse==7990200),1,0),
+                            g9=ifelse((subclasse==9001901)|
+                             (subclasse==9001902)|
+                               (subclasse==9001903)|
+                                 (subclasse==9001904)|
+                                   (subclasse==9001905)|
+                                     (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                         (subclasse==9102301)|
+                                           (subclasse==9103100)|
+                                             (subclasse==9200301)|
+                                               (subclasse==9200302)|
+                                                 (subclasse==9200399)|
+                                                   (subclasse==9319101)|
+                                                     (subclasse==9321200)|
+                                                       (subclasse==9329801)|
+                                                         (subclasse==9329802)|
+                                                           (subclasse==9329803)|
+                                                             (subclasse==9329804)|
+                                                               (subclasse==9329899),1,0)
+
+)
+
+tab2010<- MG2010 %>% group_by(cod_mun) %>%
+  summarise(ano=2010,
+            t_vinc_ativo = sum(vinc_ativo),
+            t_vinc_g1=sum(g1),
+            t_vinc_g2=sum(g2),
+            t_vinc_g3=sum(g3),
+            t_vinc_g4=sum(g4),
+            t_vinc_g5=sum(g5),
+            t_vinc_g6=sum(g6),
+            t_vinc_g7=sum(g7),
+            t_vinc_g8=sum(g8),
+            t_vinc_g9=sum(g9),
+            t_tur=t_vinc_g1+t_vinc_g2+t_vinc_g3+t_vinc_g4+
+              t_vinc_g5+t_vinc_g6+t_vinc_g7+t_vinc_g8+t_vinc_g9,
+            t_massa_sal= sum(rem_med),
+            t_massa_g1= sum(rem_med*g1),
+            t_massa_g2= sum(rem_med*g2),
+            t_massa_g3= sum(rem_med*g3),
+            t_massa_g4= sum(rem_med*g4),
+            t_massa_g5= sum(rem_med*g5),
+            t_massa_g6= sum(rem_med*g6),
+            t_massa_g7= sum(rem_med*g7),
+            t_massa_g8= sum(rem_med*g8),
+            t_massa_g9= sum(rem_med*g9),
+            t_massa_tur = t_massa_g1+t_massa_g2+t_massa_g3+t_massa_g4+
+              t_massa_g5+t_massa_g6+t_massa_g7+t_massa_g8+t_massa_g9)
+
+rm(MG2010)
+save.image("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2010.RData")
+rm(list=ls())
+
+########
+# 2011
+MG2011 <- read.csv2("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2011.txt")
+beep(1)
+MG2011 <- MG2011[,c('Vínculo.Ativo.31.12','Município','Vl.Remun.Média.Nom',
+                    'CNAE.2.0.Subclasse','Tamanho.Estabelecimento')]
+colnames(MG2011)<-c("vinc_ativo","cod_mun","rem_med","subclasse","tam_estab")
+
+MG2011<- subset(MG2011,vinc_ativo==1)
+MG2011<- MG2011 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+
+tab2011<- MG2011 %>% group_by(cod_mun) %>%
+  summarise(ano=2011,
+            t_vinc_ativo = sum(vinc_ativo),
+            t_vinc_g1=sum(g1),
+            t_vinc_g2=sum(g2),
+            t_vinc_g3=sum(g3),
+            t_vinc_g4=sum(g4),
+            t_vinc_g5=sum(g5),
+            t_vinc_g6=sum(g6),
+            t_vinc_g7=sum(g7),
+            t_vinc_g8=sum(g8),
+            t_vinc_g9=sum(g9),
+            t_tur=t_vinc_g1+t_vinc_g2+t_vinc_g3+t_vinc_g4+
+              t_vinc_g5+t_vinc_g6+t_vinc_g7+t_vinc_g8+t_vinc_g9,
+            t_massa_sal= sum(rem_med),
+            t_massa_g1= sum(rem_med*g1),
+            t_massa_g2= sum(rem_med*g2),
+            t_massa_g3= sum(rem_med*g3),
+            t_massa_g4= sum(rem_med*g4),
+            t_massa_g5= sum(rem_med*g5),
+            t_massa_g6= sum(rem_med*g6),
+            t_massa_g7= sum(rem_med*g7),
+            t_massa_g8= sum(rem_med*g8),
+            t_massa_g9= sum(rem_med*g9),
+            t_massa_tur = t_massa_g1+t_massa_g2+t_massa_g3+t_massa_g4+
+              t_massa_g5+t_massa_g6+t_massa_g7+t_massa_g8+t_massa_g9)
+rm(MG2011)
+save.image("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2011.RData")
+rm(list=ls())
+
+########
+#2012
+MG2012 <- read.csv2("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2012.txt")
+beep(1)
+MG2012 <- MG2012[,c('Vínculo.Ativo.31.12','Município','Vl.Remun.Média.Nom',
+                    'CNAE.2.0.Subclasse','Tamanho.Estabelecimento')]
+colnames(MG2012)<-c("vinc_ativo","cod_mun","rem_med","subclasse","tam_estab")
+
+MG2012<- subset(MG2012,vinc_ativo==1)
+MG2012<- MG2012 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+
+tab2012<- MG2012 %>% group_by(cod_mun) %>%
+  summarise(ano=2012,
+            t_vinc_ativo = sum(vinc_ativo),
+            t_vinc_g1=sum(g1),
+            t_vinc_g2=sum(g2),
+            t_vinc_g3=sum(g3),
+            t_vinc_g4=sum(g4),
+            t_vinc_g5=sum(g5),
+            t_vinc_g6=sum(g6),
+            t_vinc_g7=sum(g7),
+            t_vinc_g8=sum(g8),
+            t_vinc_g9=sum(g9),
+            t_tur=t_vinc_g1+t_vinc_g2+t_vinc_g3+t_vinc_g4+
+              t_vinc_g5+t_vinc_g6+t_vinc_g7+t_vinc_g8+t_vinc_g9,
+            t_massa_sal= sum(rem_med),
+            t_massa_g1= sum(rem_med*g1),
+            t_massa_g2= sum(rem_med*g2),
+            t_massa_g3= sum(rem_med*g3),
+            t_massa_g4= sum(rem_med*g4),
+            t_massa_g5= sum(rem_med*g5),
+            t_massa_g6= sum(rem_med*g6),
+            t_massa_g7= sum(rem_med*g7),
+            t_massa_g8= sum(rem_med*g8),
+            t_massa_g9= sum(rem_med*g9),
+            t_massa_tur = t_massa_g1+t_massa_g2+t_massa_g3+t_massa_g4+
+              t_massa_g5+t_massa_g6+t_massa_g7+t_massa_g8+t_massa_g9)
+rm(MG2012)
+save.image("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2012.RData")
+rm(list=ls())
+
+########
+#2013
+MG2013 <- read.csv2("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2013.txt")
+beep(1)
+MG2013 <- MG2013[,c('Vínculo.Ativo.31.12','Município','Vl.Remun.Média.Nom',
+                    'CNAE.2.0.Subclasse','Tamanho.Estabelecimento')]
+colnames(MG2013)<-c("vinc_ativo","cod_mun","rem_med","subclasse","tam_estab")
+
+MG2013<- subset(MG2013,vinc_ativo==1)
+MG2013<- MG2013 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+
+tab2013<- MG2013 %>% group_by(cod_mun) %>%
+  summarise(ano=2013,
+            t_vinc_ativo = sum(vinc_ativo),
+            t_vinc_g1=sum(g1),
+            t_vinc_g2=sum(g2),
+            t_vinc_g3=sum(g3),
+            t_vinc_g4=sum(g4),
+            t_vinc_g5=sum(g5),
+            t_vinc_g6=sum(g6),
+            t_vinc_g7=sum(g7),
+            t_vinc_g8=sum(g8),
+            t_vinc_g9=sum(g9),
+            t_tur=t_vinc_g1+t_vinc_g2+t_vinc_g3+t_vinc_g4+
+              t_vinc_g5+t_vinc_g6+t_vinc_g7+t_vinc_g8+t_vinc_g9,
+            t_massa_sal= sum(rem_med),
+            t_massa_g1= sum(rem_med*g1),
+            t_massa_g2= sum(rem_med*g2),
+            t_massa_g3= sum(rem_med*g3),
+            t_massa_g4= sum(rem_med*g4),
+            t_massa_g5= sum(rem_med*g5),
+            t_massa_g6= sum(rem_med*g6),
+            t_massa_g7= sum(rem_med*g7),
+            t_massa_g8= sum(rem_med*g8),
+            t_massa_g9= sum(rem_med*g9),
+            t_massa_tur = t_massa_g1+t_massa_g2+t_massa_g3+t_massa_g4+
+              t_massa_g5+t_massa_g6+t_massa_g7+t_massa_g8+t_massa_g9)
+rm(MG2013)
+save.image("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2013.RData")
+rm(list=ls())
+
+########
+########
+#2014
+MG2014 <- read.csv2("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2014.txt")
+beep(1)
+MG2014 <- MG2014[,c('Vínculo.Ativo.31.12','Município','Vl.Remun.Média.Nom',
+                    'CNAE.2.0.Subclasse','Tamanho.Estabelecimento')]
+colnames(MG2014)<-c("vinc_ativo","cod_mun","rem_med","subclasse","tam_estab")
+
+MG2014<- subset(MG2014,vinc_ativo==1)
+MG2014<- MG2014 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+
+tab2014<- MG2014 %>% group_by(cod_mun) %>%
+  summarise(ano=2014,
+            t_vinc_ativo = sum(vinc_ativo),
+            t_vinc_g1=sum(g1),
+            t_vinc_g2=sum(g2),
+            t_vinc_g3=sum(g3),
+            t_vinc_g4=sum(g4),
+            t_vinc_g5=sum(g5),
+            t_vinc_g6=sum(g6),
+            t_vinc_g7=sum(g7),
+            t_vinc_g8=sum(g8),
+            t_vinc_g9=sum(g9),
+            t_tur=t_vinc_g1+t_vinc_g2+t_vinc_g3+t_vinc_g4+
+              t_vinc_g5+t_vinc_g6+t_vinc_g7+t_vinc_g8+t_vinc_g9,
+            t_massa_sal= sum(rem_med),
+            t_massa_g1= sum(rem_med*g1),
+            t_massa_g2= sum(rem_med*g2),
+            t_massa_g3= sum(rem_med*g3),
+            t_massa_g4= sum(rem_med*g4),
+            t_massa_g5= sum(rem_med*g5),
+            t_massa_g6= sum(rem_med*g6),
+            t_massa_g7= sum(rem_med*g7),
+            t_massa_g8= sum(rem_med*g8),
+            t_massa_g9= sum(rem_med*g9),
+            t_massa_tur = t_massa_g1+t_massa_g2+t_massa_g3+t_massa_g4+
+              t_massa_g5+t_massa_g6+t_massa_g7+t_massa_g8+t_massa_g9)
+rm(MG2014)
+save.image("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2014.RData")
+rm(list=ls())
+
+########
+#2015
+MG2015 <- read.csv2("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2015.txt")
+beep(1)
+MG2015 <- MG2015[,c('Vínculo.Ativo.31.12','Município','Vl.Remun.Média.Nom',
+                    'CNAE.2.0.Subclasse','Tamanho.Estabelecimento')]
+colnames(MG2015)<-c("vinc_ativo","cod_mun","rem_med","subclasse","tam_estab")
+
+MG2015<- subset(MG2015,vinc_ativo==1)
+MG2015<- MG2015 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+
+tab2015<- MG2015 %>% group_by(cod_mun) %>%
+  summarise(ano=2015,
+            t_vinc_ativo = sum(vinc_ativo),
+            t_vinc_g1=sum(g1),
+            t_vinc_g2=sum(g2),
+            t_vinc_g3=sum(g3),
+            t_vinc_g4=sum(g4),
+            t_vinc_g5=sum(g5),
+            t_vinc_g6=sum(g6),
+            t_vinc_g7=sum(g7),
+            t_vinc_g8=sum(g8),
+            t_vinc_g9=sum(g9),
+            t_tur=t_vinc_g1+t_vinc_g2+t_vinc_g3+t_vinc_g4+
+              t_vinc_g5+t_vinc_g6+t_vinc_g7+t_vinc_g8+t_vinc_g9,
+            t_massa_sal= sum(rem_med),
+            t_massa_g1= sum(rem_med*g1),
+            t_massa_g2= sum(rem_med*g2),
+            t_massa_g3= sum(rem_med*g3),
+            t_massa_g4= sum(rem_med*g4),
+            t_massa_g5= sum(rem_med*g5),
+            t_massa_g6= sum(rem_med*g6),
+            t_massa_g7= sum(rem_med*g7),
+            t_massa_g8= sum(rem_med*g8),
+            t_massa_g9= sum(rem_med*g9),
+            t_massa_tur = t_massa_g1+t_massa_g2+t_massa_g3+t_massa_g4+
+              t_massa_g5+t_massa_g6+t_massa_g7+t_massa_g8+t_massa_g9)
+rm(MG2015)
+save.image("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2015.RData")
+rm(list=ls())
+
+########
+#2016
+MG2016 <- read.csv2("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2016.txt")
+beep(1)
+MG2016 <- MG2016[,c('Vínculo.Ativo.31.12','Município','Vl.Remun.Média.Nom',
+                    'CNAE.2.0.Subclasse','Tamanho.Estabelecimento')]
+colnames(MG2016)<-c("vinc_ativo","cod_mun","rem_med","subclasse","tam_estab")
+
+MG2016<- subset(MG2016,vinc_ativo==1)
+MG2016<- MG2016 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+
+tab2016<- MG2016 %>% group_by(cod_mun) %>%
+  summarise(ano=2016,
+            t_vinc_ativo = sum(vinc_ativo),
+            t_vinc_g1=sum(g1),
+            t_vinc_g2=sum(g2),
+            t_vinc_g3=sum(g3),
+            t_vinc_g4=sum(g4),
+            t_vinc_g5=sum(g5),
+            t_vinc_g6=sum(g6),
+            t_vinc_g7=sum(g7),
+            t_vinc_g8=sum(g8),
+            t_vinc_g9=sum(g9),
+            t_tur=t_vinc_g1+t_vinc_g2+t_vinc_g3+t_vinc_g4+
+              t_vinc_g5+t_vinc_g6+t_vinc_g7+t_vinc_g8+t_vinc_g9,
+            t_massa_sal= sum(rem_med),
+            t_massa_g1= sum(rem_med*g1),
+            t_massa_g2= sum(rem_med*g2),
+            t_massa_g3= sum(rem_med*g3),
+            t_massa_g4= sum(rem_med*g4),
+            t_massa_g5= sum(rem_med*g5),
+            t_massa_g6= sum(rem_med*g6),
+            t_massa_g7= sum(rem_med*g7),
+            t_massa_g8= sum(rem_med*g8),
+            t_massa_g9= sum(rem_med*g9),
+            t_massa_tur = t_massa_g1+t_massa_g2+t_massa_g3+t_massa_g4+
+              t_massa_g5+t_massa_g6+t_massa_g7+t_massa_g8+t_massa_g9)
+rm(MG2016)
+save.image("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2016.RData")
+rm(list=ls())
+
+########
+#2017
+MG2017 <- read.csv2("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2017.txt")
+beep(1)
+MG2017 <- MG2017[,c('Vínculo.Ativo.31.12','Município','Vl.Remun.Média.Nom',
+                    'CNAE.2.0.Subclasse','Tamanho.Estabelecimento')]
+colnames(MG2017)<-c("vinc_ativo","cod_mun","rem_med","subclasse","tam_estab")
+
+MG2017<- subset(MG2017,vinc_ativo==1)
+MG2017<- MG2017 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+
+tab2017<- MG2017 %>% group_by(cod_mun) %>%
+  summarise(ano=2017,
+            t_vinc_ativo = sum(vinc_ativo),
+            t_vinc_g1=sum(g1),
+            t_vinc_g2=sum(g2),
+            t_vinc_g3=sum(g3),
+            t_vinc_g4=sum(g4),
+            t_vinc_g5=sum(g5),
+            t_vinc_g6=sum(g6),
+            t_vinc_g7=sum(g7),
+            t_vinc_g8=sum(g8),
+            t_vinc_g9=sum(g9),
+            t_tur=t_vinc_g1+t_vinc_g2+t_vinc_g3+t_vinc_g4+
+              t_vinc_g5+t_vinc_g6+t_vinc_g7+t_vinc_g8+t_vinc_g9,
+            t_massa_sal= sum(rem_med),
+            t_massa_g1= sum(rem_med*g1),
+            t_massa_g2= sum(rem_med*g2),
+            t_massa_g3= sum(rem_med*g3),
+            t_massa_g4= sum(rem_med*g4),
+            t_massa_g5= sum(rem_med*g5),
+            t_massa_g6= sum(rem_med*g6),
+            t_massa_g7= sum(rem_med*g7),
+            t_massa_g8= sum(rem_med*g8),
+            t_massa_g9= sum(rem_med*g9),
+            t_massa_tur = t_massa_g1+t_massa_g2+t_massa_g3+t_massa_g4+
+              t_massa_g5+t_massa_g6+t_massa_g7+t_massa_g8+t_massa_g9)
+rm(MG2017)
+save.image("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2017.RData")
+rm(list=ls())
+
+########
+#2018
+
+MG2018 <- fread("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/RAIS_VINC_PUB_MG_ES_RJ_2018.txt")
+beep(3)
+colnames(MG2018)
+MG2018 <- MG2018[,c('Vínculo Ativo 31/12','Município','Vl Remun Média Nom',
+                    'CNAE 2.0 Subclasse','Tamanho Estabelecimento')]
+colnames(MG2018)<-c("vinc_ativo","cod_mun","rem_med","subclasse","tam_estab")
+
+MG2018<- subset(MG2018,vinc_ativo==1)
+MG2018$UF<-substr(MG2018$cod_mun,start=1,stop=2)
+table(MG2018$UF)
+str(MG2018$UF)
+MG2018<-subset(MG2018,UF=="31")
+MG2018<- MG2018 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+MG2018$rem_med<-as.numeric(gsub(",",".",MG2018$rem_med))
+
+tab2018<- MG2018 %>% group_by(cod_mun) %>%
+  summarise(ano=2018,
+            t_vinc_ativo = sum(vinc_ativo),
+            t_vinc_g1=sum(g1),
+            t_vinc_g2=sum(g2),
+            t_vinc_g3=sum(g3),
+            t_vinc_g4=sum(g4),
+            t_vinc_g5=sum(g5),
+            t_vinc_g6=sum(g6),
+            t_vinc_g7=sum(g7),
+            t_vinc_g8=sum(g8),
+            t_vinc_g9=sum(g9),
+            t_tur=t_vinc_g1+t_vinc_g2+t_vinc_g3+t_vinc_g4+
+              t_vinc_g5+t_vinc_g6+t_vinc_g7+t_vinc_g8+t_vinc_g9,
+            t_massa_sal= sum(rem_med),
+            t_massa_g1= sum(rem_med*g1),
+            t_massa_g2= sum(rem_med*g2),
+            t_massa_g3= sum(rem_med*g3),
+            t_massa_g4= sum(rem_med*g4),
+            t_massa_g5= sum(rem_med*g5),
+            t_massa_g6= sum(rem_med*g6),
+            t_massa_g7= sum(rem_med*g7),
+            t_massa_g8= sum(rem_med*g8),
+            t_massa_g9= sum(rem_med*g9),
+            t_massa_tur = t_massa_g1+t_massa_g2+t_massa_g3+t_massa_g4+
+              t_massa_g5+t_massa_g6+t_massa_g7+t_massa_g8+t_massa_g9)
+rm(MG2018)
+save.image("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2018.RData")
+rm(list=ls())
+
+########
+#2019
+
+MG2019 <- fread("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/2019/RAIS_VINC_PUB_MG_ES_RJ.txt")
+beep(3)
+MG2019 <- MG2019[,c('Vínculo Ativo 31/12','Município','Vl Remun Média Nom',
+                    'CNAE 2.0 Subclasse','Tamanho Estabelecimento')]
+colnames(MG2019)<-c("vinc_ativo","cod_mun","rem_med","subclasse","tam_estab")
+
+MG2019<- subset(MG2019,vinc_ativo==1)
+MG2019$UF<-substr(MG2019$cod_mun,start=1,stop=2)
+MG2019<-subset(MG2019,UF=="31")
+MG2019<- MG2019 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+MG2019$rem_med<-as.numeric(gsub(",",".",MG2019$rem_med))
+
+tab2019<- MG2019 %>% group_by(cod_mun) %>%
+  summarise(ano=2019,
+            t_vinc_ativo = sum(vinc_ativo),
+            t_vinc_g1=sum(g1),
+            t_vinc_g2=sum(g2),
+            t_vinc_g3=sum(g3),
+            t_vinc_g4=sum(g4),
+            t_vinc_g5=sum(g5),
+            t_vinc_g6=sum(g6),
+            t_vinc_g7=sum(g7),
+            t_vinc_g8=sum(g8),
+            t_vinc_g9=sum(g9),
+            t_tur=t_vinc_g1+t_vinc_g2+t_vinc_g3+t_vinc_g4+
+              t_vinc_g5+t_vinc_g6+t_vinc_g7+t_vinc_g8+t_vinc_g9,
+            t_massa_sal= sum(rem_med),
+            t_massa_g1= sum(rem_med*g1),
+            t_massa_g2= sum(rem_med*g2),
+            t_massa_g3= sum(rem_med*g3),
+            t_massa_g4= sum(rem_med*g4),
+            t_massa_g5= sum(rem_med*g5),
+            t_massa_g6= sum(rem_med*g6),
+            t_massa_g7= sum(rem_med*g7),
+            t_massa_g8= sum(rem_med*g8),
+            t_massa_g9= sum(rem_med*g9),
+            t_massa_tur = t_massa_g1+t_massa_g2+t_massa_g3+t_massa_g4+
+              t_massa_g5+t_massa_g6+t_massa_g7+t_massa_g8+t_massa_g9)
+rm(MG2019)
+save.image("G:/Drives compartilhados/Chamada UFMG_Turismo_Brumadinho/Base de dados/ME_Rais/MG2019.RData")
+rm(list=ls())

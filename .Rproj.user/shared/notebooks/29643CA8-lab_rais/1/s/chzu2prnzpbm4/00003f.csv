@@ -1,0 +1,6 @@
+"0","vinc2<- read.csv2(""RAIS_VINC_PUB_MG_ES_RJ.txt"", 
+    delim = "";"",dec = "","")
+"
+"2","Error in read.table(file = file, header = header, sep = sep, quote = quote,  : 
+  unused argument (delim = "";"")
+"

@@ -1,0 +1,967 @@
+# microdados da Rais
+
+setwd("G:\\Drives compartilhados\\Chamada UFMG_Turismo_Brumadinho\\Base de dados\\ME_Rais\\ESTAB")
+
+# leitura dos dados
+# preparação base dos 853 municípios
+
+library(tidyverse)
+library(beepr)
+library(data.table)
+
+
+########
+#2010
+MG2010 <- fread("ESTB2010.txt")
+beep(3)
+colnames(MG2010)
+MG2010 <- MG2010[,c('Qtd Vínculos Ativos','Ind Atividade Ano','Ind Rais Negativa',
+                    'Município','CNAE 2.0 Subclasse','Tamanho Estabelecimento')]
+colnames(MG2010)<-c("vinc_ativo","ind_ativ","rais_neg",
+                    "cod_mun","subclasse","tam_estab")
+MG2010$estab<-1
+# MG2010<- subset(MG2010,ind_ativ==1)
+MG2010$UF<-substr(MG2010$cod_mun,start=1,stop=2)
+table(MG2010$UF)
+str(MG2010$UF)
+MG2010<-subset(MG2010,UF=="31")
+MG2010<- MG2010 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+
+tab2010<- MG2010 %>% group_by(cod_mun) %>%
+  summarise(ano=2010,
+            t_estab_ativo = sum(estab),
+            t_estab_g1=sum(g1),
+            t_estab_g2=sum(g2),
+            t_estab_g3=sum(g3),
+            t_estab_g4=sum(g4),
+            t_estab_g5=sum(g5),
+            t_estab_g6=sum(g6),
+            t_estab_g7=sum(g7),
+            t_estab_g8=sum(g8),
+            t_estab_g9=sum(g9),
+            t_tur=t_estab_g1+t_estab_g2+t_estab_g3+t_estab_g4+
+              t_estab_g5+t_estab_g6+t_estab_g7+t_estab_g8+t_estab_g9)
+
+rm(MG2010)
+save.image("MG2010_estab.RData")
+rm(list=ls())
+
+########
+#2011
+MG2011 <- fread("ESTB2011.txt")
+beep(3)
+colnames(MG2011)
+MG2011 <- MG2011[,c('Qtd Vínculos Ativos','Ind Atividade Ano','Ind Rais Negativa',
+                    'Município','CNAE 2.0 Subclasse','Tamanho Estabelecimento')]
+colnames(MG2011)<-c("vinc_ativo","ind_ativ","rais_neg",
+                    "cod_mun","subclasse","tam_estab")
+MG2011$estab<-1
+# MG2011<- subset(MG2011,ind_ativ==1)
+MG2011$UF<-substr(MG2011$cod_mun,start=1,stop=2)
+table(MG2011$UF)
+str(MG2011$UF)
+MG2011<-subset(MG2011,UF=="31")
+MG2011<- MG2011 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+
+tab2011<- MG2011 %>% group_by(cod_mun) %>%
+  summarise(ano=2011,
+            t_estab_ativo = sum(estab),
+            t_estab_g1=sum(g1),
+            t_estab_g2=sum(g2),
+            t_estab_g3=sum(g3),
+            t_estab_g4=sum(g4),
+            t_estab_g5=sum(g5),
+            t_estab_g6=sum(g6),
+            t_estab_g7=sum(g7),
+            t_estab_g8=sum(g8),
+            t_estab_g9=sum(g9),
+            t_tur=t_estab_g1+t_estab_g2+t_estab_g3+t_estab_g4+
+              t_estab_g5+t_estab_g6+t_estab_g7+t_estab_g8+t_estab_g9)
+
+rm(MG2011)
+save.image("MG2011_estab.RData")
+rm(list=ls())
+
+#2012
+MG2012 <- fread("ESTB2012.txt")
+beep(3)
+colnames(MG2012)
+MG2012 <- MG2012[,c('Qtd Vínculos Ativos','Ind Atividade Ano','Ind Rais Negativa',
+                    'Município','CNAE 2.0 Subclasse','Tamanho Estabelecimento')]
+colnames(MG2012)<-c("vinc_ativo","ind_ativ","rais_neg",
+                    "cod_mun","subclasse","tam_estab")
+MG2012$estab<-1
+# MG2012<- subset(MG2012,ind_ativ==1)
+MG2012$UF<-substr(MG2012$cod_mun,start=1,stop=2)
+table(MG2012$UF)
+str(MG2012$UF)
+MG2012<-subset(MG2012,UF=="31")
+MG2012<- MG2012 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+
+tab2012<- MG2012 %>% group_by(cod_mun) %>%
+  summarise(ano=2012,
+            t_estab_ativo = sum(estab),
+            t_estab_g1=sum(g1),
+            t_estab_g2=sum(g2),
+            t_estab_g3=sum(g3),
+            t_estab_g4=sum(g4),
+            t_estab_g5=sum(g5),
+            t_estab_g6=sum(g6),
+            t_estab_g7=sum(g7),
+            t_estab_g8=sum(g8),
+            t_estab_g9=sum(g9),
+            t_tur=t_estab_g1+t_estab_g2+t_estab_g3+t_estab_g4+
+              t_estab_g5+t_estab_g6+t_estab_g7+t_estab_g8+t_estab_g9)
+
+rm(MG2012)
+save.image("MG2012_estab.RData")
+rm(list=ls())
+#2013
+MG2013 <- fread("ESTB2013.txt")
+beep(3)
+colnames(MG2013)
+MG2013 <- MG2013[,c('Qtd Vínculos Ativos','Ind Atividade Ano','Ind Rais Negativa',
+                    'Município','CNAE 2.0 Subclasse','Tamanho Estabelecimento')]
+colnames(MG2013)<-c("vinc_ativo","ind_ativ","rais_neg",
+                    "cod_mun","subclasse","tam_estab")
+MG2013$estab<-1
+# MG2013<- subset(MG2013,ind_ativ==1)
+MG2013$UF<-substr(MG2013$cod_mun,start=1,stop=2)
+table(MG2013$UF)
+str(MG2013$UF)
+MG2013<-subset(MG2013,UF=="31")
+MG2013<- MG2013 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+
+tab2013<- MG2013 %>% group_by(cod_mun) %>%
+  summarise(ano=2013,
+            t_estab_ativo = sum(estab),
+            t_estab_g1=sum(g1),
+            t_estab_g2=sum(g2),
+            t_estab_g3=sum(g3),
+            t_estab_g4=sum(g4),
+            t_estab_g5=sum(g5),
+            t_estab_g6=sum(g6),
+            t_estab_g7=sum(g7),
+            t_estab_g8=sum(g8),
+            t_estab_g9=sum(g9),
+            t_tur=t_estab_g1+t_estab_g2+t_estab_g3+t_estab_g4+
+              t_estab_g5+t_estab_g6+t_estab_g7+t_estab_g8+t_estab_g9)
+
+rm(MG2013)
+save.image("MG2013_estab.RData")
+rm(list=ls())
+#2014
+MG2014 <- fread("ESTB2014.txt")
+beep(3)
+colnames(MG2014)
+MG2014 <- MG2014[,c('Qtd Vínculos Ativos','Ind Atividade Ano','Ind Rais Negativa',
+                    'Município','CNAE 2.0 Subclasse','Tamanho Estabelecimento')]
+colnames(MG2014)<-c("vinc_ativo","ind_ativ","rais_neg",
+                    "cod_mun","subclasse","tam_estab")
+MG2014$estab<-1
+# MG2014<- subset(MG2014,ind_ativ==1)
+MG2014$UF<-substr(MG2014$cod_mun,start=1,stop=2)
+table(MG2014$UF)
+str(MG2014$UF)
+MG2014<-subset(MG2014,UF=="31")
+MG2014<- MG2014 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+
+tab2014<- MG2014 %>% group_by(cod_mun) %>%
+  summarise(ano=2014,
+            t_estab_ativo = sum(estab),
+            t_estab_g1=sum(g1),
+            t_estab_g2=sum(g2),
+            t_estab_g3=sum(g3),
+            t_estab_g4=sum(g4),
+            t_estab_g5=sum(g5),
+            t_estab_g6=sum(g6),
+            t_estab_g7=sum(g7),
+            t_estab_g8=sum(g8),
+            t_estab_g9=sum(g9),
+            t_tur=t_estab_g1+t_estab_g2+t_estab_g3+t_estab_g4+
+              t_estab_g5+t_estab_g6+t_estab_g7+t_estab_g8+t_estab_g9)
+
+rm(MG2014)
+save.image("MG2014_estab.RData")
+rm(list=ls())
+#2015
+MG2015 <- fread("ESTB2015.txt")
+beep(3)
+colnames(MG2015)
+MG2015 <- MG2015[,c('Qtd Vínculos Ativos','Ind Atividade Ano','Ind Rais Negativa',
+                    'Município','CNAE 2.0 Subclasse','Tamanho Estabelecimento')]
+colnames(MG2015)<-c("vinc_ativo","ind_ativ","rais_neg",
+                    "cod_mun","subclasse","tam_estab")
+MG2015$estab<-1
+# MG2015<- subset(MG2015,ind_ativ==1)
+MG2015$UF<-substr(MG2015$cod_mun,start=1,stop=2)
+table(MG2015$UF)
+str(MG2015$UF)
+MG2015<-subset(MG2015,UF=="31")
+MG2015<- MG2015 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+
+tab2015<- MG2015 %>% group_by(cod_mun) %>%
+  summarise(ano=2015,
+            t_estab_ativo = sum(estab),
+            t_estab_g1=sum(g1),
+            t_estab_g2=sum(g2),
+            t_estab_g3=sum(g3),
+            t_estab_g4=sum(g4),
+            t_estab_g5=sum(g5),
+            t_estab_g6=sum(g6),
+            t_estab_g7=sum(g7),
+            t_estab_g8=sum(g8),
+            t_estab_g9=sum(g9),
+            t_tur=t_estab_g1+t_estab_g2+t_estab_g3+t_estab_g4+
+              t_estab_g5+t_estab_g6+t_estab_g7+t_estab_g8+t_estab_g9)
+
+rm(MG2015)
+save.image("MG2015_estab.RData")
+rm(list=ls())
+#2016
+MG2016 <- fread("ESTB2016.txt")
+beep(3)
+colnames(MG2016)
+MG2016 <- MG2016[,c('Qtd Vínculos Ativos','Ind Atividade Ano','Ind Rais Negativa',
+                    'Município','CNAE 2.0 Subclasse','Tamanho Estabelecimento')]
+colnames(MG2016)<-c("vinc_ativo","ind_ativ","rais_neg",
+                    "cod_mun","subclasse","tam_estab")
+MG2016$estab<-1
+# MG2016<- subset(MG2016,ind_ativ==1)
+MG2016$UF<-substr(MG2016$cod_mun,start=1,stop=2)
+table(MG2016$UF)
+str(MG2016$UF)
+MG2016<-subset(MG2016,UF=="31")
+MG2016<- MG2016 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+
+tab2016<- MG2016 %>% group_by(cod_mun) %>%
+  summarise(ano=2016,
+            t_estab_ativo = sum(estab),
+            t_estab_g1=sum(g1),
+            t_estab_g2=sum(g2),
+            t_estab_g3=sum(g3),
+            t_estab_g4=sum(g4),
+            t_estab_g5=sum(g5),
+            t_estab_g6=sum(g6),
+            t_estab_g7=sum(g7),
+            t_estab_g8=sum(g8),
+            t_estab_g9=sum(g9),
+            t_tur=t_estab_g1+t_estab_g2+t_estab_g3+t_estab_g4+
+              t_estab_g5+t_estab_g6+t_estab_g7+t_estab_g8+t_estab_g9)
+
+rm(MG2016)
+save.image("MG2016_estab.RData")
+rm(list=ls())
+#2017
+MG2017 <- fread("ESTB2017.txt")
+beep(3)
+colnames(MG2017)
+MG2017 <- MG2017[,c('Qtd Vínculos Ativos','Ind Atividade Ano','Ind Rais Negativa',
+                    'Município','CNAE 2.0 Subclasse','Tamanho Estabelecimento')]
+colnames(MG2017)<-c("vinc_ativo","ind_ativ","rais_neg",
+                    "cod_mun","subclasse","tam_estab")
+MG2017$estab<-1
+# MG2017<- subset(MG2017,ind_ativ==1)
+MG2017$UF<-substr(MG2017$cod_mun,start=1,stop=2)
+table(MG2017$UF)
+str(MG2017$UF)
+MG2017<-subset(MG2017,UF=="31")
+MG2017<- MG2017 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+
+tab2017<- MG2017 %>% group_by(cod_mun) %>%
+  summarise(ano=2017,
+            t_estab_ativo = sum(estab),
+            t_estab_g1=sum(g1),
+            t_estab_g2=sum(g2),
+            t_estab_g3=sum(g3),
+            t_estab_g4=sum(g4),
+            t_estab_g5=sum(g5),
+            t_estab_g6=sum(g6),
+            t_estab_g7=sum(g7),
+            t_estab_g8=sum(g8),
+            t_estab_g9=sum(g9),
+            t_tur=t_estab_g1+t_estab_g2+t_estab_g3+t_estab_g4+
+              t_estab_g5+t_estab_g6+t_estab_g7+t_estab_g8+t_estab_g9)
+
+rm(MG2017)
+save.image("MG2017_estab.RData")
+rm(list=ls())
+#2018
+MG2018 <- fread("ESTB2018.txt")
+beep(3)
+colnames(MG2018)
+MG2018 <- MG2018[,c('Qtd Vínculos Ativos','Ind Atividade Ano','Ind Rais Negativa',
+                    'Município','CNAE 2.0 Subclasse','Tamanho Estabelecimento')]
+colnames(MG2018)<-c("vinc_ativo","ind_ativ","rais_neg",
+                    "cod_mun","subclasse","tam_estab")
+MG2018$estab<-1
+table(MG2018$ind_ativ)
+# MG2018<- subset(MG2018,ind_ativ==1)
+MG2018$UF<-substr(MG2018$cod_mun,start=1,stop=2)
+table(MG2018$UF)
+str(MG2018$UF)
+MG2018<-subset(MG2018,UF=="31")
+MG2018<- MG2018 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+
+tab2018<- MG2018 %>% group_by(cod_mun) %>%
+  summarise(ano=2018,
+            t_estab_ativo = sum(estab),
+            t_estab_g1=sum(g1),
+            t_estab_g2=sum(g2),
+            t_estab_g3=sum(g3),
+            t_estab_g4=sum(g4),
+            t_estab_g5=sum(g5),
+            t_estab_g6=sum(g6),
+            t_estab_g7=sum(g7),
+            t_estab_g8=sum(g8),
+            t_estab_g9=sum(g9),
+            t_tur=t_estab_g1+t_estab_g2+t_estab_g3+t_estab_g4+
+              t_estab_g5+t_estab_g6+t_estab_g7+t_estab_g8+t_estab_g9)
+
+rm(MG2018)
+save.image("MG2018_estab.RData")
+rm(list=ls())
+#2019
+MG2019 <- fread("ESTB2019.txt")
+beep(3)
+colnames(MG2019)
+MG2019 <- MG2019[,c('Qtd Vínculos Ativos','Ind Atividade Ano','Ind Rais Negativa',
+                    'Município','CNAE 2.0 Subclasse','Tamanho Estabelecimento')]
+colnames(MG2019)<-c("vinc_ativo","ind_ativ","rais_neg",
+                    "cod_mun","subclasse","tam_estab")
+MG2019$estab<-1
+# MG2019<- subset(MG2019,ind_ativ==1)
+MG2019$UF<-substr(MG2019$cod_mun,start=1,stop=2)
+table(MG2019$UF)
+str(MG2019$UF)
+MG2019<-subset(MG2019,UF=="31")
+MG2019<- MG2019 %>% mutate(g1=ifelse((subclasse==4912401)|
+                                       (subclasse==4922101)|
+                                       (subclasse==4922102)|
+                                       (subclasse==4922103)|
+                                       (subclasse==4923001)|
+                                       (subclasse==4923002)|
+                                       (subclasse==4929902)|
+                                       (subclasse==4929904)|
+                                       (subclasse==4929999)|
+                                       (subclasse==4950700),1,0),
+                           g2=ifelse((subclasse==5011402)|
+                                       (subclasse==5012202)|
+                                       (subclasse==5022002)|
+                                       (subclasse==5091202)|
+                                       (subclasse==5099801)|
+                                       (subclasse==5099899),1,0),
+                           g3=ifelse((subclasse==5111100)|
+                                       (subclasse==5112901)|
+                                       (subclasse==5112999),1,0),
+                           g4=ifelse((subclasse== 5222200)|
+                                       (subclasse==5229001)|
+                                       (subclasse==5229099)|
+                                       (subclasse==5240101)|
+                                       (subclasse==5240199),1,0),
+                           g5=ifelse((subclasse==5510801)|
+                                       (subclasse==5510802)|
+                                       (subclasse==5590601)|
+                                       (subclasse==5590602)|
+                                       (subclasse==5590603)|
+                                       (subclasse==5590699),1,0),
+                           g6=ifelse((subclasse==5611201)|
+                                       (subclasse==5611202)|
+                                       (subclasse==5611204)|
+                                       (subclasse==5611205)|
+                                       (subclasse==5611203)|
+                                       (subclasse==5612100),1,0),
+                           g7=ifelse((subclasse==7711000)|
+                                       (subclasse==7721700),1,0),
+                           g8=ifelse((subclasse==7911200)|
+                                       (subclasse==7912100)|
+                                       (subclasse==7990200),1,0),
+                           g9=ifelse((subclasse==9001901)|
+                                       (subclasse==9001902)|
+                                       (subclasse==9001903)|
+                                       (subclasse==9001904)|
+                                       (subclasse==9001905)|
+                                       (subclasse==9001999)|
+                                       (subclasse==9002701)|
+                                       (subclasse==9102301)|
+                                       (subclasse==9103100)|
+                                       (subclasse==9200301)|
+                                       (subclasse==9200302)|
+                                       (subclasse==9200399)|
+                                       (subclasse==9319101)|
+                                       (subclasse==9321200)|
+                                       (subclasse==9329801)|
+                                       (subclasse==9329802)|
+                                       (subclasse==9329803)|
+                                       (subclasse==9329804)|
+                                       (subclasse==9329899),1,0)
+
+)
+
+tab2019<- MG2019 %>% group_by(cod_mun) %>%
+  summarise(ano=2019,
+            t_estab_ativo = sum(estab),
+            t_estab_g1=sum(g1),
+            t_estab_g2=sum(g2),
+            t_estab_g3=sum(g3),
+            t_estab_g4=sum(g4),
+            t_estab_g5=sum(g5),
+            t_estab_g6=sum(g6),
+            t_estab_g7=sum(g7),
+            t_estab_g8=sum(g8),
+            t_estab_g9=sum(g9),
+            t_tur=t_estab_g1+t_estab_g2+t_estab_g3+t_estab_g4+
+              t_estab_g5+t_estab_g6+t_estab_g7+t_estab_g8+t_estab_g9)
+
+rm(MG2019)
+save.image("MG2019_estab.RData")
+rm(list=ls())

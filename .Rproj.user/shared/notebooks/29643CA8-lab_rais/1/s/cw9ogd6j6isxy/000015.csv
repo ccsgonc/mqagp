@@ -1,0 +1,4 @@
+"0","# total da UF"
+"0","tabela01 <- base.vinc %>% "
+"0","  summarise(t.vinc = sum(one))"
+"0","tabela01"
