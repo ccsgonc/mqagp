@@ -41,7 +41,15 @@ library(data.table)
 
 Sys.setlocale(category = "LC_ALL", locale = "Portuguese_Brazil.1252")
 vinc <- fread("RAIS_VINC_PUB_MG_ES_RJ.txt",dec=",")
+saveRDS(vinc,"RAIS_VINC_PUB_MG_ES_RJ.RData")
 
+vinc <- fread("RAIS_VINC_PUB_NORDESTE.txt",dec=",")
+saveRDS(vinc,"RAIS_VINC_PUB_NORDESTE.RData")
+
+vinc <- fread("RAIS_VINC_PUB_NORTE.txt",dec=",")
+saveRDS(vinc,"RAIS_VINC_PUB_NORTE.RData")
+
+base <- readRDS("RAIS_VINC_PUB_MG_ES_RJ.RData")
 
 # visualizando as variáveis
 colnames(vinc) 

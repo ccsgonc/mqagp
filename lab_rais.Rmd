@@ -1,0 +1,202 @@
+---
+title: "Indicadores no R: vínculos empregatícios"
+author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
+date: "02-outubro-2023"
+output:
+  html_document: 
+    toc: true
+    toc_float: true
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+O objetivo deste tutorial é explorar os dados da Relação Anual de
+Informações Sociais - RAIS.
+
+# Contextualização
+
+## Relação Anual de Informações Sociais (RAIS)
+
+Instituída pelo Decreto nº 76.900, de 23 de dezembro de 1975 e regida
+atualmente pelo Decreto nº 10.854, de 10 de novembro de 2021, a RAIS tem
+por objetivo:
+
+-   o suprimento às necessidades de controle da atividade trabalhista no
+    País,
+-   o provimento de dados para a elaboração de estatísticas do trabalho,
+-   a disponibilização de informações do mercado de trabalho às
+    entidades governamentais.
+
+A RAIS é um Registro Administrativo e possui periodicidade anual e
+apresenta informações sobre todos os estabelecimentos formais e vínculos
+celetistas e estatutários no Brasil. Constitui um instrumento
+imprescindível para o cumprimento das normas legais, como também é de
+fundamental importância para o acompanhamento e a caracterização do
+mercado de trabalho formal brasileiro.
+
+Fonte:
+<http://pdet.mte.gov.br/images/RAIS/2021/2-Sumário_Executivo_RAIS_2021.pdf>
+
+# Base de dados
+
+## Leitura dos dados
+
+Defina o diretório para o local onde está a base de dados e importe a
+base completa. Os microdados estão disponíveis no seguinte endereço
+eletrônico: <ftp://ftp.mtps.gov.br/pdet/microdados/>
+
+```{r dados, echo=TRUE, warning=FALSE}
+# setwd("insira o caminho")
+options(scipen = 999) # opção para não exibir números científicos
+library(readxl)
+library(tidyverse)
+library(vroom)
+
+Sys.setlocale(category = "LC_ALL", locale = "Portuguese_Brazil.1252")
+vinc <- vroom("RAIS_VINC_PUB_MG_ES_RJ.txt",delim = ";",col_names = "Município",)
+vinc2<- read.csv2("RAIS_VINC_PUB_MG_ES_RJ.txt",dec = ",")
+
+# visualizando as variáveis
+colnames(vinc) 
+
+# filtra a base
+# seleciona as variáveis de interesse 
+base.vinc <- vinc %>% mutate (one = 1,
+                              UF = substr(Município,1,2)) %>% 
+  filter(UF == "31" & Vínculo.Ativo.31.12==1)
+# rm(vinc)
+```
+
+Visualizando dados duplicados:
+
+```{r dados2, warning=FALSE, include=FALSE}
+library(tidyverse)
+base.vinc2<- distinct(base.vinc)
+nrow(base.vinc2)-nrow(base.vinc)
+```
+
+## Verificando variáveis
+
+O pacote
+[DataMaid](https://cran.r-project.org/web/packages/dataMaid/index.html)
+é uma ferramenta valiosa no ambiente R para a verificação, limpeza e
+organização eficiente de conjuntos de dados. Desenvolvido com o objetivo
+de aprimorar a qualidade e confiabilidade dos dados, o DataMaid oferece
+funcionalidades que auxiliam na identificação de valores ausentes, erros
+de digitação, inconsistências e outras anomalias nos dados. Além disso,
+permite a criação de relatórios detalhados, facilitando a compreensão
+das estruturas e conteúdo dos datasets, promovendo assim uma exploração
+mais assertiva. Com suas capacidades automatizadas de geração de
+sumários e gráficos descritivos, o DataMaid é uma ferramenta para
+cientistas de dados e analistas que desejam garantir a qualidade e
+integridade dos seus dados, tornando todo o processo de análise mais
+eficiente e confiável.
+
+```{r verificação, echo=TRUE, warning=FALSE}
+library(dataMaid)
+# makeDataReport(base.vinc,replace = TRUE)
+```
+
+## Indicadores
+
+1.  Total de vínculos
+2.  Total de vínculos por municípios
+3.  Total de vínculos por atividade econômica
+4.  Total de vínculo por sexo
+5.  Total de vínculo por idade
+6.  Total de vínculo por escolaridade
+
+### UF e municípios
+
+```{r vinculos, echo=TRUE}
+# total da UF
+tabela01 <- base.vinc %>% 
+  summarise(t.vinc = sum(one))
+tabela01
+
+# total por municípios
+tabela02 <- base.vinc %>%  group_by(Município) %>% 
+  summarise(t.vinc = sum(one)) %>% 
+  mutate(p.vinc = round(t.vinc/sum(t.vinc)*100,2))
+
+arrange(tabela02,desc(tabela02$t.vinc))[1:10,]
+arrange(tabela02,(tabela02$t.vinc))[1:10,]
+
+```
+### Atividades econômicas
+
+```{r vinculos, echo=TRUE}
+# total da UF
+tabela01 <- base.vinc %>% 
+  summarise(t.vinc = sum(one))
+tabela01
+
+# total por municípios
+tabela02 <- base.vinc %>%  group_by(Município) %>% 
+  summarise(t.vinc = sum(one)) %>% 
+  mutate(p.vinc = round(t.vinc/sum(t.vinc)*100,2))
+
+arrange(tabela02,desc(tabela02$t.vinc))[1:10,]
+arrange(tabela02,(tabela02$t.vinc))[1:10,]
+
+```
+
+
+### Sexo
+
+```{r vinculos, echo=TRUE}
+# total da UF
+tabela01 <- base.vinc %>% 
+  summarise(t.vinc = sum(one))
+tabela01
+
+# total por municípios
+tabela02 <- base.vinc %>%  group_by(Município) %>% 
+  summarise(t.vinc = sum(one)) %>% 
+  mutate(p.vinc = round(t.vinc/sum(t.vinc)*100,2))
+
+arrange(tabela02,desc(tabela02$t.vinc))[1:10,]
+arrange(tabela02,(tabela02$t.vinc))[1:10,]
+
+```
+
+### Idade
+
+```{r vinculos, echo=TRUE}
+# total da UF
+tabela01 <- base.vinc %>% 
+  summarise(t.vinc = sum(one))
+tabela01
+
+# total por municípios
+tabela02 <- base.vinc %>%  group_by(Município) %>% 
+  summarise(t.vinc = sum(one)) %>% 
+  mutate(p.vinc = round(t.vinc/sum(t.vinc)*100,2))
+
+arrange(tabela02,desc(tabela02$t.vinc))[1:10,]
+arrange(tabela02,(tabela02$t.vinc))[1:10,]
+
+```
+
+### Escolaridade
+
+```{r vinculos, echo=TRUE}
+# total da UF
+tabela01 <- base.vinc %>% 
+  summarise(t.vinc = sum(one))
+tabela01
+
+# total por municípios
+tabela02 <- base.vinc %>%  group_by(Município) %>% 
+  summarise(t.vinc = sum(one)) %>% 
+  mutate(p.vinc = round(t.vinc/sum(t.vinc)*100,2))
+
+arrange(tabela02,desc(tabela02$t.vinc))[1:10,]
+arrange(tabela02,(tabela02$t.vinc))[1:10,]
+
+```
