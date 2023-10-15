@@ -1,0 +1,68 @@
+# lista 09
+
+install.packages("survey")
+install.packages("sampling")
+library(survey)
+library(sampling)
+
+fazendas = readRDS("C:/Users/201950041-83/Downloads/fazendas_dat.rds")
+fazendas = readRDS("C:/Users/Caio Gon?alves/Downloads/fazendas_dat.rds")
+str(fazendas)
+
+# plano 01
+n=32
+N=nrow(fazendas)
+H=4
+fazendas1 = fazendas
+
+# algoritmo para estratifica??o
+fazendas1$Area2 = sqrt(fazendas1$Area)
+fazendas1 = fazendas1[order(fazendas1$Area2),]
+fazendas1$cumsum = cumsum(fazendas1$Area2)
+corte = fazendas1$cumsum[N]/H
+fazendas1$estrato = 0
+for (i in 1:N) {
+  if (fazendas1$cumsum[i]<= corte) {
+      fazendas1$estrato[i]=1}
+  else if (fazendas1$cumsum[i]<= 2*corte){
+      fazendas1$estrato[i]=2} 
+  else if (fazendas1$cumsum[i]<= 3*corte){
+        fazendas1$estrato[i]=3}    
+  else fazendas1$estrato[i]=4 
+    }
+
+set.seed(123)
+
+fazendas1.amo1 = srswor(n/H,nrow(fazendas1[fazendas1$estrato==1,]))
+amofaz1 = fazendas1[fazendas1.amo1==1,]
+Npop1 = nrow(fazendas1[fazendas1$estrato==1,])
+amofaz1$Npop=rep(Npop1, nrow(amofaz1))
+
+fazendas1.amo2 = srswor(n/H,nrow(fazendas1[fazendas1$estrato==2,]))
+amofaz2 = fazendas1[fazendas1.amo2==1,]
+Npop2 = nrow(fazendas1[fazendas1$estrato==2,])
+amofaz2$Npop=rep(Npop2, nrow(amofaz2))
+
+fazendas1.amo3 = srswor(n/H,nrow(fazendas1[fazendas1$estrato==3,]))
+amofaz3 = fazendas1[fazendas1.amo3==1,]
+Npop3 = nrow(fazendas1[fazendas1$estrato==3,])
+amofaz3$Npop=rep(Npop3, nrow(amofaz3))
+
+fazendas1.amo4 = srswor(n/H,nrow(fazendas1[fazendas1$estrato==4,]))
+amofaz4 = fazendas1[fazendas1.amo4==1,]
+Npop4 = nrow(fazendas1[fazendas1$estrato==4,])
+amofaz4$Npop=rep(Npop4, nrow(amofaz4))
+
+#base final estratitificada com aloca??o igual
+amostra1=rbind(amofaz1,amofaz2,amofaz3,amofaz4)
+str(amostra1)
+
+#fazendas.amostra1 = svydesign(data=amostra1, id=~1,fpc=~Npop, strata = amostra1$estrato)
+#summary(fazendas.amostra1)
+
+
+
+
+
+
+

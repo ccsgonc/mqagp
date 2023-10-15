@@ -1,0 +1,69 @@
+################################################################################
+#####  Curso de Amostragem - Edição 2019              
+#####  Solução de exercícios da Unidade 04                              
+#####  Programador: Pedro Silva
+#####  Atualização: 22/07/2019
+################################################################################
+
+# Limpa objetos da memória
+rm(list = ls())
+# Opção para controlar impressão de valores grandes e evitar uso de notação científica
+options(scipen=8)
+
+# Define pasta onde estão ou serão armazenados arquivos nesta sessão
+setwd("E:/RJ/Cursos/Amostragem2019/Dados")
+
+# Exercício 4.1
+# Tamanho populacional
+(N <- 4000000)
+# Tamanho amostral
+(n <- 2000)
+# Eleitores dos candidatos na amostra
+(n_A <- 900)
+(n_B <- 800)
+(n_I <- 300)
+
+# Estimativa da proporção de eleitores de A
+(p_A <- (n_A / n))
+# Estimativa da proporção de eleitores de B
+(p_B <- (n_B / n))
+# Estimativa da contagem de eleitores Indecisos
+(p_I <- (n_I / n))
+(N_I <- N*p_I)
+
+# Intervalo de confiança, com aproximação
+(me_P_A <- qnorm(0.975)*sqrt(p_A*(1-p_A)/n))
+(LIC_P_A <- p_A - me_P_A)
+(LSC_P_A <- p_A + me_P_A)
+# Intervalo de confiança, com aproximação
+(me_P_B <- qnorm(0.975)*sqrt(p_B*(1-p_B)/n))
+(LIC_P_B <- p_A - me_P_B)
+(LSC_P_B <- p_A + me_P_B)
+# Intervalo de confiança, com aproximação
+(me_N_I <- N * qnorm(0.975)*sqrt(p_I*(1-p_I)/n))
+(LIC_N_I <- N_I - me_N_I)
+(LSC_N_I <- N_I + me_N_I)
+
+# Questão 2
+# Especifica margem de erro
+(d <- 0.01)
+# Tamanho da população
+(N <- 30000)
+# Usando fórmula 'exata' e proporção que maximiza variância
+(P <- 1/2)
+(n_max <- (N * P * (1-P))/
+          ((N-1)*d^2/qnorm(0.975)^2 +  P * (1-P)))
+(n_max <- ceiling(n_max))
+# Usando fórmula 'exata' e proporção no limite inferior (opção errada)
+(P <- 0.1)
+(n_min <- (N * P * (1-P))/
+          ((N-1)*d^2/qnorm(0.975)^2 +  P * (1-P)))
+(n_min <- ceiling(n_min))
+# Usando fórmula 'exata' e proporção no limite superior (opção correta)
+(P <- 0.3)
+(n_maxint <- (N * P * (1-P))/
+             ((N-1)*d^2/qnorm(0.975)^2 +  P * (1-P)))
+(n_maxint <- ceiling(n_maxint))
+
+# Limpa objetos da memória
+rm(list = ls())

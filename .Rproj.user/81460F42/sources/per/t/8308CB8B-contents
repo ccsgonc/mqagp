@@ -1,0 +1,152 @@
+############ Lista 09 #############
+
+# Define pasta de trabalho onde encontrar arquivos de dados
+setwd("D:\\HOJE\\Monitoria Amostragem 2019\\Monitoria 6")
+# Carrega o pacote sampling 
+install.packages("sampling")
+library(sampling)
+# Lê o arquivo de dados com a população
+fazendas = read.csv(file="Fazendas.csv", header=TRUE, sep=";")
+str(fazendas)
+# Transforma em fatores as vari?veis classe e regi?o do arquivo de dados
+fazendas = transform(fazendas, CLASSE = as.factor(CLASSE))
+fazendas = transform(fazendas, REGIAO = as.factor(REGIAO))
+str(fazendas)
+
+########## Questão 1 #####################################
+
+## Definindo o tamanho da amostra ##
+n<-32
+N<-nrow(fazendas)
+raiz<-sqrt(fazendas$AREA)
+fazendas<-cbind(fazendas,raiz)
+
+### Criando os estratos ###
+
+fazendas<-fazendas[order(fazendas$raiz),]# ordenando as fazendas pela raiz quadrada da área
+soma<-cumsum(fazendas$raiz)
+fazendas<-cbind(fazendas,soma) # criando um vetor com a soma acumulada da raiz
+total<-sum(fazendas$raiz)/4 # soma das raízes que cada estrato deve ter aproximadamente
+
+est<-vector(mode="numeric",length= N)
+for (i in 1:N){
+if (soma[i] <= total){est[i]<-1 }
+else if (soma[i] <= total*2){est[i]<-2 }
+else if (soma[i] <= total*3){est[i]<-3 }
+else if (soma[i] <= total*4){est[i]<-4 }}
+fazendas<-cbind(fazendas,est)
+
+tapply(fazendas$raiz,est,sum) # soma das raízes da área por estrato
+
+# Calcula e armazena resumos das variáveis por estrato
+
+(est.Yh = aggregate( cbind(QUANT, RECEITA) ~ est, data=fazendas,FUN=sum))
+est.Yh = est.Yh[,-1]
+str(est.Yh)
+
+(est.Sh2 = aggregate( cbind(QUANT, RECEITA) ~ est, data=fazendas,FUN=var))
+est.Sh2 = est.Sh2[,-1]
+str(est.Sh2)
+
+(est.Nh = as.vector(table(fazendas$est)))
+
+### CV alocação igual ###
+
+# Calcula variância e CV do estimador HT de total para variáveis de pesquisa - Plano 1
+Plano1.nh = c(8, 8, 8, 8)
+Plano1.Vartot = colSums(est.Nh^2 * ((1 / Plano1.nh) - (1 / est.Nh)) * est.Sh2)
+(Plano1.CVtot = 100 * sqrt(Plano1.Vartot) / colSums(est.Yh))
+
+### CV alocação proporcional ###
+
+# n1= 32*113/338 =10,69 , n2= 32*90/338= 8,52 , n3=32*76/338 = 7,19 , n4=32*59/338=5,58
+
+# Calcula variância e CV do estimador HT de total para variáveis de pesquisa - Plano 1
+Plano2.nh = c(11, 8, 7, 6)
+Plano2.Vartot = colSums(est.Nh^2 * ((1 / Plano2.nh) - (1 / est.Nh)) * est.Sh2)
+(Plano2.CVtot = 100 * sqrt(Plano2.Vartot) / colSums(est.Yh))
+
+### CV alocação ótima ###
+
+est.Sh2x = aggregate( raiz ~ est, data=fazendas,FUN=var)
+est.Sh2x  =   est.Sh2x[,-1]
+
+# Calcula alocaçao ótima da amostra
+
+Plano3.nh=32 *  est.Nh * sqrt (est.Sh2x)/sum(est.Nh * sqrt(est.Sh2x))
+(Plano3.nh = round(Plano3.nh))
+
+# Calcula variância e CV do estimador HT de total para variáveis de pesquisa - Plano 3
+
+Plano3.Vartot = colSums(est.Nh^2 * ((1 / Plano3.nh) - (1 / est.Nh)) * est.Sh2)
+(Plano3.CVtot = 100 * sqrt(Plano3.Vartot) / colSums(est.Yh))
+
+
+(compara.CV<-rbind(Plano1.CVtot,Plano2.CVtot,Plano3.CVtot))
+
+################# Quest?o 2 ####################
+
+## Sorteio Plano 3 ##
+
+(fazendas.amo3 = strata(data=fazendas, stratanames=c("est"), Plano3.nh, method=c("srswor")))
+# Obtém dados das variáveis de pesquisa para amostra selecionada
+fazendas.aux3 = fazendas[fazendas.amo3$ID_unit, c("raiz", "QUANT", "RECEITA")]
+fazendas.amo3 = cbind(fazendas.amo3, fazendas.aux3)
+# Cria objeto de desenho correspondente ? amostra selecionada
+# Carrega o pacote survey
+#install.packages("survey")
+library(survey)
+fazendas.plano3 = svydesign(data=fazendas.amo3, ids=~1, strata=~est, fpc=~Prob)
+summary(fazendas.plano3)
+# Calcula estimativas de totais com amostra selecionada
+(fazendas.est3 = svytotal(~QUANT+RECEITA, design=fazendas.plano3))
+(fazendas.cv3 = 100* sqrt(diag(vcov(fazendas.est3))) / coef(fazendas.est3))
+
+# (fazendas.amo3 = strata(data=fazendas, stratanames=c("est"), size=c(8,5,5,14), method=c("srswor")))
+
+## CVs dos outros planos AAS, Sequencial de Poisson e PPT de Pareto
+# AAS
+EP.quant.AAS<-sqrt((1/n-1/N)*var(fazendas$QUANT)*N^2)
+(CV.quant.AAS<-100*EP.quant.AAS/sum(fazendas$QUANT))
+EP.receita.AAS<-sqrt((1/n-1/N)*var(fazendas$RECEITA)*N^2)
+(CV.receita.AAS<-100*EP.receita.AAS/sum(fazendas$RECEITA))
+
+# sequencial de Poisson, usar a lista anterior (lista 8) e colocar n = 32
+# PPT Sequencial de Poisson
+fazendas = transform(fazendas, p_i = AREA / sum(AREA) )
+fazendas = transform(fazendas, pi_i = n * AREA / sum(AREA) )
+
+fazendas = transform(fazendas, pptasp_e_quant = (QUANT/p_i),
+                     pptasp_e_receita = (RECEITA/p_i),
+                     pptasp_v_quant = (QUANT/p_i - sum(QUANT))^2 * (1 - n * p_i) * p_i ,
+                     pptasp_v_receita = (RECEITA/p_i - sum(RECEITA))^2 * (1 - n * p_i) * p_i )
+
+varp_pptasp_quant = N/(N-1) * sum(fazendas$pptasp_v_quant) / n 
+varp_pptasp_receita = N/(N-1) * sum(fazendas$pptasp_v_receita) / n 
+(cv_pptasp_quant = 100 * sqrt(varp_pptasp_quant) / sum(fazendas$QUANT))
+(cv_pptasp_receita = 100 * sqrt(varp_pptasp_receita) / sum(fazendas$RECEITA))
+
+
+# PPT de Pareto, usar a lista anterior (lista 8) e colocar n = 32
+# PPT de Pareto
+fazendas = transform(fazendas, 
+                     pptpar_e_quant = (QUANT/pi_i),
+                     pptpar_e_receita = (RECEITA/pi_i),
+                     pptpar_v_quant = (QUANT/pi_i - sum(QUANT * (1 - pi_i))/sum(pi_i * (1 - pi_i)))^2 * pi_i * (1 - pi_i),
+                     pptpar_v_receita = (RECEITA/pi_i - sum(RECEITA * (1 - pi_i))/sum(pi_i * (1 - pi_i)))^2 * pi_i * (1 - pi_i) )
+
+varp_pptpar_quant = N * sum(fazendas$pptpar_v_quant) / (N-1)
+varp_pptpar_receita = N * sum(fazendas$pptpar_v_receita) / (N-1)
+(cv_pptpar_quant = 100 * sqrt(varp_pptpar_quant) / sum(fazendas$QUANT))
+(cv_pptpar_receita = 100 * sqrt(varp_pptpar_receita) / sum(fazendas$RECEITA))
+
+
+(compara.CV.quant<-c(CV.quant.AAS,cv_pptasp_quant,cv_pptpar_quant,Plano3.CVtot[1] ))
+(compara.CV.receita <-c(CV.receita.AAS,cv_pptasp_receita,cv_pptpar_receita, Plano3.CVtot[2]))
+
+
+
+
+
+
+

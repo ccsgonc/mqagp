@@ -1,0 +1,59 @@
+# lista 10
+
+# pacotes
+library(sampling)
+library(survey)
+
+# base de dados
+data = read_delim("G:/Meu Drive/Doutorado Ence/02_2019_Amostragem/Listas e rotinas/Munic1.csv", 
+                                ";", escape_double = FALSE, trim_ws = TRUE)
+# informa??es populacionais
+N = nrow(data)
+
+# informa??es amostrais
+n = 200
+
+# plano 1 - aas
+set.seed(123)
+amostra_ass = data[srswor(n,nrow(data))==1,]
+
+# plano 2 - aes - por regi?o
+
+# plnao 3 - aes - por tamanho popula??o
+# aloca??o igual 
+H = 5
+corte = N/H
+
+est<-vector(mode="numeric",length= N)
+for (i in 1:N){
+  if (i <= corte){est[i]<-1 }
+  else if (i <= corte*2){est[i]<-2 }
+  else if (i <= corte*3){est[i]<-3 }
+  else if (i <= corte*4){est[i]<-4 }
+  else if (i <= corte*5){est[i]<-5 }}
+table(est)
+data3<-cbind(data,est)
+
+dat1 = subset(data, est == 1)
+amostra1 = dat1[srswor(n/H,corte)==1,]
+
+dat2 = subset(data, est == 2)
+amostra2 = dat2[srswor(n/H,corte)==1,]
+
+dat3 = subset(data, est == 3)
+amostra3 = dat3[srswor(n/H,corte)==1,]
+
+dat4 = subset(data, est == 4)
+amostra4 = dat4[srswor(n/H,corte)==1,]
+
+dat5 = subset(data, est == 5)
+amostra5 = dat5[srswor(n/H,corte)==1,]
+
+amostra_aes2 = rbind(amostra1, amostra2, amostra3, amostra4, amostra5)
+
+# plano 4 - ppt de pareto
+
+data4 = transform(data, pi_i = n * Pop / sum(Pop) )
+data4 = transform(data4, A_i = runif(N))
+data4 = transform(data4, C_i = A_i * (1 - pi_i) / ((1 - A_i)*pi_i) )
+amostra_pptpar = data4[order(data4$C_i)[1:n],]

@@ -1,0 +1,132 @@
+############ Lista 06 #############
+# Define pasta de trabalho onde encontrar arquivos de dados
+setwd("D:/HOJE/Monitoria Amostragem 2019/Monitoria 4/Lista 6")
+# Carrega os pacotes sampling e survey
+library(sampling)
+library(survey)
+# L? o arquivo de dados com a popula??o
+fazendas = read.csv(file="Fazendas.csv", header=TRUE, sep=";")
+N=nrow(fazendas)
+str(fazendas)
+
+# Cria a variavel produtividade por fazenda
+fazendas = transform(fazendas, PROD = QUANT / AREA)
+# Cria a variavel indicadora de fazendas das classes 4, 5 e 6
+fazendas = transform(fazendas, IndClasses = 1 * (CLASSE >= 4) )
+# Verifica criacao da variavel indicadora do dominio de interesse
+table(fazendas$IndClasses, fazendas$CLASSE)
+
+# Transforma em fatores as variaveis classe e regiao do arquivo de dados
+fazendas = transform(fazendas, CLASSE = as.factor(CLASSE))
+fazendas = transform(fazendas, REGIAO = as.factor(REGIAO))
+
+# Adiciona vetor com o tamanho populacional em uma coluna no arquivo
+fazendas = transform(fazendas, Npop = rep(N,N) )
+str(fazendas)
+
+# Calcula as vari?veis de interesse na popula??o
+MEDIA_PROD<-mean(fazendas$PROD)
+tam<-c(5,10,20,50,100) # tamanhos de amostra da quest?o 1 
+EP_MEDIA_PROD<-sqrt((1/tam - 1/N)*var(fazendas$PROD)*(N-1)/N) # erros padr?o populacionais da produtividade 
+PROD_MEDIA<-sum(fazendas$QUANT)/sum(fazendas$AREA)
+EP_PROD_MEDIA<-sqrt((1-tam/N)/(tam*mean(fazendas$AREA)^2)*sum((fazendas$QUANT - PROD_MEDIA*fazendas$AREA)^2 )/(N-1))
+
+dom<-fazendas[fazendas$IndClasses==1,]
+sum(dom$DESPESA)
+
+######## Quest?o 1  #######
+
+# Quest?o 1 - a , b , c
+
+# gera??o de 500 AAS de tamanho n, variar o n em {5,10,20,50,100}
+
+N=338
+n=100
+media_prod<-vector(mode="numeric",length= 500)
+ep.media_prod<-vector(mode="numeric",length= 500)
+prod_media<-vector(mode="numeric",length= 500)
+ep.prod_media<-vector(mode="numeric",length= 500)
+for(i in 1:500){
+  fazendas.amo = srswor(n,nrow(fazendas))
+  amofaz = fazendas[fazendas.amo==1,]
+  Npop = rep(nrow(fazendas),nrow(amofaz))
+  amofaz = cbind(amofaz, Npop)
+  fazendas.amostra = svydesign(data=amofaz, id=~1,fpc=~Npop)
+  a<-svymean(~PROD, design=fazendas.amostra) #m?dia da produtividade
+  b<-svyratio(~QUANT,~AREA,design=fazendas.amostra) #produtividade da m?dia
+  media_prod[i]<-coef(a) # estimativas da m?dia de produtividade
+  ep.media_prod<-SE(a)
+  prod_media[i]<-coef(b) # estimativas da produtividade m?dia
+  ep.prod_media<-SE(b)
+}
+
+# m?dia e erro padr?o das estimativas de m?dia da produtividade
+mean(media_prod)
+sd(media_prod)
+mean(ep.media_prod)
+
+# m?dia e erro padr?o das estimativas da produtividade m?dia
+mean(prod_media)
+sd(prod_media)
+mean(ep.prod_media)
+
+# Questao 1 - c
+
+# visualizando a distribui??o da m?dia de produtividade
+# par(mfrow=c(5,2))# visualizar os 10 gr?ficos em uma figura, rodar uma vez
+hist(media_prod, main=" Histograma tamanho = 5")
+hist(prod_media, main=" Histograma tamanho = 5")
+
+# Teste de normalidade
+
+shapiro.test(media_prod)
+shapiro.test(prod_media)
+
+######## Quest?o 2  #######
+
+# gera 500 AAS de tamanho n ==> variar o n em {20, 100}
+n=100
+(popcounts<-as.data.frame(table(fazendas$IndClasses)))
+colnames(popcounts)[1]=c("IndClasses")
+total_desp_HT<-vector(mode="numeric",length= 500)
+total_desp_PE<-vector(mode="numeric",length= 500)
+ep.total_desp_HT<-vector(mode="numeric",length= 500)
+ep.total_desp_PE<-vector(mode="numeric",length= 500)
+for(i in 1:500){
+  fazendas.amo = srswor(n,N)
+  amofaz = fazendas[fazendas.amo==1,]
+  fazendas.amostra = svydesign(data=amofaz,id=~1,fpc=~Npop)
+  fazendas.dominio = subset(fazendas.amostra, IndClasses==1)
+  d<-svytotal(~DESPESA,  fazendas.dominio)
+  fazendas.post = postStratify(fazendas.amostra, 
+                               strata=~IndClasses,
+                               population = popcounts)
+  c<-svytotal(~DESPESA, subset(fazendas.post, IndClasses==1))
+  total_desp_HT[i]<-coef(d) # estimativa do total da produ??o usando HT
+  ep.total_desp_HT<-SE(d)
+  total_desp_PE[i]<-coef(c) # estimativa do total da produ??o usando p?s-estratifica??o
+  ep.total_desp_PE<-SE(c)
+}
+
+# Media e desvio padrao das estimativas de interesse:
+mean(total_desp_HT)
+sd(total_desp_HT)
+mean(ep.total_desp_HT)
+
+mean(total_desp_PE)
+sd(total_desp_PE)
+mean(ep.total_desp_PE)
+
+# visualizando a distribui??o da m?dia de produtividade
+par(mfrow=c(2,2))# visualizar os 4 gr?ficos em uma figura, rodar uma vez
+hist(total_desp_HT, main=" Histograma tamanho = 100")
+hist(total_desp_PE, main=" Histograma tamanho = 100")
+
+# Teste de normalidade
+
+shapiro.test(total_desp_HT)
+shapiro.test(total_desp_PE)
+
+
+
+

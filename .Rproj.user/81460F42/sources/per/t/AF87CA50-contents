@@ -1,0 +1,69 @@
+#Exercício 4.1
+
+n=2000
+A=900
+B=800
+D=300
+
+N=4000000
+
+pa=A/n
+pamax=pa+qnorm(0.975)*sqrt(pa*(1-pa)/n)
+pamin=pa-qnorm(0.975)*sqrt(pa*(1-pa)/n)
+
+pb=B/n
+pbmax=pb+qnorm(0.975)*sqrt(pb*(1-pb)/n)
+pbmin=pb-qnorm(0.975)*sqrt(pb*(1-pb)/n)
+
+
+I=D/n*N
+I
+
+#Exercício 4.2
+
+N2=30000
+
+#(a) A fórmula está correta, com algumas manipulações é possível mostrar.
+
+d=0.01 #precisão desejada ou margem de erro
+P=1/2
+z=qnorm(0.975)
+
+#(b)
+(n=(N2*P*(1-P))/
+  ((N2*(d^2))/(z^2)+P*(1-P))) #fórmula dada
+n=ceiling(n)
+n
+
+#calculada pelo Pedro
+(nn=(N2*P*(1-P))/
+    (((N2-1)*(d^2))/(z^2)+P*(1-P))) #fórmula dada
+nn=ceiling(n)
+nn
+
+#outras fórmulas
+(n2=(z^2*P*(1-P))/d^2)
+(n3=((d^2/z^2)*1/(P*(1-P))+1/N2)^(-1))
+(n4=((d^2/z^2)*1/(P*(1-P)))^(-1))
+(n5=z^2/(4*d^2))
+(n6=1/d^2)
+(cvp=sqrt((1-P)/(n*P)))
+
+#(c)
+Pmin=0.10
+d2=0.01
+(n7=(z^2/d2^2)*((1-Pmin)/Pmin))
+n7=ceiling(n7)
+n7
+
+P=0.10
+(n=(N2*P*(1-P))/
+    ((N2*(d^2))/(z^2)+P*(1-P))) #fórmula dada
+n=ceiling(n)
+n
+
+P=0.30
+(n=(N2*P*(1-P))/
+    ((N2*(d^2))/(z^2)+P*(1-P))) #fórmula dada
+n=ceiling(n)
+n

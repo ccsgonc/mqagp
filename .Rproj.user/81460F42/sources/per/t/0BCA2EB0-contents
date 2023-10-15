@@ -1,0 +1,202 @@
+# unidade 10 - exerc?cio em aula
+
+# base de dados
+base <- read_delim("G:/Meu Drive/Doutorado Ence/02_2019_Amostragem/Listas e rotinas/exercicio10_3.csv", 
+                  ";", escape_double = FALSE, trim_ws = TRUE)
+
+# informa??es populacionais
+N1 = 107
+N2 = 81
+N3 = 62
+N = N1 + N2 + N3
+
+# informa??es da amostra n=15
+n1 = 5
+n2 = 5
+n3 = 5
+n = n1 + n2 + n3
+
+# calcule um estimador n?o viesado para o total populacional de leite ordenhado
+y1 = N1 * mean(base$est1)
+y2 = N2 * mean(base$est2)
+y3 = N3 * mean(base$est3)
+yest = y1 + y2 + y3
+
+# d? uma estimativa da vari?ncia do estimador calculado em a. 
+
+v1 = (N1/N)^2 * (1/n1-1/N1) * var(base$est1)
+v2 = (N2/N)^2 * (1/n2-1/N2) * var(base$est2)
+v3 = (N3/N)^2 * (1/n3-1/N3) * var(base$est3)
+vyest = N^2 * (v1 + v2 + v3)
+
+# calcule o 95% I.C. para o estimador calculado em a). Apresente uma
+# estimativa do coeficiente de varia??o.
+
+yest_sup = yest + qnorm(0.975) * sqrt(vyest)
+yest_inf = yest - qnorm(0.975) * sqrt(vyest)
+print(c(yest_inf, yest_sup))
+
+CV = sqrt(vyest) / yest * 100
+
+# suponha que os dados foram coletados via AAS. Recalcule e compare com os
+# resultados anteriores.
+
+base2 =  matrix(0,n,1)
+base2[1:5] = base$est1
+base2[6:10] = base$est2
+base2[11:15] = base$est3
+base2
+
+yest_ass = N * mean(base2)
+vyest_ass = (N)^2 * (1/n-1/N) * var(base2)
+
+yest_ass_sup = yest_ass + qnorm(0.975) * sqrt(vyest_ass)
+yest_ass_inf = yest_ass - qnorm(0.975) * sqrt(vyest_ass)
+print(c(yest_ass_inf, yest_ass_sup))
+
+CV = sqrt(vyest_ass) / yest_ass * 100
+
+# exerc?cio extra 1
+
+N1 = 4
+N2 = 6
+N = N1 + N2
+n1 = 2
+n2 = 3
+n = n1 + n2
+
+est1 = c(5,8)
+est2 = c(3,2,1)
+
+# estimativas para o total e a media
+
+mean1 = mean(est1)
+mean2 = mean(est2)
+mean = N1/N * mean1 + N2/N * mean2
+
+total1 = N1 * mean1
+total2 = N2 * mean2
+total = total1 + total2
+
+#estimativas para vari?ncias do total e da m?dia
+
+vtotal1 = (N1/N)^2 * (1/n1-1/N1) * var(est1)
+vtotal2 = (N2/N)^2 * (1/n2-1/N2) * var(est2)
+vtotal = N^2 * (vtotal1 + vtotal2)
+
+vmedia1 = (N1/N)^2 * (1/n1-1/N1) * var(est1)
+vmedia2 = (N2/N)^2 * (1/n2-1/N2) * var(est2)
+vmedia = vmedia1 + vmedia2
+
+# exercicio 10.4
+
+# base de dados
+base4 <- read_delim("G:/Meu Drive/Doutorado Ence/02_2019_Amostragem/Listas e rotinas/exercicio10_4.csv", 
+                   ";", escape_double = FALSE, trim_ws = TRUE)
+est1 = base4$est1
+est2 = base4$est2[1:16]
+est3 = base4$est3[1:12]
+
+# informa??es populacionais
+N1 = 107
+N2 = 81
+N3 = 62
+N = N1 + N2 + N3
+
+# informa??es da amostra
+n = 50
+n1 = length(est1)
+n2 = length(est2)
+n3 = length(est3)
+c(n1, n2, n3)
+
+# pesos/fatores
+w1 = n1/n
+w2 = n2/n
+w3 = n3/n
+c(w1, w2, w3)
+
+W1 = N1/N
+W2 = N2/N
+W3 = N3/N
+c(W1, W2, W3)
+W1*n
+W2*n
+W3*n
+
+# -> resposta ? aloca??o proporcional
+
+# b) calcule um estimador n?o viesado para o total populacional de leite ordenhado.
+
+mean1 = mean(est1)
+mean2 = mean(est2)
+mean3 = mean(est3)
+total1 = N1 * mean1
+total2 = N2 * mean2
+total3 = N3 * mean3
+total = total1 + total2 + total3
+print(total)
+
+# exerc?cio 10.5
+
+# base de dados
+base5 <- read_delim("G:/Meu Drive/Doutorado Ence/02_2019_Amostragem/Listas e rotinas/exercicio10_5.csv", 
+                    ";", escape_double = FALSE, trim_ws = TRUE)
+
+# informa??es populacionais
+N = 30
+
+
+# informa??es amostrais
+n = 8
+H = 3
+
+
+# algoritmo de Dalenius e Hodges para Hi
+
+# ordena de ordem crescente
+base = base5[order(base5$Hi),]
+View(base)
+
+# acumular a raiz quadrada da vari?vel
+base$raiz = sqrt(base$Hi)
+base$cumsum = cumsum(base$raiz)
+corte = sum(base$raiz)/H
+limites_Hi = c(corte, corte*2, corte*3)
+
+# determinar a aloca??o da amostra
+est<-vector(mode="numeric",length= N)
+for (i in 1:N){
+  if (base$cumsum[i] <= corte){est[i]<-1 }
+  else if (base$cumsum[i] <= corte*2){est[i]<-2 }
+  else if (base$cumsum[i] <= corte*3){est[i]<-3 }}
+base = cbind(base, est)
+table(base$est)
+
+# algoritmo de Dalenius e Hodges para Wi
+
+# ordena de ordem crescente
+base2 = base5[order(base5$Wi),]
+View(base2)
+
+# acumular a raiz quadrada da vari?vel
+base2$raiz = sqrt(base2$Wi)
+base2$cumsum = cumsum(base2$raiz)
+corte = sum(base2$raiz)/H
+limites_Wi = c(corte, corte*2, corte*3)
+
+# determinar a aloca??o da amostra
+est2<-vector(mode="numeric",length= N)
+for (i in 1:N){
+  if (base2$cumsum[i] <= corte){
+    est2[i]<-1 }
+  else if (base2$cumsum[i] <= corte*2){
+    est2[i]<-2 }
+  else if (base2$cumsum[i] <= corte*3){
+    est2[i]<-3 }}
+base2 = cbind(base2, est2)
+table(base2$est2)
+
+
+
+

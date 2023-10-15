@@ -1,0 +1,41 @@
+### Monitoria 01/07/19 #####
+# Exerc?cio 2 #
+
+# Define pasta de trabalho onde encontrar arquivos de dados
+setwd("D:/HOJE/Monitoria Amostragem 2019/Monitoria 1/Exerc?cio 2")
+
+# Carrega pacotes requeridos
+install.packages("sampling")
+install.packages("lpsolve")
+library(sampling)
+
+# L? o arquivo de dados com a popula??o
+fazendas <- read.csv(file="Fazendas.csv", header=TRUE, sep=";")
+str(fazendas)
+
+# Transforma em fatores as vari?veis categ?ricas do arquivo de dados
+fazendas = transform(fazendas, CLASSE = as.factor(CLASSE))
+fazendas = transform(fazendas, REGIAO = as.factor(REGIAO))
+ #ou
+fazendas$CLASSE<-as.factor(fazendas$CLASSE)
+
+s<-srswor(50,338)
+
+#attach(amostra)
+
+#1
+amostra<-getdata(fazendas,s)
+#2
+mean(amostra$RECEITA)
+#3
+sum(amostra$AREA)
+#4
+prop.table(table(amostra$REGIAO))
+
+
+#Com pacote teaching sampling
+install.packages("TeachingSampling")
+library(TeachingSampling)
+
+S.WR(338, 50)
+

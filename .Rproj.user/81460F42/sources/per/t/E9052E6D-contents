@@ -1,0 +1,173 @@
+############ Lista 07 #############
+# Define pasta de trabalho onde encontrar arquivos de dados
+setwd("D:/HOJE/Monitoria Amostragem 2019/Monitoria 5/Lista 7")
+
+# Carrega os pacotes sampling e survey
+library(sampling)
+library(survey)
+
+# Lê o arquivo de dados com a população
+fazendas = read.csv(file="Fazendas.csv", header=TRUE, sep=";")
+N=nrow(fazendas)
+str(fazendas)
+
+# Cria a variavel produtividade por fazenda
+fazendas = transform(fazendas, PROD = QUANT / AREA)
+
+# Transforma em fatores as variaveis classe e região do arquivo de dados
+fazendas = transform(fazendas, CLASSE = as.factor(CLASSE))
+fazendas = transform(fazendas, REGIAO = as.factor(REGIAO))
+
+# Adiciona vetor com o tamanho populacional em uma coluna no arquivo
+fazendas = transform(fazendas, Npop = rep(N,N) )
+str(fazendas)
+
+############# Exerc?cio 7.1 ##############
+
+#Letra a
+
+# Valores das quantidades de interesse na população
+sum(fazendas$QUANT)
+mean(fazendas$PROD)
+
+# Especifica tamanho da amostra
+n=50
+
+# Adiciona vetor com números aleatórios ao arquivo
+set.seed(123)
+fazendas = transform(fazendas, Aleat = runif(N) )
+str(fazendas)
+
+# Ordena fazendas conforme números aleatórios gerados
+fazendas.sort = fazendas[order(fazendas$Aleat),]
+
+# Determina salto do sorteio sistemático
+(K = floor(N / n))
+# Cria conjuntos de índices das amostras sistemáticas de salto K
+s1 = seq(from=1, to=N, by = K)
+s2 = seq(from=2, to=N, by = K)
+s3 = seq(from=3, to=N, by = K)
+s4 = seq(from=4, to=N, by = K)
+s5 = seq(from=5, to=N, by = K)
+s6 = seq(from=6, to=N, by = K)
+
+
+#Letra b
+
+# Cria vetores para armazenar estimativas
+p1.est<-vector(mode="numeric",length= K)
+p2.est<-vector(mode="numeric",length= K)
+
+# Calcula estimativas pontuais dos parâmetros de interesse
+amofaz = fazendas.sort[s1,]
+p1.est[1] = K * sum(amofaz$QUANT)
+p2.est[1] = K * sum(amofaz$PROD) / N
+amofaz = fazendas.sort[s2,]
+p1.est[2] = K * sum(amofaz$QUANT)
+p2.est[2] = K * sum(amofaz$PROD) / N
+amofaz = fazendas.sort[s3,]
+p1.est[3] = K * sum(amofaz$QUANT)
+p2.est[3] = K * sum(amofaz$PROD) / N
+amofaz = fazendas.sort[s4,]
+p1.est[4] = K * sum(amofaz$QUANT)
+p2.est[4] = K * sum(amofaz$PROD) / N
+amofaz = fazendas.sort[s5,]
+p1.est[5] = K * sum(amofaz$QUANT)
+p2.est[5] = K * sum(amofaz$PROD) / N
+amofaz = fazendas.sort[s6,]
+p1.est[6] = K * sum(amofaz$QUANT)
+p2.est[6] = K * sum(amofaz$PROD) / N
+
+# Media e desvio padrão das estimativas de interesse:
+mean(p1.est)
+sd(p1.est)
+mean(p2.est)
+sd(p2.est)
+
+#Letra c -  Obs: d no final
+
+# Ordena fazendas conforme números aleatórios gerados
+fazendas.area = fazendas[order(fazendas$AREA),]
+
+# Cria vetores para armazenar estimativas
+p3.est<-vector(mode="numeric",length= K)
+p4.est<-vector(mode="numeric",length= K)
+
+# Calcula estimativas pontuais dos parâmetros de interesse
+amofaz = fazendas.area[s1,]
+p3.est[1] = K * sum(amofaz$QUANT)
+p4.est[1] = K * sum(amofaz$PROD) / N
+amofaz = fazendas.area[s2,]
+p3.est[2] = K * sum(amofaz$QUANT)
+p4.est[2] = K * sum(amofaz$PROD) / N
+amofaz = fazendas.area[s3,]
+p3.est[3] = K * sum(amofaz$QUANT)
+p4.est[3] = K * sum(amofaz$PROD) / N
+amofaz = fazendas.area[s4,]
+p3.est[4] = K * sum(amofaz$QUANT)
+p4.est[4] = K * sum(amofaz$PROD) / N
+amofaz = fazendas.area[s5,]
+p3.est[5] = K * sum(amofaz$QUANT)
+p4.est[5] = K * sum(amofaz$PROD) / N
+amofaz = fazendas.area[s6,]
+p3.est[6] = K * sum(amofaz$QUANT)
+p4.est[6] = K * sum(amofaz$PROD) / N
+
+# Media e desvio padrao das estimativas de interesse:
+mean(p3.est)
+sd(p3.est)
+mean(p4.est)
+sd(p4.est)
+
+############# Exerc?cio 7.2 ##############
+
+#Letra a 
+
+## Plano Bernoulli 
+# CV dos estimadores sob o plano Bernoulli:
+(Var.quant<-(N/n - 1)*sum (fazendas$QUANT ^ 2))
+(CV.quant<-100*sqrt(Var.quant)/sum(fazendas$QUANT))
+
+(Var.prod<-(N/n - 1)*sum (fazendas$PROD ^ 2)/N^2)
+(CV.prod<-100*sqrt(Var.prod)/mean(fazendas$PROD))
+
+#Letra d
+
+# Seleção da amostra e estimativas 
+set.seed(456)
+fazendas = transform(fazendas, s = 1 * (Aleat < n/N ) )
+amofaz = fazendas[fazendas$s==1,]
+n<-nrow(amofaz)
+
+#Estimativas 
+(total.quant<-sum(amofaz$QUANT * N/n))
+(var.quant<-N/n*(N/n - 1)*sum (amofaz$QUANT ^ 2))
+(cv.quant<-100*sqrt(var.quant)/total.quant)
+
+(media.prod<-mean(amofaz$PROD))
+(var.prod<-N/n*(N/n - 1)*sum (amofaz$PROD ^ 2)/N^2)
+(cv.prod<-100*sqrt(var.prod)/media.prod)
+
+############ Compara??o dos resultados #######################
+
+# Coeficientes de variação do total da variável quant 
+(CV1.quant<-100*sd(p1.est)/mean(p1.est)) # Amostragem sistemática 
+(CV2.quant<-100*sd(p3.est)/mean(p3.est)) # Amostragem sistemática com ordenação pela variável Área
+(CV3.quant<-CV.quant) # Amostragem de Bernoulli
+
+# Coeficientes de variação da média da variável prod 
+(CV1.prod<-100*sd(p2.est)/mean(p2.est)) # Amostragem sistemática 
+(CV2.prod<-100*sd(p4.est)/mean(p4.est)) # Amostragem sistemática com ordenação pela variável Área
+(CV3.prod<-CV.prod) # Amostragem de Bernoulli
+
+# Coeficiente de variação com estimador alternativo na amostragem de Bernoulli: aula 8, slide 8
+Var.R.quant<-N^2*(1/n-1/N)*var(fazendas$QUANT)*(N-1)/N
+(CV.R.quant<-100*sqrt(Var.R.quant)/sum(fazendas$QUANT))
+
+Var.R.prod<-(1/n-1/N)*var(fazendas$PROD)*(N-1)/N
+(CV.R.quant<-100*sqrt(Var.R.prod)/mean(fazendas$PROD))
+
+
+
+
+

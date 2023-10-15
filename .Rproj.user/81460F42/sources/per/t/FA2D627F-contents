@@ -1,0 +1,159 @@
+############ Lista 08 #############
+# Define pasta de trabalho onde encontrar arquivos de dados
+setwd("D:/HOJE/Monitoria Amostragem 2019/Monitoria 5/Lista 8")
+# Clear working environment
+rm(list = ls())
+
+# Carrega os pacotes sampling e survey
+library(sampling)
+install.packages("TeachingSampling")
+library(TeachingSampling)
+library(survey)
+
+# Le o arquivo de dados com a população
+fazendas = read.csv(file="Fazendas.csv", header=TRUE, sep=";")
+(N=nrow(fazendas))
+str(fazendas)
+
+# Define o tamanho da amostra a ser considerada
+n=30
+
+# Transforma em fatores as variaveis classe e regiao do arquivo de dados
+fazendas = transform(fazendas, CLASSE = as.factor(CLASSE))
+fazendas = transform(fazendas, REGIAO = as.factor(REGIAO))
+
+# Adiciona colunas necessárias para cálculos com vários planos amostrais
+# PPTC - Com reposi??o
+fazendas = transform(fazendas, p_i = AREA / sum(AREA) )
+sum(fazendas$p_i) # Confere criação da variável - soma tem que ser igual a 1
+fazendas = transform(fazendas, pptc_e_quant = (QUANT/p_i),
+                     pptc_e_receita = (RECEITA/p_i),
+                     pptc_v_quant = (QUANT/p_i - sum(QUANT))^2 * p_i,
+                     pptc_v_receita = (RECEITA/p_i - sum(RECEITA))^2 * p_i)
+str(fazendas)
+
+# PPT Poisson
+fazendas = transform(fazendas, pi_i = n * AREA / sum(AREA) )
+sum(fazendas$pi_i) # Confere criação da variável - soma tem que ser igual a n
+fazendas = transform(fazendas, pptpo_e_quant = (QUANT/pi_i),
+                     pptpo_e_receita = (RECEITA/pi_i),
+                     pptpo_v_quant = ( (1 - pi_i)/pi_i ) *  QUANT^2 ,
+                     pptpo_v_receita = ( (1 - pi_i)/pi_i ) *  RECEITA^2 )
+str(fazendas)
+
+# PPT Sequencial de Poisson
+fazendas = transform(fazendas, pptasp_e_quant = (QUANT/p_i),
+                     pptasp_e_receita = (RECEITA/p_i),
+                     pptasp_v_quant = (QUANT/p_i - sum(QUANT))^2 * (1 - n * p_i) * p_i ,
+                     pptasp_v_receita = (RECEITA/p_i - sum(RECEITA))^2 * (1 - n * p_i) * p_i )
+str(fazendas)
+
+# PPT de Pareto
+fazendas = transform(fazendas, 
+                     pptpar_e_quant = (QUANT/pi_i),
+                     pptpar_e_receita = (RECEITA/pi_i),
+                     pptpar_v_quant = (QUANT/pi_i - sum(QUANT * (1 - pi_i))/sum(pi_i * (1 - pi_i)))^2 * pi_i * (1 - pi_i),
+                     pptpar_v_receita = (RECEITA/pi_i - sum(RECEITA * (1 - pi_i))/sum(pi_i * (1 - pi_i)))^2 * pi_i * (1 - pi_i) )
+str(fazendas)
+
+# Questao 1
+# PPT Com reposição
+varp_pptc_quant = sum(fazendas$pptc_v_quant) / n
+varp_pptc_receita = sum(fazendas$pptc_v_receita) / n
+(cv_pptc_quant = 100 * sqrt(varp_pptc_quant) / sum(fazendas$QUANT))
+(cv_pptc_receita = 100 * sqrt(varp_pptc_receita) / sum(fazendas$RECEITA))
+
+# PPT Poisson
+varp_pptpo_quant = sum(fazendas$pptpo_v_quant)
+varp_pptpo_receita = sum(fazendas$pptpo_v_receita)
+(cv_pptpo_quant = 100 * sqrt(varp_pptpo_quant) / sum(fazendas$QUANT))
+(cv_pptpo_receita = 100 * sqrt(varp_pptpo_receita) / sum(fazendas$RECEITA))
+
+# PPT Sequencial de Poisson
+varp_pptasp_quant = N/(N-1) * sum(fazendas$pptasp_v_quant) / n 
+varp_pptasp_receita = N/(N-1) * sum(fazendas$pptasp_v_receita) / n 
+(cv_pptasp_quant = 100 * sqrt(varp_pptasp_quant) / sum(fazendas$QUANT))
+(cv_pptasp_receita = 100 * sqrt(varp_pptasp_receita) / sum(fazendas$RECEITA))
+
+# PPT de Pareto
+varp_pptpar_quant = N * sum(fazendas$pptpar_v_quant) / (N-1)
+varp_pptpar_receita = N * sum(fazendas$pptpar_v_receita) / (N-1)
+(cv_pptpar_quant = 100 * sqrt(varp_pptpar_quant) / sum(fazendas$QUANT))
+(cv_pptpar_receita = 100 * sqrt(varp_pptpar_receita) / sum(fazendas$RECEITA))
+
+# Questao 2
+set.seed(2345) # rodar todos os sorteios juntos para manter a semente
+# PPTC - Com reposição
+sorteio = S.PPS(n,fazendas$p_i)
+amo_pptc = fazendas[sorteio[,1],]
+(tot_pptc_quant = sum(amo_pptc$pptc_e_quant) / n)
+(tot_pptc_receita = sum(amo_pptc$pptc_e_receita) / n)
+var_pptc_quant = sum((amo_pptc$pptc_e_quant - tot_pptc_quant)^2) / (n*(n-1))
+var_pptc_receita = sum((amo_pptc$pptc_e_receita - tot_pptc_receita)^2) / (n*(n-1))
+(cve_pptc_quant = 100 * sqrt(var_pptc_quant) / tot_pptc_quant)
+(cve_pptc_receita = 100 * sqrt(var_pptc_receita) / tot_pptc_receita)
+
+# PPT Poisson
+sorteio = S.PO(N,fazendas$pi_i)
+amo_pptpo = fazendas[sorteio!=0,]
+(tot_pptpo_quant = sum(amo_pptpo$pptpo_e_quant) )
+(tot_pptpo_receita = sum(amo_pptpo$pptpo_e_receita) )
+var_pptpo_quant = sum(amo_pptpo$pptpo_v_quant / amo_pptpo$pi_i)
+var_pptpo_receita = sum(amo_pptpo$pptpo_v_receita / amo_pptpo$pi_i)
+(cve_pptpo_quant = 100 * sqrt(var_pptpo_quant) / tot_pptpo_quant)
+(cve_pptpo_receita = 100 * sqrt(var_pptpo_receita) / tot_pptpo_receita)
+
+# PPT Sequencial de Poisson
+fazendas = transform(fazendas, c_i = runif(N)/p_i)
+amo_pptasp = fazendas[order(fazendas$c_i)[1:n],]
+(tot_pptasp_quant = sum(amo_pptasp$pptasp_e_quant) / n)
+(tot_pptasp_receita = sum(amo_pptasp$pptasp_e_receita) / n)
+var_pptasp_quant = sum(  (amo_pptasp$pptasp_e_quant - tot_pptasp_quant)^2 * (1 - n*amo_pptasp$p_i) ) / (n*(n-1))
+var_pptasp_receita = sum(  (amo_pptasp$pptasp_e_receita - tot_pptasp_receita)^2 * (1 - n*amo_pptasp$p_i) ) / (n*(n-1))
+(cve_pptasp_quant = 100 * sqrt(var_pptasp_quant) / tot_pptasp_quant)
+(cve_pptasp_receita = 100 * sqrt(var_pptasp_receita) / tot_pptasp_receita)
+
+# PPT de Pareto
+fazendas = transform(fazendas, A_i = runif(N))
+fazendas = transform(fazendas, C_i = A_i * (1 - pi_i) / ((1 - A_i)*pi_i) )
+amo_pptpar = fazendas[order(fazendas$C_i)[1:n],]
+(tot_pptpar_quant = sum(amo_pptpar$pptpar_e_quant) )
+(tot_pptpar_receita = sum(amo_pptpar$pptpar_e_receita) )
+var_pptpar_quant = sum( ( (amo_pptpar$pptpar_e_quant - 
+                             sum(amo_pptpar$pptpar_e_quant * (1 - amo_pptpar$pi_i)) /
+                             sum((1 - amo_pptpar$pi_i)) ) * (1 - amo_pptpar$pi_i))^2 ) * n / (n-1)                         
+var_pptpar_receita = sum( ( (amo_pptpar$pptpar_e_receita - 
+                               sum(amo_pptpar$pptpar_e_receita * (1 - amo_pptpar$pi_i)) /
+                               sum((1 - amo_pptpar$pi_i)) ) * (1 - amo_pptpar$pi_i))^2 ) * n / (n-1)
+(cve_pptpar_quant = 100 * sqrt(var_pptpar_quant) / tot_pptpar_quant)
+(cve_pptpar_receita = 100 * sqrt(var_pptpar_receita) / tot_pptpar_receita)
+
+# Questão 3, ver Lohr (2010) p. 369
+# PPTC - Com reposição
+amo_pptc = transform (amo_pptc, e = amo_pptc$RECEITA - tot_pptc_receita/tot_pptc_quant * amo_pptc$QUANT)
+tot_pptc_e = sum(amo_pptc$e/amo_pptc$p_i)/n
+var_pptc_razao = (sum((amo_pptc$e/amo_pptc$p_i - tot_pptc_e) ^2) / (n*(n-1)))/ tot_pptc_quant^2
+(cve_razao_pptc = 100 * sqrt(var_pptc_razao) / (tot_pptc_receita/tot_pptc_quant))
+
+# PPT Poisson
+amo_pptpo = transform (amo_pptpo, e = amo_pptpo$RECEITA - tot_pptpo_receita/tot_pptpo_quant * amo_pptpo$QUANT)
+tot_pptpo_e = sum(amo_pptpo$e/amo_pptpo$pi_i)
+var_pptpo_razao = (sum(amo_pptpo$e ^ 2 * (1- amo_pptpo$pi_i)/amo_pptpo$pi_i^2))/ tot_pptpo_quant^2
+(cve_razao_pptpo = 100 * sqrt(var_pptpo_razao) / (tot_pptpo_receita/tot_pptpo_quant))
+
+# PPT Sequencial de Poisson
+amo_pptasp = transform (amo_pptasp, e = amo_pptasp$RECEITA - tot_pptasp_receita/tot_pptasp_quant * amo_pptasp$QUANT)
+tot_pptasp_e = sum(amo_pptasp$e/amo_pptasp$p_i)/n
+var_pptasp_razao =  (sum((amo_pptasp$e/amo_pptasp$p_i - tot_pptasp_e)^2 * (1 - n*amo_pptasp$p_i) ) / (n*(n-1))) / tot_pptasp_quant^2
+(cve_razao_pptasp = 100 * sqrt(var_pptasp_razao) / (tot_pptasp_receita/tot_pptasp_quant))
+
+# PPT de Pareto
+amo_pptpar = transform (amo_pptpar, e = amo_pptpar$RECEITA - tot_pptpar_receita/tot_pptpar_quant * amo_pptpar$QUANT)
+tot_pptpar_e = sum(amo_pptpar$e/amo_pptpar$p_i)/n
+var_pptpar_razao = (sum(((amo_pptpar$e/amo_pptasp$pi_i  - 
+                             sum(amo_pptpar$e * (1 - amo_pptpar$pi_i)) /
+                             sum((1 - amo_pptpar$pi_i)) ) * (1 - amo_pptpar$pi_i))^2 ) * n / (n-1))/tot_pptasp_quant^2    
+(cve_razao_pptpar = 100 * sqrt(var_pptpar_razao) / (tot_pptpar_receita/tot_pptpar_quant))
+
+
+

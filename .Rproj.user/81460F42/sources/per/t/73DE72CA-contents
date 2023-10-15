@@ -1,0 +1,78 @@
+###############################################################################
+#####  Curso de Amostragem - Edi??o 2019              
+#####  Comandos usados para resolver exerc?cios da Unidade 05                                   
+#####  Programador: Pedro Silva
+#####  Atualiza??o: 23/07/2019
+################################################################################
+
+# Limpa ?rea de trabalho
+rm(list = ls())
+
+# Define pasta onde ficam dados usados nesta sess?o
+setwd("D:/RJ/Cursos/Amostragem2019/Exerc?cios 2019")
+getwd()
+
+# Carrega biblioteca(s) requerida(s)
+library(sampling)
+library(tidyverse)
+
+# Leitura dos dados
+MunicBR_dat <- readRDS(file="MunicBR_dat.rds")
+str(MunicBR_dat)
+
+# Define senha para gera??o de n?meros aleat?rios para permitir repeti??o
+set.seed(123)
+
+# Exerc?cio 5.1
+# Tamanho da amostra
+(n <- 200)
+# Tamanho da popul??o
+(N <- nrow(MunicBR_dat))
+
+# Seleciona amostra AAS dos munic?pios
+munic_amo <- getdata(MunicBR_dat, srswor(n,N))
+str(munic_amo)
+
+# Estima densidade habitacional m?dia por km2 no Brasil
+(r_chapeu <- munic_amo %>%
+             summarise(Popm = mean(Pop),
+                       Aream = mean(Area)) %>%
+             mutate(Densm = Popm / Aream) %>%
+             select(Densm))
+
+# Estima m?dia da densidade habitacional por km2 por munic?pio
+(media.densidade <- munic_amo %>%
+                    summarise(Densm = mean(Densidade)))
+
+# Adiciona valor de r_chapeu aos dados da amostra
+munic_amo <- cbind(munic_amo, r_chapeu)
+
+# Exerc?cio 2a
+(precisao.r_chapeu <- munic_amo %>% 
+                     mutate(Z = Pop - Densm * Area) %>%
+                     summarise(varZ = var(Z),
+                               Aream = mean(Area),
+                               Densm = mean(Densm)) %>%
+                     mutate(dp.r_chapeu = sqrt((1/n - 1/N)*varZ)/Aream, 
+                            cv.r_chapeu = 100 * dp.r_chapeu / Densm)  %>%
+                     select(dp.r_chapeu, cv.r_chapeu))
+
+# Exerc?cio 2b
+(precisao.media.densidade <- munic_amo %>%
+         summarise(Densv = var(Densidade),
+                   Densm = mean(Densidade)) %>%
+         mutate(dp.media.dens = sqrt((1/n - 1/N)*Densv),
+                cv.media.dens = 100 * dp.media.dens / Densm) %>%
+         select(dp.media.dens, cv.media.dens))
+ 
+# Calcula densidade habitacional m?dia por km2 no Brasil
+(R <- MunicBR_dat %>%
+      summarise(Popm = mean(Pop),
+                Aream = mean(Area)) %>%
+      mutate(Densidade_pop = Popm / Aream) %>%
+      select(Densidade_pop))   
+
+# Estima m?dia da densidade habitacional por km2 por munic?pio
+(densidade_media_pop <- MunicBR_dat %>%
+    summarise(densidade_media_pop = mean(Densidade)))
+

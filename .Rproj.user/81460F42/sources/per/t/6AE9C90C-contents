@@ -1,0 +1,26 @@
+#Exerc?cio monitoria 01/07/2019
+
+#carregar pacotes
+library(sampling)
+
+#Entrada dos dados
+
+View(Fazendas)
+str(Fazendas)
+
+Fazendas=transform(Fazendas,CLASSE=as.factor(CLASSE))
+set.seed(1)
+
+N=nrow(Fazendas)
+n=50
+
+(s=srswor(n,N))
+(amostra=getdata(Fazendas,s))
+
+#m?dia das receitas
+mean(amostra$RECEITA)
+#?rea total
+sum(amostra$AREA)
+#porcentagem de ?rea
+prop.table(table(amostra$REGIAO))
+

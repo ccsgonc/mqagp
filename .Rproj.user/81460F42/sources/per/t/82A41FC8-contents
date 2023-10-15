@@ -1,0 +1,66 @@
+################################################################################
+#####  Curso de Amostragem - Edição 2019              
+#####  Comandos usados para resolver exercícios da Unidade 3                                   
+#####  Programador: Pedro Silva
+#####  Atualização: 20/07/2019
+################################################################################
+
+# Limpa área de trabalho
+rm(list = ls())
+
+# Define pasta onde ficam dados usados nesta sessão
+setwd("F:/SkyDrive/RJ/Cursos/Amostragem2019/Exercícios 2019")
+getwd()
+
+# Carrega biblioteca(s) requerida(s)
+library(sampling)
+
+# Leitura dos dados
+MunicBR_dat <- readRDS(file="MunicBR_dat.rds")
+str(MunicBR_dat)
+
+# Unidade 3 - Exercício 1
+
+# Tamanho da população
+(N = nrow(MunicBR_dat))
+# Tamanho inicial da amostra
+(n <- 50)
+
+# Soluções para exercício 1
+# 1a) Média populacional
+(med_pop <- mean(MunicBR_dat$Area))
+
+# 1b) Dispersão do estimador de média sob AAS
+(VAR_med_amo <- ((1/n) - (1/N)) * var(MunicBR_dat$Area))
+(DP_med_amo <- sqrt(VAR_med_amo))
+(CV_med_amo <- 100 * DP_med_amo / med_pop)
+
+# 1c) Margem de erro relativo do estimador de média sob AAS
+(ME_med_amo <- qnorm(0.975)*CV_med_amo)
+
+# 1d) Tamanho de amostra para obter margem de erro relativo de 2% ao nível 95%
+(dr <- 0.02)
+(n_amo <- (N * qnorm(0.975)^2 * var(MunicBR_dat$Area)) /
+          (N * dr^2 * med_pop^2 + qnorm(0.975)^2 * var(MunicBR_dat$Area)))
+(n_amo <- ceiling(n_amo))
+
+# Soluções para exercício 2
+# Seleciona amostra
+munic_amo <- getdata(MunicBR_dat, srswor(n, N))
+
+# 2a) Média amostral
+(med_amo <- mean(munic_amo$Area))
+
+# 2b) Estimativas da dispersão do estimador de média sob AAS
+(var_med_amo <- ((1/n) - (1/N)) * var(munic_amo$Area))
+(dp_med_amo <- sqrt(VAR_med_amo))
+(cv_med_amo <- 100 * DP_med_amo / med_amo)
+
+# 2c) Margem de erro relativo do estimador de média sob AAS
+(me_med_amo <- qnorm(0.975)*cv_med_amo)
+
+# 2d) Tamanho de amostra para obter margem de erro relativo de 2% ao nível 95%
+(dr <- 0.02)
+(n_amo_est <- (N * qnorm(0.975)^2 * var(munic_amo$Area)) /
+              (N * dr^2 * med_amo^2 + qnorm(0.975)^2 * var(munic_amo$Area)))
+(n_amo_est <- ceiling(n_amo_est))

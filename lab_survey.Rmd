@@ -1,0 +1,256 @@
+---
+title: "Indicadores no R: Conhecendo o pacote survey"
+author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
+date: "16-outubro-2023"
+output:
+  html_document: 
+    toc: true
+    toc_float: true
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+O objetivo deste tutorial é introduzir funcionalidades do pacote survey
+no R.
+
+Material preparado com base em: SILVA, P.L.d.N. Amostragem. Notas de aula - Escola Nacional de Ciências Estatísticas, 2019.
+
+# Contextualização
+
+O pacote "survey" no R é uma poderosa ferramenta estatística que foi
+desenvolvida para lidar com pesquisas complexas e amostragem
+probabilística. Ele fornece uma variedade de funções e métodos para
+analisar dados de pesquisas, ajustar modelos estatísticos, calcular
+estimativas ponderadas e realizar análises de erros amostrais. O pacote
+"survey" é amplamente utilizado por pesquisadores, estatísticos e
+cientistas sociais para análise de dados de pesquisas amostrais e para
+gerar resultados representativos de uma população maior com base em uma
+amostra.
+
+Aqui estão algumas das principais funcionalidades e usos do pacote
+"survey" no R:
+
+1.  **Estratificação e Ponderação**: O pacote "survey" permite que você
+    lide com estratificação e ponderação de dados de pesquisa. Isso é
+    fundamental para garantir que as estimativas geradas a partir de uma
+    amostra sejam representativas da população de origem.
+
+2.  **Desenho Complexo de Amostra**: Ele suporta a análise de dados de
+    pesquisa que envolvem desenhos complexos de amostra, como
+    estratificação, conglomerados e unidades primárias de amostragem.
+
+3.  **Cálculo de Estimativas e Erros-padrão**: O pacote fornece funções
+    para calcular estimativas ponderadas, bem como erros-padrão
+    apropriados para dados amostrais complexos. Isso é crucial para a
+    interpretação adequada dos resultados.
+
+4.  **Análise de Regressão**: Você pode ajustar modelos de regressão que
+    levam em consideração o desenho complexo da amostra. Isso é
+    importante ao analisar relações entre variáveis em pesquisas
+    amostrais.
+
+5.  **Bootstrap para Estimativas de Erros-padrão**: O pacote "survey"
+    também oferece suporte para o uso de técnicas de bootstrap para
+    estimar erros-padrão quando os métodos tradicionais não são
+    apropriados.
+
+6.  **Análise de Sobreamostragem**: É útil na análise de dados de
+    pesquisa que envolvem técnicas de sobreamostragem, como oversampling
+    de grupos minoritários.
+
+7.  **Manipulação de Dados Complexos**: O pacote facilita a manipulação
+    e a limpeza de dados complexos de pesquisa, incluindo a criação de
+    variáveis derivadas e agregações ponderadas.
+
+Em resumo, o pacote "survey" no R é uma ferramenta fundamental para
+analisar dados de pesquisas complexas que envolvem amostragem
+probabilística e desenhos de amostra não triviais. Ele fornece métodos
+estatísticos robustos para gerar resultados representativos e confiáveis
+a partir de dados de pesquisa, levando em consideração a estrutura de
+amostragem e as ponderações. Se você estiver trabalhando com dados de
+pesquisa ou qualquer conjunto de dados amostrais complexos, o "survey" é
+uma escolha poderosa e recomendada para análise estatística.
+
+# Base de dados
+
+Defina o diretório:
+
+```{r diretorio, echo=TRUE, warning=FALSE}
+# setwd("insira o caminho")
+```
+
+Considere a população de 338 fazendas produtoras de cana de açúcar fornecida no arquivo “fazendas_dat.rds”. Esse arquivo contém os dados de algumas variáveis econômicas medidas para cada uma das fazendas dessa população, tais como área plantada com cana de açúcar (Area), quantidade colhida de cana (Quant), receita (Receita) e despesa com a produção de cana (Despesa), e algumas variáveis de contexto sobre as fazendas, tais como região de localização (Regiao) e classe de tamanho da fazenda (Classe).
+
+```{r dados, echo=TRUE, warning=FALSE}
+# carrega as bibliotecas
+library(sampling)
+library(survey)
+
+# importa base de dados
+fazendas_dat <- readRDS("fazendas_dat.rds")
+
+# visualiza os dados
+View(fazendas_dat)
+
+# verifica a estrutura
+str(fazendas_dat)
+
+```
+
+```{r amostragem, echo=TRUE, warning=FALSE}
+# Define valores necessários para cálculos com amostra AAS 
+N = nrow(fazendas_dat) # Calcula tamanho da população 
+n = 50 # Define tamanho da amostra 
+
+# Define senha para geração de números aleatórios para permitir repetição 
+set.seed(12345)
+
+# Seleciona amostra AAS de n=50 fazendas da população 
+fazendas_amo <- getdata(fazendas_dat, srswor(n, N))
+
+```
+
+
+
+# Funções
+
+## Descrição de planos amostrais: svydesign()
+
+A função svydesign() é a que permite descrever a estrutura de um plano amostral para o pacote survey.
+Possui recursos para especificar:
+* o estratificação,
+* o conglomeração,
+* o observações com pesos desiguais, para lidar com probabilidades desiguais de seleção, e ajustes para compensar não resposta e outros ajustes, e
+* o métodos a serem empregados para estimar erro padrão.
+
+Depois de aplicada, os metadados sobre o plano amostral são armazenados junto dos dados da pesquisa.
+
+```{r plano, echo=TRUE, warning=FALSE}
+# Define objeto com estrutura do plano amostral 
+fazendas_plan = svydesign(data=fazendas_amo, 
+                          ids = ~1, # ~0 or ~1 is a formula for no clusters
+                          fpc = ~rep(N, n)) # Finite population correction
+
+# Sumariza o objeto contendo as informações sobre estrutura do plano amostral 
+summary(fazendas_plan)
+
+# Obtém pesos dos elementos da amostra calculados pelo pacote survey 
+fazendas_amo_pesos = weights(fazendas_plan)
+
+# Sumariza vetor de pesos dos elementos da amostra 
+summary(fazendas_amo_pesos)
+
+```
+
+## Estatísticas descritivas: médias, totais, quantis, razões, etc. - svymean(), svytotal(), svyratio(), etc.
+
+Após especificar a estrutura do plano amostral usado para obter os dados que vai analisar com a função svydesign(), o próximo passo é especificar a análise de interesse – por exemplo, função que permite estimar totais populacionais - função svytotal() ou médias e proporções svymean() ou ainda razões svyratio().
+
+```{r descritiva1, echo=TRUE, warning=FALSE}
+# Calcula totais populacionais de variáveis de interesse 
+Totais.pop = colSums(fazendas_dat[,c("Area", "Quant", "Receita", "Despesa")])
+
+# Calcula estimativas simples dos totais populacionais 
+Totais.est = svytotal(~Area+Quant+Receita+Despesa, fazendas_plan)
+
+Totais.pop
+Totais.est
+
+# outras funções importantes
+cv(Totais.est)*100
+SE(Totais.est)
+confint(Totais.est)
+
+```
+
+```{r descritiva2, echo=TRUE, warning=FALSE}
+# Obtém valor da razão populacional Produção por hectare 
+Razao.pop = sum(fazendas_dat$Quant)/sum(fazendas_dat$Area)
+
+# Calcula estimativa simples da razão de dois totais populacionais 
+Razao.est = svyratio(~Quant, ~Area, fazendas_plan)
+
+Razao.pop
+Razao.est
+
+# avaliando a precisão
+cv(Razao.est)*100
+
+```
+```{r descritiva3, echo=TRUE, warning=FALSE}
+# Calcula proporção de fazendas com área menor ou igual a 40 na população 
+Prop.pop = mean(fazendas_dat$Area<=40)
+
+# Estima proporção de fazendas com área menor ou igual a 40 usando amostra 
+Prop.est = svymean(~Area<=40, fazendas_plan)
+
+Prop.pop
+Prop.est
+
+# avaliando a precisão
+cv(Prop.est)*100
+
+```
+
+## Estimação para domínios
+
+```{r descritiva4, echo=TRUE, warning=FALSE}
+# Calcula totais populacionais de variáveis de interesse por região
+library(tidyverse)
+
+t.quant_regiao.pop <- fazendas_dat %>% group_by(Regiao) %>% 
+  summarise(t.quant = sum(Quant))
+
+# Calcula estimativas simples dos totais populacionais 
+t.quant_regiao.est = svyby(~Quant,by =~Regiao, fazendas_plan, svytotal )
+
+t.quant_regiao.pop
+t.quant_regiao.est
+
+# avaliando a precisão
+cv(t.quant_regiao.est)*100
+
+```
+```{r descritiva5, echo=TRUE, warning=FALSE}
+# Calcula totais populacionais de variáveis de interesse por região e por classe
+library(tidyverse)
+
+t.quant_regiao_classe.pop <- fazendas_dat %>% group_by(Regiao,Classe) %>% 
+  summarise(t.quant = sum(Quant))
+
+# Calcula estimativas simples dos totais populacionais 
+t.quant_regiao_classe.est = svyby(~Quant,by =~Regiao+Classe, fazendas_plan, svytotal )
+
+t.quant_regiao_classe.pop
+t.quant_regiao_classe.est
+
+# avaliando a precisão
+cv(t.quant_regiao_classe.est)*100
+
+```
+
+## Outras funções
+
+Existem outras funções interessantes:
+
+* Tabelas de contingência: svytable(), svychisq(), svyloglin()
+* Gráficos: histogramas svyhist(), diagramas de dispersão svyplot(), suavizadores não paramétricos, etc
+* Modelos de regressão: svyglm(), svyolr()
+* Calibração e pós-estratificação: calibrate(), poststratify()
+
+
+# Referências
+
+Lumley T (2023). "survey: analysis of complex survey samples." R package
+version 4.2.
+
+Lumley T (2004). "Analysis of Complex Survey Samples." Journal of
+Statistical Software, 9(1), 1-19. R package verson 2.2.
+
+Lumley T (2010). Complex Surveys: A Guide to Analysis Using R: A Guide
+to Analysis Using R. John Wiley and Sons.

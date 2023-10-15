@@ -1,0 +1,73 @@
+#Exerc?cio em sala 3.1
+
+rm(list=ls())
+#install.packages("sampling")
+library(sampling)
+set.seed(123)
+
+#MunicBR_dat = readRDS("C:/Users/201950041-83/Downloads/MunicBR_dat.rds")
+MunicBR_dat <- readRDS("C:/Users/Caio Gon?alves/Downloads/MunicBR_dat.rds")
+str(MunicBR_dat)
+
+n=50
+N=nrow(MunicBR_dat)
+
+#informa??es populacionais
+
+# (a) calcular a m?dia populacional
+(media.pop=mean(MunicBR_dat$Area))
+
+#(b) calcular a vari?ncia, desvio padr?o e coeficente de varia??o do estimador usual
+(s2=var(MunicBR_dat$Area))
+
+(var.media=s2*(1/n-1/N))
+
+(desv.media=sqrt(var.media))
+
+(CV=100*desv.media/media.pop)
+
+# (c) avaliar margem de erro relativo que a estimativa teria ao n?vel de confian?a 95%
+z=qnorm(0.975)
+media.pop
+
+(margem_erro=z*CV)
+
+#intervalo
+(max.media=media.pop+z*CV)
+(min.media=media.pop-z*CV)
+
+#(d) determinar o tamanho da amostra - erro relativo m?ximo 2% e N?vel ce confian?a 95%
+d=0.02
+
+#n.amostra=1/((d*media.pop/z)^2+(desv.media/N)) - conferir depois
+n.amostra=ceiling(N*z^2*s2)/(N*d^2*media.pop^2+z^2*s2)
+n.amostra
+
+#informa??es amostrais
+
+(s=srswor(n,N))
+(amostra=getdata(MunicBR_dat,s))
+
+#(a) estimativa da m?dia populacional
+media.amos=mean(amostra$Area)
+media.amos
+
+#(b) estimativa de vari?ncia, desvio padr?o e coeficiente de varia??o
+(s22=var(amostra$Area))
+(var.media.amos=s22*(1/n-1/N))
+(desv.media.amos=sqrt(var.media))
+(CV2=100*desv.media.amos/media.amos)
+
+# (c) avaliar margem de erro relativo que a estiamtiva teria ao n?vel de confian?a 95%
+z=qnorm(0.975)
+(margem_erro2=z*CV2)
+(max.media2=media.amos+z*CV2)
+(min.media2=media.amos-z*CV2)
+media.amos
+
+#(d) detemrinar o tamanho da amostra - erro relativo m?ximo 2% e N?vel ce confian?a 95%
+d=0.02
+
+#n.amostra=1/((d*media.amos/z)^2+(desv.media.amos/N))
+n.amostra2=ceiling((N*z^2*s22)/(N*d^2*media.amos^2+z^2*s22))
+n.amostra2

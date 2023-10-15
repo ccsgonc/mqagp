@@ -1,0 +1,113 @@
+############ Lista 05 #############
+# Define pasta de trabalho onde encontrar arquivos de dados
+setwd("D:/HOJE/Monitoria Amostragem 2019/Monitoria 4/Lista 5")
+# Carrega os pacotes sampling e survey
+library(sampling)
+library(survey)
+# L? o arquivo de dados com a popula??o
+fazendas = read.csv(file="Fazendas.csv", header=TRUE, sep=";")
+N=nrow(fazendas)
+str(fazendas)
+
+# Transforma em fatores as vari?veis classe e regi?o do arquivo de dados
+fazendas = transform(fazendas, CLASSE = as.factor(CLASSE))
+fazendas = transform(fazendas, REGIAO = as.factor(REGIAO))
+str(fazendas)
+
+# Criando a indicadora de fazendas da regi?o 1
+fazendas = transform(fazendas, IndReg1 = 1 * (REGIAO ==1) )
+# Criando a indicadora de fazendas com area maior que 100
+fazendas = transform(fazendas, IndArea100 = 1 * (AREA > 100) )
+# Criando a vari?vel produtividade por fazenda
+fazendas = transform(fazendas, PROD = QUANT / AREA)
+# Criando a indicadora de fazendas com produtividade maior que 67
+fazendas = transform(fazendas, Indprod = 1 * (PROD > 67) )
+# Adiciona vetor com o tamanho populacional em uma coluna no arquivo
+fazendas = transform(fazendas, 
+                     Npop = rep(N,N) )
+str(fazendas)
+
+######## Quest?o 1  #######
+
+# Seleciona ?ndices das unidades da amostra AAS
+set.seed(123)# semente para selecionar sempre a mesma amostra
+(fazendas.amo = srswor(50,nrow(fazendas)))
+# Obt?m dados das unidades da amostra
+amofaz = fazendas[fazendas.amo==1,]
+str(amofaz)
+
+
+# Define plano amostral para as fazendas da amostra
+fazendas.amostra = svydesign(data=amofaz, id=~1, strata=NULL, fpc=~Npop)
+# id=~1 =aas=sem conglomerado, strata=null=n?o tem estratifica??o, fpc=Npop corre??o de popula??o finita (sem reposi??o)
+summary(fazendas.amostra)
+weights(fazendas.amostra)
+
+# Quest?o 1- a
+# Estima propor??o de fazendas na regi?o 1
+reg1<-svymean(~IndReg1, design=fazendas.amostra)
+# ou
+reg<-svymean(~REGIAO, design=fazendas.amostra)
+coef(reg1) # estimativa pontual
+SE(reg1)  # erro padr?o
+(cv.reg1<-100*SE(reg1)/coef(reg1)) # CV
+# Intervalo de confian?a
+(IC.reg1<-c(coef(reg1)-1.96*SE(reg1),coef(reg1)+1.96*SE(reg1))) 
+
+# Quest?o 1 - b
+
+area100<-svymean(~IndArea100, design=fazendas.amostra)
+coef(area100)  # estimativa pontual
+SE(area100)    # erro padr?o
+(cv.reg1<-100*SE(area100)/coef(area100)) # CV
+# Intervalo de confian?a
+(IC.area100<-c(coef(area100)-1.96*SE(area100),coef(area100)+1.96*SE(area100)))
+
+# Quest?o 1 - c
+
+# Estima a propor??o de fazendas com produtividade maior que 67
+pro<- svymean(~Indprod, design=fazendas.amostra)
+coef(pro)  # estimativa pontual
+SE(pro)   # erro padr?o
+(cv.pro<-100*SE(pro)/coef(pro)) # CV
+# Intervalo de confian?a
+(IC.pro<-c(coef(pro)-1.96*SE(pro),coef(pro)+1.96*SE(pro))) 
+
+# Quest?o 2 - a , b , c
+
+# gera??o de 500 AAS de tamanho n, variar o n em {5,10,20,50,100,150}
+n=150
+p1.est<-vector(mode="numeric",length= 500)
+p1.ep<-vector(mode="numeric",length= 500)
+p2.est<-vector(mode="numeric",length= 500)
+p2.ep<-vector(mode="numeric",length= 500)
+for(i in 1:500){
+  fazendas.amo = srswor(n,N)
+  amofaz = fazendas[fazendas.amo==1,]
+  fazendas.amostra = svydesign(data=amofaz,id=~1,fpc=~Npop)
+  a<-svymean(~IndArea100,design=fazendas.amostra)
+  b<-svymean(~Indprod,design=fazendas.amostra)
+  p1.est[i]<-coef(a) # estimativas da propor??o de ?rea maior que 100
+  p1.ep[i]<-SE(a) # erro padr?o da  estimativa da propor??o de ?rea maior que 100
+  p2.est[i]<-coef(b) # estimativas da propor??o com produtividade maior que 67
+  p2.ep[i]<-SE(a) # erro padr?o da  estimativa da propor??o com produtividade maior que 67
+  }
+
+# M?dia e desvio padr?o das propor??es de interesse:
+mean(p1.est)
+sd(p1.est)
+mean(p2.est)
+sd(p2.est)
+
+# letra d
+
+# Questao 2 - d
+
+# visualizando a distribui??o da m?dia de produtividade
+par(mfrow=c(6,2))# visualizar os 6 gr?ficos em uma figura, rodar apenas uma vez
+hist(p1.est, main=paste(" Histograma tamanho =", n) )
+hist(p2.est, main=" Histograma tamanho = 200")
+
+mean(fazendas$IndArea100)
+mean(fazendas$Indprod)
+

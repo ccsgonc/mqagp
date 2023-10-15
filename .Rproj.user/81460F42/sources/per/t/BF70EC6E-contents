@@ -1,0 +1,118 @@
+################################################################################
+#####  Curso de Amostragem - Edição 2019              
+#####  Comandos usados para resolver exercícios da Unidade 06                                  
+#####  Programador: Pedro Silva
+#####  Atualização: 28/07/2019
+################################################################################
+
+# Limpa área de trabalho
+rm(list = ls())
+
+# Define pasta onde ficam dados usados nesta sessão
+setwd("F:/SkyDrive/RJ/Cursos/Amostragem2019/Exercícios 2019")
+getwd()
+
+# Carrega biblioteca(s) requerida(s)
+library(sampling)
+library(tidyverse)
+
+# Leitura dos dados
+MunicBR_dat <- readRDS(file="MunicBR_dat.rds")
+str(MunicBR_dat)
+
+# Cria código de região nos dados da população
+reglabels = c("Norte", "Nordeste", "Sudeste", "Sul", "Centro-Oeste")
+MunicBR_dat <- mutate(MunicBR_dat,
+                      Regiao = substr(CodUF,1,1))  %>%
+               mutate(Regiao = factor(Regiao, labels=reglabels))
+table(MunicBR_dat$Regiao)  
+
+# Define senha para geração de números aleatórios para permitir repetição
+set.seed(123)
+
+### Exercício 6.1 - Estimação da população total por macro-região
+# Tamanho da amostra
+(n <- 250)
+# Tamanho da população
+(N <- nrow(MunicBR_dat))
+
+# Seleciona amostra AAS dos municípios
+munic_amo <- getdata(MunicBR_dat, srswor(n,N))
+str(munic_amo)
+table(munic_amo$Regiao)
+
+# Calcula as contagens de municípios e totais populacionais por domínio
+(Res_pop <- MunicBR_dat %>%
+        group_by(Regiao) %>%
+        summarise(N_d = n(),
+                  Y_d = sum(Pop)) %>%
+        select(Regiao, N_d, Y_d) )
+
+# Calcula resumos amostrais por domínio
+(Res_amo <- munic_amo %>%
+    group_by(Regiao) %>%
+    summarise(n_d  = n(),
+              ybar_d = mean(Pop),
+              t_d = sum(Pop),
+              s2_d = var(Pop)) %>%
+    select(Regiao, n_d, ybar_d, t_d, s2_d) )
+
+# Junta informações das duas tabelas por Região
+resumo_regiao <- left_join(Res_pop, Res_amo, by=c("Regiao"))
+
+# a) Calcula estimativas dos totais de população por região, 
+# supondo contagens de municípios por região conhecidas
+Tot_reg_est1 <- resumo_regiao %>%
+   mutate(Yhat1_d = N_d * ybar_d,
+          v_Yhat1_d = N_d^2 * (1/n_d - 1/N_d) * s2_d,
+          mer_Yhat1_d = 100 * qnorm(0.975) * 
+                             sqrt(v_Yhat1_d) / Yhat1_d) 
+select(Tot_reg_est1, Regiao, Yhat1_d, mer_Yhat1_d)
+
+# Prepara cálculo das estimativas de variância do estimador 2
+munic_amo <- munic_amo %>%
+    mutate(y1 = Pop * (Regiao=="Norte"),
+           y2 = Pop * (Regiao=="Nordeste"),
+           y3 = Pop * (Regiao=="Sudeste"),
+           y4 = Pop * (Regiao=="Sul"),
+           y5 = Pop * (Regiao=="Centro-Oeste") )
+# Calcula variâncias amostrais de variáveis derivadas
+Res2_amo <- munic_amo %>%
+  summarise(s2_1 = var(y1),
+            s2_2 = var(y2),
+            s2_3 = var(y3),
+            s2_4 = var(y4),
+            s2_5 = var(y5))
+Res2_amo <- data.frame(s2 = t(Res2_amo))
+
+# Junta informações para permitir cálculo das variâncias
+resumo_regiao <- cbind(resumo_regiao, Res2_amo)
+
+# b) Calcula estimativas dos totais de população por região, 
+# supondo contagens de municípios por região desconhecidas
+Tot_reg_est2 <- resumo_regiao %>%
+    mutate(Yhat2_d = N * t_d / n,
+           v_Yhat2_d = N^2 * (1/n - 1/N) * s2,
+           mer_Yhat2_d = 100 * qnorm(0.975) * 
+             sqrt(v_Yhat2_d) / Yhat2_d)
+select(Tot_reg_est2, Regiao, Yhat2_d, mer_Yhat2_d)
+
+### c) Estima média da densidade habitacional por município
+#      para municípios com população igual ou superior a 100 mil
+# Prepara cálculo das estimativas para o domínio definido
+munic_amo <- munic_amo %>%
+  mutate(dens_d = Densidade * (Pop>= 100000),
+         d_i = 1*(Pop>= 100000))
+
+# Calcula variâncias amostrais de variáveis derivadas
+Res3_amo <- munic_amo %>%
+  summarise(n_d = sum(d_i), 
+            t_d = sum(dens_d),
+            s2_d = var(dens_d)) %>%
+  mutate(dens_media = t_d / n_d,
+         v_dens_media = (1 - n/N)*s2_d/n_d,
+         me_dens_media = qnorm(0.975) * sqrt(v_dens_media) )
+select(Res3_amo, dens_media, me_dens_media)
+
+# Limpa área de trabalho
+rm(list = ls())

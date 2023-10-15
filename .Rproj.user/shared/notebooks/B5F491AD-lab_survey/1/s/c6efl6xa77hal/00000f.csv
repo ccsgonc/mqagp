@@ -1,0 +1,7 @@
+"0","# Define valores necessários para cálculos com amostra AAS "
+"0","N = nrow(fazendas_dat) # Calcula tamanho da população "
+"0","n = 50 # Define tamanho da amostra "
+"0",""
+"0","# Seleciona amostra AAS de n=50 fazendas da população "
+"0","fazendas_amo <- getdata(fazendas_dat, srswor(n, N))"
+"0",""
