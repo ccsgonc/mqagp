@@ -1,0 +1,234 @@
+---
+title: "Indicadores no R: indicadores de emprego e renda na PNADC trimestral"
+author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
+date: "23-outubro-2023"
+output:
+  html_document: 
+    toc: true
+    toc_float: true
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+O objetivo deste tutorial é extrair os dados amostrais da PNADC trimestral de emprego e renda com auxílio do pacote PNADcIBGE.
+
+
+# Pacote PNADcIBGE
+
+O pacote PNADcIBGE foi desenvolvido com o propósito de simplificar o processo de download, importação e análise dos dados amostrais provenientes da Pesquisa Nacional por Amostra de Domicílios Contínua, conduzida pelo Instituto Brasileiro de Geografia e Estatística (IBGE).
+
+A PNAD Contínua abrange três tipos distintos de microdados:
+
+1. **Trimestral:** Este conjunto de dados compreende as informações essenciais coletadas durante a pesquisa, que incluem variáveis conjunturais relacionadas ao mercado de trabalho em um trimestre civil específico.
+
+2. **Anual acumulados em determinada visita:** Nesse conjunto, são contemplados temas e tópicos suplementares investigados ao longo do ano, durante visitas específicas.
+
+3. **Anual concentrados em determinado trimestre:** Aqui, são abordados temas e tópicos suplementares que foram pesquisados em trimestres específicos do ano.
+
+Adicionalmente, a partir de 2021, foram incorporados módulos aplicados exclusivamente a um morador selecionado na PNAD Contínua, abordando temas e tópicos suplementares específicos.
+
+Para obter informações detalhadas sobre a pesquisa e os tópicos investigados, recomenda-se consultar o site oficial do IBGE.
+
+O uso deste pacote possibilita a utilização do pacote "survey" para realizar análises que levem em consideração o efeito do esquema de seleção empregado no plano amostral complexo da pesquisa. Isso permite calcular de forma precisa as medidas de erro das estimativas, levando em consideração o estimador de pós-estratificação adotado na pesquisa.
+
+Material sobre o pacote: https://rpubs.com/gabriel-assuncao-ibge/pnadc
+
+# Base de dados
+
+A função get_pnadc desempenha um papel fundamental ao facilitar o processo de obtenção, leitura, rotulagem, incorporação das variáveis para fins de deflacionamento e criação do objeto do plano amostral da pesquisa. Esta função é versátil e pode ser aplicada tanto aos microdados trimestrais como aos microdados anuais (seja aqueles acumulados em visitas específicas ou concentrados em trimestres determinados).
+
+```{r dados, echo=TRUE, warning=FALSE}
+# carrega as bibliotecas
+library(PNADcIBGE)
+library(survey)
+library(dplyr)
+
+# definição de variáveis
+variaveis_selecionadas <- c("UF","VD4002","V4013","VD4020","VD3005","V4012","V2007","V2010","V2009")
+
+# importando os dados
+dadosPNADc <- get_pnadc(year=2023, quarter=2, vars = variaveis_selecionadas)
+
+# Utilizar opção para ajuste de UPAs com único setor
+options(survey.lonely.psu = "adjust")
+
+# Opção de vizualização
+options(scipen = 999)
+
+# modifica e cria variáveis
+dadosPNADc$variables <- dadosPNADc$variables %>% 
+  mutate(one = 1,
+         desocupada = 1 * (VD4002 == "Pessoas desocupadas"),
+         ocupada = 1 * (VD4002 == "Pessoas ocupadas"),
+         atividades = case_when( (V4013>=01101 & V4013<=03002) ~"A - Agropecuária",
+                            (V4013>=05000 & V4013<=09000) ~"B - Ind. extrativas",
+                            (V4013>=10010 & V4013<=33002) ~"C - Ind. transformação",
+                            (V4013>=35010 & V4013<=39000) ~"D - SIUP",
+                            (V4013>=41000 & V4013<=43000) ~"E - Construção",
+                            (V4013>=45010 & V4013<=48100) ~"F - Comércio",
+                            (V4013>=49010 & V4013<=53002) ~"G - Transporte",
+                            (V4013>=58000 & V4013<=63000) ~"H - Serv. de informação",
+                            (V4013>=64000 & V4013<=66002) ~"I - Serv. financeiros",
+                            (V4013==68000) ~"J - Serv. imobiliários",
+                            (V4013>=55000 & V4013<=56020) | (V4013>=69000 & V4013<=82009) | (V4013>=90000 & V4013<=99000) ~"K - Outros serviços",
+                            (V4013>=85011 & V4013<=88000) & (V4012!=2 & V4012!=4)~"K - Outros serviços",
+                            (V4013>=85011 & V4013<=88000) & (V4012==2 | V4012==4)~"L - Administração pública",
+                            (V4013>=84011 & V4013<=84020) ~"L - Administração pública",
+                            (V4013>=00000) ~"M - Mal definidas"),
+          rend = as.numeric(VD4020),
+          anosest = as.numeric(VD3005),
+          faixa_anosest = case_when(VD3005 < 1               ~ "0SemInstrucao",
+                                                   VD3005 >= 1 & VD3005 < 5 ~ "de1a4anos",
+                                                   VD3005 >= 5 & VD3005 < 9 ~ "de5a8anos",
+                                                   VD3005 >= 9 & VD3005 < 12~ "de9a11anos",
+                                                   VD3005 >=12               ~ "de12a+anos") ,
+          faixa_anosest2 = case_when(VD3005 >= 0 & VD3005 < 12~ "de0a11anos",
+                                                   VD3005 >=12               ~ "de12a+anos") ,
+          d.contapropria = 1 *(V4012==6),
+          d.homem = 1 * (V2007 == "Homem"),
+          d.mulher = 1 * (V2007 == "Mulher"),
+          d.raca = case_when(V2010 == "Preta" | V2010 == "Amarela" | V2010 == "Parda" | V2010 == "Indígena" | V2010 == "Ignorado" ~ "Não brancos",
+                                            V2010 == "Branca" ~ "Brancos"),
+          idade = as.numeric(V2009),
+          faixa_idade = case_when((V2009>=14 & V2009<= 29) ~"0De14a29anos",
+                                                 (V2009>=30 & V2009<= 44) ~"de30a44anos",
+                                                 (V2009>=45 & V2009<= 59) ~"de45a59anos",
+                                                 (V2009>=60             ) ~"de60a+anos"),
+         estratos_geogr = case_when((Estrato=="3110213"|Estrato=="3110113" |Estrato=="3110112" |Estrato=="3110212" |Estrato=="3110111" |Estrato=="3110211") ~"01-Belo Horizonte",
+                                                    (Estrato=="3120011"|Estrato=="3120013" |Estrato=="3120020" |Estrato=="3120012") ~"02-Entorno metropolitono de BH",
+                                                    (Estrato=="3130011"|Estrato== "3130012"|Estrato== "3130020") ~"03-Colar metropolitano de BH",
+                                                    (Estrato=="3140010"|Estrato== "3140020") ~"04-RIDE de Brasília em Minas",
+                                                    (Estrato=="3151011"|Estrato== "3151012" |Estrato=="3151013" |Estrato=="3151021"|Estrato=="3151022" |Estrato=="3151023") ~"05-Sul de Minas",
+                                                    (Estrato=="3152011"|Estrato== "3152012" |Estrato=="3152013" |Estrato=="3152021"|Estrato=="3152022") ~"06-Triângulo Mineiro",
+                                                    (Estrato=="3153011"|Estrato== "3153012" |Estrato=="3153013" |Estrato=="3153021"|Estrato=="3153022" |Estrato=="3153023") ~"07-Mata de Minas Gerais",
+                                                    (Estrato=="3154011"|Estrato== "3154012" |Estrato=="3154013" |Estrato=="3154021"|Estrato=="3154022" |Estrato=="3154023") ~"08-Norte de Minas",
+                                                    (Estrato=="3155011"|Estrato== "3155012" |Estrato=="3155013" |Estrato=="3155021"|Estrato== "3155022"|Estrato== "3155023") ~"09-Vale do Rio Doce",
+                                                    (Estrato=="3156011"|Estrato== "3156012" |Estrato=="3156013" |Estrato=="3156021"|Estrato== "3156022") ~"10-Central")
+)
+
+```
+
+
+# Ocupação e renda média do trabalho em Minas Gerais
+
+
+```{r ocupação, echo=TRUE, warning=FALSE}
+# Estimativas para Minas Gerais # https://sidra.ibge.gov.br/pesquisa/pnadct/tabelas
+
+# Total de ocupados
+t.ocup <- coef(svytotal(~ ocupada, subset(dadosPNADc,UF=="Minas Gerais"), na.rm = TRUE))
+t.ocup
+t.ocup_cv <- round(cv(svytotal(~ ocupada, subset(dadosPNADc,UF=="Minas Gerais"), na.rm = TRUE))*100,1)
+t.ocup_cv
+
+# Total de ocupapos por atividades
+t.ocup.ativ <- coef(svyby(~ ocupada,by = ~atividades, subset(dadosPNADc,UF=="Minas Gerais"), svytotal,na.rm = TRUE))
+t.ocup.ativ 
+t.ocup.ativ_cv <- round(cv(svyby(~ ocupada,by = ~atividades, subset(dadosPNADc,UF=="Minas Gerais"), svytotal, na.rm = TRUE))*100,1)
+t.ocup.ativ_cv
+
+# Total e proporção de ocupapos por sexo
+t.ocup.sexo <- coef(svyby(~ ocupada,by = ~V2007, subset(dadosPNADc,UF=="Minas Gerais"), svytotal,na.rm = TRUE))
+t.ocup.sexo 
+t.ocup.sexo_cv <- round(cv(svyby(~ ocupada,by = ~V2007, subset(dadosPNADc,UF=="Minas Gerais"), svytotal, na.rm = TRUE))*100,1)
+t.ocup.sexo_cv
+
+p.ocup.sexo <- coef(svymean( ~V2007, subset(dadosPNADc,UF=="Minas Gerais"),na.rm = TRUE))
+p.ocup.sexo 
+p.ocup.sexo_cv <- round(cv(svymean( ~V2007, subset(dadosPNADc,UF=="Minas Gerais"),na.rm = TRUE))*100,1)
+p.ocup.sexo_cv
+
+# Total e proporção de ocupapos por idade
+t.ocup.idade <- coef(svyby(~ ocupada,by = ~faixa_idade, subset(dadosPNADc,UF=="Minas Gerais"), svytotal,na.rm = TRUE))
+t.ocup.idade 
+t.ocup.idade_cv <- round(cv(svyby(~ ocupada,by = ~faixa_idade, subset(dadosPNADc,UF=="Minas Gerais"), svytotal, na.rm = TRUE))*100,1)
+t.ocup.idade_cv
+
+p.ocup.idade <- coef(svymean( ~faixa_idade, subset(dadosPNADc,UF=="Minas Gerais"),na.rm = TRUE))
+p.ocup.idade 
+p.ocup.idade_cv <- round(cv(svymean( ~faixa_idade, subset(dadosPNADc,UF=="Minas Gerais"),na.rm = TRUE))*100,1)
+p.ocup.idade_cv
+
+# Total de ocupapos por idade e sexo
+t.ocup.idade.sexo <- coef(svyby(~ ocupada,by = ~faixa_idade+V2007, subset(dadosPNADc,UF=="Minas Gerais"), svytotal,na.rm = TRUE))
+t.ocup.idade.sexo 
+t.ocup.idade.sexo_cv <- round(cv(svyby(~ ocupada,by = ~faixa_idade+V2007, subset(dadosPNADc,UF=="Minas Gerais"), svytotal, na.rm = TRUE))*100,1)
+t.ocup.idade.sexo_cv
+
+# Total e proporção de ocupapos por raça ou cor
+t.ocup.racacor <- coef(svyby(~ ocupada,by = ~V2010, subset(dadosPNADc,UF=="Minas Gerais"), svytotal,na.rm = TRUE))
+t.ocup.racacor 
+t.ocup.racacor_cv <- round(cv(svyby(~ ocupada,by = ~V2010, subset(dadosPNADc,UF=="Minas Gerais"), svytotal, na.rm = TRUE))*100,1)
+t.ocup.racacor_cv
+
+p.ocup.racacor <- coef(svymean( ~V2010, subset(dadosPNADc,UF=="Minas Gerais"),na.rm = TRUE))
+p.ocup.racacor 
+p.ocup.racacor_cv <- round(cv(svymean( ~V2010, subset(dadosPNADc,UF=="Minas Gerais"),na.rm = TRUE))*100,1)
+p.ocup.racacor_cv
+
+# Total de ocupapos por idade, sexo e raça ou cor
+t.ocup.idade.sexo.racacor <- coef(svyby(~ ocupada,by = ~faixa_idade+V2007+d.raca, subset(dadosPNADc,UF=="Minas Gerais"), svytotal,na.rm = TRUE))
+t.ocup.idade.sexo.racacor  
+t.ocup.idade.sexo.racacor_cv <- round(cv(svyby(~ ocupada,by = ~faixa_idade+V2007+d.raca, subset(dadosPNADc,UF=="Minas Gerais"), svytotal, na.rm = TRUE))*100,1)
+t.ocup.idade.sexo.racacor_cv
+
+# Renda média ocupapos por idade, sexo e raça ou cor
+m.renda.idade.sexo.racacor <- coef(svyby(~ rend,by = ~faixa_idade+V2007+d.raca, subset(dadosPNADc,UF=="Minas Gerais"), svymean,na.rm = TRUE))
+m.renda.idade.sexo.racacor  
+m.renda.idade.sexo.racacor_cv <- round(cv(svyby(~ rend,by = ~faixa_idade+V2007+d.raca, subset(dadosPNADc,UF=="Minas Gerais"), svymean, na.rm = TRUE))*100,1)
+m.renda.idade.sexo.racacor_cv
+
+```
+# Desocupação em Minas Gerais
+
+
+```{r desocupação, echo=TRUE, warning=FALSE}
+# Estimativas para Minas Gerais # https://sidra.ibge.gov.br/pesquisa/pnadct/tabelas
+
+# Total e taxa de desocupados
+t.desocup <- coef(svytotal(~ desocupada, subset(dadosPNADc,UF=="Minas Gerais"), na.rm = TRUE))
+t.desocup
+t.desocup_cv <- round(cv(svytotal(~ desocupada, subset(dadosPNADc,UF=="Minas Gerais"), na.rm = TRUE))*100,1)
+t.desocup_cv
+
+tx.desocup <- coef(svymean(~ desocupada, subset(dadosPNADc,UF=="Minas Gerais"), na.rm = TRUE))
+tx.desocup
+tx.desocup_cv <- round(cv(svymean(~ desocupada, subset(dadosPNADc,UF=="Minas Gerais"), na.rm = TRUE))*100,1)
+tx.desocup_cv
+
+# Taxa de desocupapos por sexo
+tx.desocup.sexo <- coef(svyby(~ desocupada,by = ~V2007, subset(dadosPNADc,UF=="Minas Gerais"), svymean,na.rm = TRUE))
+tx.desocup.sexo 
+tx.desocup.sexo_cv <- round(cv(svyby(~ desocupada,by = ~V2007, subset(dadosPNADc,UF=="Minas Gerais"), svymean, na.rm = TRUE))*100,1)
+tx.desocup.sexo_cv
+
+# Taxa de desocupapos por idade
+tx.desocup.idade <- coef(svyby(~ desocupada,by = ~faixa_idade, subset(dadosPNADc,UF=="Minas Gerais"), svymean,na.rm = TRUE))
+tx.desocup.idade 
+tx.desocup.idade_cv <- round(cv(svyby(~ desocupada,by = ~faixa_idade, subset(dadosPNADc,UF=="Minas Gerais"), svymean, na.rm = TRUE))*100,1)
+tx.desocup.idade_cv
+
+# Taxa de desocupapos por idade e sexo
+tx.desocup.idade.sexo <- coef(svyby(~ desocupada,by = ~faixa_idade+V2007, subset(dadosPNADc,UF=="Minas Gerais"), svymean,na.rm = TRUE))
+tx.desocup.idade.sexo 
+tx.desocup.idade.sexo_cv <- round(cv(svyby(~ desocupada,by = ~faixa_idade+V2007, subset(dadosPNADc,UF=="Minas Gerais"), svymean, na.rm = TRUE))*100,1)
+tx.desocup.idade.sexo_cv
+
+# Taxa de desocupapos por raça ou cor
+tx.desocup.racacor <- coef(svyby(~ desocupada,by = ~d.raca, subset(dadosPNADc,UF=="Minas Gerais"), svymean,na.rm = TRUE))
+tx.desocup.racacor 
+tx.desocup.racacor_cv <- round(cv(svyby(~ desocupada,by = ~d.raca, subset(dadosPNADc,UF=="Minas Gerais"), svymean, na.rm = TRUE))*100,1)
+tx.desocup.racacor_cv
+
+# Taxa de desocupapos por idade, sexo e raça ou cor
+tx.desocup.idade.sexo.racacor <- coef(svyby(~ desocupada,by = ~faixa_idade+V2007+d.raca, subset(dadosPNADc,UF=="Minas Gerais"), svymean,na.rm = TRUE))
+tx.desocup.idade.sexo.racacor  
+tx.desocup.idade.sexo.racacor_cv <- round(cv(svyby(~ desocupada,by = ~faixa_idade+V2007+d.raca, subset(dadosPNADc,UF=="Minas Gerais"), svymean, na.rm = TRUE))*100,1)
+tx.desocup.idade.sexo.racacor_cv
+
+```
