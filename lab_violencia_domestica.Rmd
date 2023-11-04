@@ -1,0 +1,340 @@
+---
+title: "Indicadores no R: violência doméstica na PNS"
+author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
+date: "06-novembro-2023"
+output:
+  html_document: 
+    toc: true
+    toc_float: true
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+O objetivo deste tutorial é extrair os dados amostrais da PNS e mostrar
+as possibilidades de análise dessa pesquisa com ênfase no modelo de
+violência.
+
+# PNS
+
+A Pesquisa Nacional de Saúde (PNS) é um importante levantamento
+realizado pelo Instituto Brasileiro de Geografia e Estatística (IBGE) em
+parceria com o Ministério da Saúde no Brasil. O objetivo da PNS é
+coletar informações detalhadas sobre a saúde da população brasileira,
+incluindo dados relacionados a condições de saúde, estilo de vida,
+acesso aos serviços de saúde, uso de medicamentos, entre outros aspectos
+relevantes.
+
+A PNS é um estudo abrangente que fornece informações valiosas para a
+formulação de políticas de saúde, planejamento de serviços de saúde,
+pesquisa acadêmica e tomada de decisões relacionadas à saúde pública.
+Além disso, a pesquisa permite o acompanhamento das tendências em saúde
+ao longo do tempo e a identificação de desafios de saúde específicos que
+podem necessitar de intervenções.
+
+Alguns dos principais tópicos cobertos pela PNS incluem:
+
+-   Condições de Saúde: A pesquisa coleta informações sobre a
+    prevalência de doenças crônicas, deficiências, condições de saúde
+    mental, entre outras.
+
+-   Estilo de Vida: A PNS abrange informações sobre hábitos relacionados
+    à saúde, como consumo de tabaco, consumo de álcool, dieta, atividade
+    física, entre outros.
+
+-   Acesso aos Serviços de Saúde: Ela investiga o acesso a serviços de
+    saúde, cobertura de seguro de saúde, uso de serviços de saúde e
+    barreiras ao acesso.
+
+-   Uso de Medicamentos: A pesquisa coleta dados sobre o uso de
+    medicamentos, incluindo prescrição e automedicação.
+
+-   Fatores Socioeconômicos: A PNS considera fatores socioeconômicos,
+    como renda, educação e ocupação, que podem estar relacionados à
+    saúde.
+
+# Violência doméstica
+
+De acordo com o art. 5º da Lei Maria da Penha, violência doméstica e
+familiar contra a mulher é "qualquer ação ou omissão baseada no gênero
+que lhe cause morte, lesão, sofrimento físico, sexual ou psicológico e
+dano moral ou patrimonial".
+
+Conforme o Instituto Maria da Penha, um dos mitos da violência doméstica
+é que:
+
+*"A violência doméstica só acontece em famílias de baixa renda e pouca
+instrução."*
+
+A violência doméstica é um fenômeno que não distingue classe social,
+raça, etnia, religião, orientação sexual, idade e grau de escolaridade.
+Todos os dias, somos impactados por notícias de mulheres que foram
+assassinadas por seus companheiros ou ex-parceiros. Na maioria desses
+casos, elas já vinham sofrendo diversos tipos de violência há algum
+tempo, mas a situação só chega ao conhecimento de outras pessoas quando
+as agressões crescem a ponto de culminar no feminicídio.
+
+Fonte:
+<https://www.institutomariadapenha.org.br/violencia-domestica/o-que-e-violencia-domestica.html>
+
+## Sobre os tipo de violência
+
+Estão previstos cinco tipos de violência doméstica e familiar contra a
+mulher na Lei Maria da Penha: física, psicológica, moral, sexual e
+patrimonial − Capítulo II, art. 7º, incisos I, II, III, IV e V.
+
+1.  VIOLÊNCIA FÍSICA: Entendida como qualquer conduta que ofenda a
+    integridade ou saúde corporal da mulher.
+
+*ESPANCAMENTO, ATIRAR OBJETOS, SACUDIR E APERTAR OS BRAÇOS,
+ESTRANGULAMENTO OU SUFOCAMENTO, LESÕES COM OBJETOS CORTANTES OU
+PERFURANTES, FERIMENTOS CAUSADOS POR QUEIMADURAS OU ARMAS DE FOGO
+TORTURA*
+
+2.  VIOLÊNCIA PSICOLÓGICA: É considerada qualquer conduta que: cause
+    dano emocional e diminuição da autoestima; prejudique e perturbe o
+    pleno desenvolvimento da mulher; ou vise degradar ou controlar suas
+    ações, comportamentos, crenças e decisões.
+
+*AMEAÇAS, CONSTRANGIMENTO, HUMILHAÇÃO, MANIPULAÇÃO, ISOLAMENTO (PROIBIR
+DE ESTUDAR E VIAJAR OU DE FALAR COM AMIGOS E PARENTES), VIGILÂNCIA
+CONSTANTE, PERSEGUIÇÃO CONTUMAZ, INSULTOS, CHANTAGEM, EXPLORAÇÃO,
+LIMITAÇÃO DO DIREITO DE IR E VIR, RIDICULARIZAÇÃO, TIRAR A LIBERDADE DE
+CRENÇA, DISTORCER E OMITIR FATOS PARA DEIXAR A MULHER EM DÚVIDA SOBRE A
+SUA MEMÓRIA E SANIDADE (GASLIGHTING)*
+
+3.  VIOLÊNCIA SEXUAL: Trata-se de qualquer conduta que constranja a
+    presenciar, a manter ou a participar de relação sexual não desejada
+    mediante intimidação, ameaça, coação ou uso da força.
+
+*ESTUPRO, OBRIGAR A MULHER A FAZER ATOS SEXUAIS QUE CAUSAM DESCONFORTO
+OU REPULSA, IMPEDIR O USO DE MÉTODOS CONTRACEPTIVOS OU FORÇAR A MULHER A
+ABORTAR, FORÇAR MATRIMÔNIO, GRAVIDEZ OU PROSTITUIÇÃO POR MEIO DE COAÇÃO,
+CHANTAGEM, SUBORNO OU MANIPULAÇÃO, LIMITAR OU ANULAR O EXERCÍCIO DOS
+DIREITOS SEXUAIS E REPRODUTIVOS DA MULHER*
+
+4.  VIOLÊNCIA PATRIMONIAL: Entendida como qualquer conduta que configure
+    retenção, subtração, destruição parcial ou total de seus objetos,
+    instrumentos de trabalho, documentos pessoais, bens, valores e
+    direitos ou recursos econômicos, incluindo os destinados a
+    satisfazer suas necessidades.
+
+*CONTROLAR O DINHEIRO, DEIXAR DE PAGAR PENSÃO ALIMENTÍCIA, DESTRUIÇÃO DE
+DOCUMENTOS PESSOAIS, FURTO, EXTORSÃO OU DANO ESTELIONATO, PRIVAR DE
+BENS, VALORES OU RECURSOS ECONÔMICOS, CAUSAR DANOS PROPOSITAIS A OBJETOS
+DA MULHER OU DOS QUAIS ELA GOSTE*
+
+5.  VIOLÊNCIA MORAL: É considerada qualquer conduta que configure
+    calúnia, difamação ou injúria.
+
+*ACUSAR A MULHER DE TRAIÇÃO, EMITIR JUÍZOS MORAIS SOBRE A CONDUTA, FAZER
+CRÍTICAS MENTIROSAS, EXPOR A VIDA ÍNTIMA, REBAIXAR A MULHER POR MEIO DE
+XINGAMENTOS QUE INCIDEM SOBRE A SUA ÍNDOLE, DESVALORIZAR A VÍTIMA PELO
+SEU MODO DE SE VESTIR*
+
+Fonte:
+<https://www.institutomariadapenha.org.br/lei-11340/tipos-de-violencia.html>
+
+# Base de dados
+
+Download online dos dados:
+
+```{r dados, echo=TRUE, warning=FALSE}
+# carrega as bibliotecas
+library(PNSIBGE)
+library(survey)
+library(dplyr)
+
+# definição de variáveis
+variaveis_selecionadas <- c("C006","V0024",
+                            "V00201","V00202","V00203","V00204","V00205","V006",
+                            "V01401","V01402","V01403","V01404","V01405","V018",
+                            "V02701","V02702","V032",
+                            "VDE002","VDF003","VDF004","VDD004A","C009")
+
+# importando os dados do questionário básico
+dadosPNS <- get_pns(year=2019, vars = variaveis_selecionadas,selected = TRUE)
+
+# Utilizar opção para ajuste de UPAs com único setor
+options(survey.lonely.psu = "adjust")
+
+# Opção de vizualização
+options(scipen = 999)
+
+# modifica e cria variáveis
+dadosPNS$variables <- dadosPNS$variables %>% 
+  mutate(one = 1,
+         agressao_psicol = 1 * ((V00201=="Sim"|V00202=="Sim"|V00203=="Sim"|V00204=="Sim"|V00205=="Sim") & (V006=="Cônjuge ou companheiro (a)"|V006== "Ex-Cônjuge ou ex-companheiro (a)"| V006 == "Parceiro (a), namorado (a), ex-parceiro (a), ex-namorado (a)" )),
+         agressao_fisica = 1 * ((V01401=="Sim"|V01402=="Sim"|V01403=="Sim"|V01404=="Sim"|V01405=="Sim") & (V018=="Cônjuge ou companheiro (a)"|V018== "Ex-Cônjuge ou ex-companheiro (a)"| V018 == "Parceiro (a), namorado (a), ex-parceiro (a), ex-namorado (a)" )),
+         agressao_sexual = 1 * ((V02701=="Sim"|V02702=="Sim") & (V032=="Cônjuge ou companheiro (a)"|V032== "Ex-Cônjuge ou ex-companheiro (a)"| V032 == "Parceiro (a), namorado (a), ex-parceiro (a), ex-namorado (a)" )),
+         violencia_domest = 1 * (agressao_psicol == 1 | agressao_fisica == 1 |
+                                    agressao_sexual == 1),
+         raca_cor = case_when(C009 == "Preta" | C009 == "Parda" ~ "Preta ou parda",C009 == "Amarela"  | C009 == "Indígena" | C009 == "Ignorado" ~ "Outras",
+                             C009 == "Branca" ~ "Branca")
+)
+
+
+```
+
+# Estimativas
+
+## 1. Violência doméstica
+
+```{r dados1, echo=TRUE, warning=FALSE}
+# Total de mulheres que sofreram alguma violência doméstica nos últimos dozes meses - Minas Gerais - 2019
+tab.1a <- data.frame(Estimativa  = round(coef(svytotal(~ violencia_domest, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"), na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svytotal(~ violencia_domest, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"), na.rm = TRUE)),0),
+                    CV = round(cv(svytotal(~ violencia_domest, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svytotal(~ violencia_domest, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"), na.rm = TRUE))[1],0),
+                    Limite_superior = round(confint(svytotal(~ violencia_domest, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"), na.rm = TRUE))[2],0))
+tab.1a
+
+# Proporção de mulheres que sofreram alguma violência doméstica nos últimos dozes meses - Minas Gerais - 2019
+tab.1b <- data.frame(Estimativa  = round(coef(svymean(~ violencia_domest, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"), na.rm = TRUE))*100,1),
+                    Erro_padrao = round(SE(svymean(~ violencia_domest, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"), na.rm = TRUE))*100,1),
+                    CV = round(cv(svymean(~ violencia_domest, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svymean(~ violencia_domest, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"), na.rm = TRUE))[1]*100,1),
+                    Limite_superior = round(confint(svymean(~ violencia_domest, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"), na.rm = TRUE))[2]*100,1))
+tab.1b
+
+# Total de mulheres que sofreram alguma violência doméstica nos últimos dozes meses - Brasil - 2019
+tab.1c <- data.frame(Estimativa  = round(coef(svytotal(~ violencia_domest, subset(dadosPNS, C006=="Mulher"), na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svytotal(~ violencia_domest, subset(dadosPNS, C006=="Mulher"), na.rm = TRUE)),0),
+                    CV = round(cv(svytotal(~ violencia_domest, subset(dadosPNS,C006=="Mulher"), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svytotal(~ violencia_domest, subset(dadosPNS, C006=="Mulher"), na.rm = TRUE))[1],0),
+                    Limite_superior = round(confint(svytotal(~ violencia_domest, subset(dadosPNS, C006=="Mulher"), na.rm = TRUE))[2],0))
+tab.1c
+
+# Proporção de mulheres que sofreram alguma violência doméstica nos últimos dozes meses - Brasil - 2019
+tab.1d <- data.frame(Estimativa  = round(coef(svymean(~ violencia_domest, subset(dadosPNS, C006=="Mulher"), na.rm = TRUE))*100,1),
+                    Erro_padrao = round(SE(svymean(~ violencia_domest, subset(dadosPNS, C006=="Mulher"), na.rm = TRUE))*100,1),
+                    CV = round(cv(svymean(~ violencia_domest, subset(dadosPNS,C006=="Mulher"), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svymean(~ violencia_domest, subset(dadosPNS, C006=="Mulher"), na.rm = TRUE))[1]*100,1),
+                    Limite_superior = round(confint(svymean(~ violencia_domest, subset(dadosPNS, C006=="Mulher"), na.rm = TRUE))[2]*100,1))
+tab.1d
+```
+
+## 2. Tipos de agressão
+
+```{r dados2, echo=TRUE, warning=FALSE}
+# Total de mulheres que sofreram alguma violência doméstica nos últimos dozes meses por tipo de agressão - Minas Gerais - 2019
+tab.2a <- data.frame(Estimativa  = round(coef(svytotal(~ agressao_psicol+agressao_fisica+agressao_sexual, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"), na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svytotal(~ agressao_psicol+agressao_fisica+agressao_sexual, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"), na.rm = TRUE)),0),
+                    CV = round(cv(svytotal(~ agressao_psicol+agressao_fisica+agressao_sexual, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svytotal(~ agressao_psicol+agressao_fisica+agressao_sexual, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"), na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svytotal(~ agressao_psicol+agressao_fisica+agressao_sexual, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"), na.rm = TRUE))[,2],0))
+tab.2a
+
+# Total de mulheres que sofreram alguma violência doméstica nos últimos dozes meses por tipo de agressão - Brasil - 2019
+tab.2b <- data.frame(Estimativa  = round(coef(svytotal(~ agressao_psicol+agressao_fisica+agressao_sexual, subset(dadosPNS, C006=="Mulher"), na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svytotal(~ agressao_psicol+agressao_fisica+agressao_sexual, subset(dadosPNS, C006=="Mulher"), na.rm = TRUE)),0),
+                    CV = round(cv(svytotal(~ agressao_psicol+agressao_fisica+agressao_sexual, subset(dadosPNS,C006=="Mulher"), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svytotal(~ agressao_psicol+agressao_fisica+agressao_sexual, subset(dadosPNS,C006=="Mulher"), na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svytotal(~ agressao_psicol+agressao_fisica+agressao_sexual, subset(dadosPNS,C006=="Mulher"), na.rm = TRUE))[,2],0))
+tab.2b
+```
+
+## 3. Características socioeconômicas
+
+### Situação de ocupação
+
+```{r dados3, echo=TRUE, warning=FALSE}
+# Total de mulheres que sofreram alguma violência doméstica nos últimos dozes meses por situação de ocupação - Minas Gerais - 2019
+tab.3a <- data.frame(Estimativa  = round(coef(svyby(~ violencia_domest,by = ~VDE002, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"),svytotal, na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svyby(~ violencia_domest, by = ~VDE002,subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"),svytotal, na.rm = TRUE)),0),
+                    CV = round(cv(svyby(~ violencia_domest, by = ~VDE002,subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"),svytotal, na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svyby(~ violencia_domest,by = ~VDE002, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"),svytotal, na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svyby(~ violencia_domest,by = ~VDE002, subset(dadosPNS,V0001=="Minas Gerais" & C006=="Mulher"),svytotal, na.rm = TRUE))[,2],0))
+tab.3a
+
+# Total de mulheres que sofreram alguma violência doméstica nos últimos dozes meses por situação de ocupação - Brasil - 2019
+tab.3b <- data.frame(Estimativa  = round(coef(svyby(~ violencia_domest,by = ~VDE002, subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svyby(~ violencia_domest, by = ~VDE002,subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE)),0),
+                    CV = round(cv(svyby(~ violencia_domest, by = ~VDE002,subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svyby(~ violencia_domest,by = ~VDE002, subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svyby(~ violencia_domest,by = ~VDE002, subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE))[,2],0))
+tab.3b
+
+# Proporção de mulheres que sofreram alguma violência doméstica nos últimos dozes meses por situação de ocupação - Brasil - 2019
+tab.3c <- data.frame(Estimativa  = round(coef(svyby(~ violencia_domest,by = ~VDE002, subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))*100,1),
+                    Erro_padrao = round(SE(svyby(~ violencia_domest, by = ~VDE002,subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))*100,1),
+                    CV = round(cv(svyby(~ violencia_domest, by = ~VDE002,subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svyby(~ violencia_domest,by = ~VDE002, subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))[,1]*100,1),
+                    Limite_superior = round(confint(svyby(~ violencia_domest,by = ~VDE002, subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))[,2]*100,1))
+tab.3c
+
+```
+
+### Rendimento domiciliar
+
+```{r dados4, echo=TRUE, warning=FALSE}
+# Rendimento domiciliar per capita de mulheres que não sofreram e que sofreram alguma violência doméstica nos últimos dozes meses - Brasil - 2019
+tab.4a <- data.frame(Estimativa  = round(coef(svyby(~ VDF003,by = ~violencia_domest, subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE)),2),
+                    Erro_padrao = round(SE(svyby(~ VDF003, by = ~violencia_domest,subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE)),2),
+                    CV = round(cv(svyby(~ VDF003, by = ~violencia_domest,subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE)),1),
+                    Limite_inferior = round(confint(svyby(~ VDF003,by = ~violencia_domest, subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))[,1],2),
+                    Limite_superior = round(confint(svyby(~ VDF003,by = ~violencia_domest, subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))[,2],2))
+tab.4a
+
+# Total de mulheres que sofreram alguma violência doméstica nos últimos dozes meses por Faixa de rendimento domiciliar per capita - Brasil - 2019
+tab.4b <- data.frame(Estimativa  = round(coef(svyby(~ violencia_domest,by = ~VDF004, subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svyby(~ violencia_domest, by = ~VDF004,subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE)),0),
+                    CV = round(cv(svyby(~ violencia_domest, by = ~VDF004,subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svyby(~ violencia_domest,by = ~VDF004, subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svyby(~ violencia_domest,by = ~VDF004, subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE))[,2],0))
+tab.4b
+
+# Proporção de mulheres que sofreram alguma violência doméstica nos últimos dozes meses por Faixa de rendimento domiciliar per capita - Brasil - 2019
+tab.4c <- data.frame(Estimativa  = round(coef(svyby(~ violencia_domest,by = ~VDF004, subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))*100,1),
+                    Erro_padrao = round(SE(svyby(~ violencia_domest, by = ~VDF004,subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))*100,1),
+                    CV = round(cv(svyby(~ violencia_domest, by = ~VDF004,subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svyby(~ violencia_domest,by = ~VDF004, subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))[,1]*100,1),
+                    Limite_superior = round(confint(svyby(~ violencia_domest,by = ~VDF004, subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))[,2]*100,1))
+tab.4c
+
+
+```
+
+### Nível de instrução
+
+```{r dados5, echo=TRUE, warning=FALSE}
+# Total de mulheres que sofreram alguma violência doméstica nos últimos dozes meses por nível de instrução - Brasil - 2019
+tab.5a <- data.frame(Estimativa  = round(coef(svyby(~ violencia_domest,by = ~VDD004A, subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svyby(~ violencia_domest, by = ~VDD004A,subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE)),0),
+                    CV = round(cv(svyby(~ violencia_domest, by = ~VDD004A,subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svyby(~ violencia_domest,by = ~VDD004A, subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svyby(~ violencia_domest,by = ~VDD004A, subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE))[,2],0))
+tab.5a
+
+# Proporção de mulheres que sofreram alguma violência doméstica nos últimos dozes meses por nível de instrução - Brasil - 2019
+tab.5b <- data.frame(Estimativa  = round(coef(svyby(~ violencia_domest,by = ~VDD004A, subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))*100,1),
+                    Erro_padrao = round(SE(svyby(~ violencia_domest, by = ~VDD004A,subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))*100,1),
+                    CV = round(cv(svyby(~ violencia_domest, by = ~VDD004A,subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svyby(~ violencia_domest,by = ~VDD004A, subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))[,1]*100,1),
+                    Limite_superior = round(confint(svyby(~ violencia_domest,by = ~VDD004A, subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))[,2]*100,1))
+tab.5b
+```
+
+### Raça ou cor
+
+```{r dados6, echo=TRUE, warning=FALSE} 
+# Total de mulheres que sofreram alguma violência doméstica nos últimos dozes meses por raça ou cor - Brasil - 2019 
+tab.6a <- data.frame(Estimativa = round(coef(svyby(~violencia_domest,by = ~raca_cor, subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE)),0),
+                     Erro_padrao = round(SE(svyby(~violencia_domest, by = ~raca_cor,subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE)),0),
+                     CV = round(cv(svyby(~violencia_domest, by = ~raca_cor,subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE))*100,1), 
+                     Limite_inferior = round(confint(svyby(~violencia_domest, by = ~raca_cor, subset(dadosPNS,C006=="Mulher"),svytotal, na.rm = TRUE))[,1],0),
+            Limite_superior = round(confint(svyby(~violencia_domest,by = ~raca_cor, subset(dadosPNS,C006=="Mulher"),svytotal,na.rm = TRUE))[,2],0)) 
+tab.6a
+
+# Proporção de mulheres que sofreram alguma violência doméstica nos últimos dozes meses por raça ou cor - Brasil - 2019
+tab.6b <- data.frame(Estimativa = round(coef(svyby(~ violencia_domest,by = ~raca_cor, subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))*100,1),
+                     Erro_padrao = round(SE(svyby(~ violencia_domest, by = ~raca_cor,subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))*100,1),
+                     CV = round(cv(svyby(~ violencia_domest, by = ~raca_cor,subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))*100,1), 
+                     Limite_inferior = round(confint(svyby(~violencia_domest, by = ~raca_cor, subset(dadosPNS,C006=="Mulher"),svymean, na.rm = TRUE))[,1]*100,1),
+                     Limite_superior = round(confint(svyby(~ violencia_domest,by = ~raca_cor, subset(dadosPNS,C006=="Mulher"),svymean,na.rm = TRUE))[,2]*100,1)) 
+tab.6b
+```

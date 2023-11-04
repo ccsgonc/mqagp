@@ -1481,13 +1481,13 @@ border-radius: 0px;
 <h1 class="title toc-ignore">Indicadores no R: animais de estimação na
 PNS</h1>
 <h4 class="author">Caio Gonçalves - <a href="mailto:caio.goncalves@fjp.mg.gov.br" class="email">caio.goncalves@fjp.mg.gov.br</a></h4>
-<h4 class="date">06-novembro-2023</h4>
+<h4 class="date">09-novembro-2023</h4>
 
 </div>
 
 
 <p>O objetivo deste tutorial é extrair os dados amostrais da PNS e
-mostras as possibilidades de análise dessa pesquisa.</p>
+mostrar as possibilidades de análise dessa pesquisa.</p>
 <div id="pns" class="section level1">
 <h1>PNS</h1>
 <p>A Pesquisa Nacional de Saúde (PNS) é um importante levantamento
@@ -1600,31 +1600,60 @@ tab.1b</code></pre>
 tab.1c &lt;- data.frame(Estimativa  = round(coef(svyby(~ animal,by = ~estratos_geogr, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), svytotal, na.rm = TRUE)),0),
                     Erro_padrao = round(SE(svyby(~ animal,by = ~estratos_geogr, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), svytotal,na.rm = TRUE)),0),
                     CV = round(cv(svyby(~ animal,by = ~estratos_geogr, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), svytotal,na.rm = TRUE))*100,1),
-                    Limite_inferior = round(confint(svyby(~ animal,by = ~estratos_geogr, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), svytotal,na.rm = TRUE))[1,],0),
-                    Limite_superior = round(confint(svyby(~ animal,by = ~estratos_geogr, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), svytotal,na.rm = TRUE))[2,],0))
+                    Limite_inferior = round(confint(svyby(~ animal,by = ~estratos_geogr, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), svytotal,na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svyby(~ animal,by = ~estratos_geogr, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), svytotal,na.rm = TRUE))[,2],0))
 tab.1c</code></pre>
 <pre><code>##                                Estimativa Erro_padrao   CV Limite_inferior
 ## 01-Belo Horizonte                 1384844       46599  3.4         1293512
-## 02-Entorno metropolitono de BH    1895353       66374  3.5         1476176
-## 03-Colar metropolitano de BH       323021       37930 11.7         1293512
-## 04-RIDE de Brasília em Minas        74821        5156  6.9         1476176
-## 05-Sul de Minas                   1891850      184400  9.7         1293512
-## 06-Triângulo Mineiro              1652391      159574  9.7         1476176
-## 07-Mata de Minas Gerais           1354627      111465  8.2         1293512
-## 08-Norte de Minas                 1595795      119616  7.5         1476176
-## 09-Vale do Rio Doce               1320655      123174  9.3         1293512
-## 10-Central                        1728128      107026  6.2         1476176
+## 02-Entorno metropolitono de BH    1895353       66374  3.5         1765261
+## 03-Colar metropolitano de BH       323021       37930 11.7          248679
+## 04-RIDE de Brasília em Minas        74821        5156  6.9           64715
+## 05-Sul de Minas                   1891850      184400  9.7         1530432
+## 06-Triângulo Mineiro              1652391      159574  9.7         1339631
+## 07-Mata de Minas Gerais           1354627      111465  8.2         1136159
+## 08-Norte de Minas                 1595795      119616  7.5         1361351
+## 09-Vale do Rio Doce               1320655      123174  9.3         1079239
+## 10-Central                        1728128      107026  6.2         1518360
 ##                                Limite_superior
-## 01-Belo Horizonte                      1765261
+## 01-Belo Horizonte                      1476176
 ## 02-Entorno metropolitono de BH         2025444
-## 03-Colar metropolitano de BH           1765261
-## 04-RIDE de Brasília em Minas           2025444
-## 05-Sul de Minas                        1765261
-## 06-Triângulo Mineiro                   2025444
-## 07-Mata de Minas Gerais                1765261
-## 08-Norte de Minas                      2025444
-## 09-Vale do Rio Doce                    1765261
-## 10-Central                             2025444</code></pre>
+## 03-Colar metropolitano de BH            397364
+## 04-RIDE de Brasília em Minas             84927
+## 05-Sul de Minas                        2253268
+## 06-Triângulo Mineiro                   1965151
+## 07-Mata de Minas Gerais                1573094
+## 08-Norte de Minas                      1830239
+## 09-Vale do Rio Doce                    1562072
+## 10-Central                             1937896</code></pre>
+<pre class="r"><code># Proporção de domicílios com algum animal de estimação - estratos geográficos de Minas Gerais - 2019
+tab.1d &lt;- data.frame(Estimativa  = round(coef(svyby(~ animal,by = ~estratos_geogr, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), svymean, na.rm = TRUE))*100,1),
+                    Erro_padrao = round(SE(svyby(~ animal,by = ~estratos_geogr, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), svymean,na.rm = TRUE))*100,1),
+                    CV = round(cv(svyby(~ animal,by = ~estratos_geogr, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), svymean,na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svyby(~ animal,by = ~estratos_geogr, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), svymean,na.rm = TRUE))[,1]*100,1),
+                    Limite_superior = round(confint(svyby(~ animal,by = ~estratos_geogr, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), svymean,na.rm = TRUE))[,2]*100,1))
+tab.1d</code></pre>
+<pre><code>##                                Estimativa Erro_padrao  CV Limite_inferior
+## 01-Belo Horizonte                    55.1         1.9 3.4            51.5
+## 02-Entorno metropolitono de BH       66.6         2.3 3.5            62.1
+## 03-Colar metropolitano de BH         69.0         5.4 7.8            58.4
+## 04-RIDE de Brasília em Minas         68.5         4.7 6.9            59.2
+## 05-Sul de Minas                      68.3         3.7 5.4            61.1
+## 06-Triângulo Mineiro                 60.7         3.9 6.4            53.0
+## 07-Mata de Minas Gerais              54.2         2.7 4.9            49.0
+## 08-Norte de Minas                    62.6         3.0 4.8            56.7
+## 09-Vale do Rio Doce                  62.5         4.5 7.2            53.7
+## 10-Central                           67.1         3.6 5.4            60.0
+##                                Limite_superior
+## 01-Belo Horizonte                         58.8
+## 02-Entorno metropolitono de BH            71.2
+## 03-Colar metropolitano de BH              79.5
+## 04-RIDE de Brasília em Minas              77.7
+## 05-Sul de Minas                           75.5
+## 06-Triângulo Mineiro                      68.3
+## 07-Mata de Minas Gerais                   59.5
+## 08-Norte de Minas                         68.5
+## 09-Vale do Rio Doce                       71.3
+## 10-Central                                74.2</code></pre>
 </div>
 <div id="quantos-destes-animais-são-gatos-cachorros-aves-e-peixes" class="section level2">
 <h2>2. Quantos destes animais são gatos, cachorros, aves e peixes?</h2>
@@ -1632,14 +1661,14 @@ tab.1c</code></pre>
 tab.2a &lt;- data.frame(Estimativa  = round(coef(svytotal(~ A02305+A02306+A02307+A02308, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), na.rm = TRUE)),0),
                     Erro_padrao = round(SE(svytotal(~ A02305+A02306+A02307+A02308, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), na.rm = TRUE)),0),
                     CV = round(cv(svytotal(~ A02305+A02306+A02307+A02308, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), na.rm = TRUE))*100,1),
-                    Limite_inferior = round(confint(svytotal(~ A02305+A02306+A02307+A02308, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), na.rm = TRUE))[1],0),
-                    Limite_superior = round(confint(svytotal(~ A02305+A02306+A02307+A02308, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), na.rm = TRUE))[2],0))
+                    Limite_inferior = round(confint(svytotal(~ A02305+A02306+A02307+A02308, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svytotal(~ A02305+A02306+A02307+A02308, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), na.rm = TRUE))[,2],0))
 tab.2a</code></pre>
 <pre><code>##        Estimativa Erro_padrao   CV Limite_inferior Limite_superior
-## A02305    6655626      409387  6.2         5853242        19006926
-## A02306   20173401      595151  3.0         5853242        19006926
-## A02307   11370945     1207239 10.6         5853242        19006926
-## A02308    2116463      456365 21.6         5853242        19006926</code></pre>
+## A02305    6655626      409387  6.2         5853242         7458011
+## A02306   20173401      595151  3.0        19006926        21339876
+## A02307   11370945     1207239 10.6         9004799        13737090
+## A02308    2116463      456365 21.6         1222004         3010922</code></pre>
 </div>
 <div id="gráfico-para-dados-amostrais" class="section level2">
 <h2>3. Gráfico para dados amostrais</h2>
@@ -1683,12 +1712,12 @@ contra raiva?</h2>
 tab.4a &lt;- data.frame(Estimativa  = round(coef(svytotal(~ A02401+A02402, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), na.rm = TRUE)),0),
                     Erro_padrao = round(SE(svytotal(~ A02401+A02402, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), na.rm = TRUE)),0),
                     CV = round(cv(svytotal(~ A02401+A02402, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), na.rm = TRUE))*100,1),
-                    Limite_inferior = round(confint(svytotal(~ A02401+A02402, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), na.rm = TRUE))[1],0),
-                    Limite_superior = round(confint(svytotal(~ A02401+A02402, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), na.rm = TRUE))[2],0))
+                    Limite_inferior = round(confint(svytotal(~ A02401+A02402, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svytotal(~ A02401+A02402, subset(dadosPNS,V0001==&quot;Minas Gerais&quot;), na.rm = TRUE))[,2],0))
 tab.4a</code></pre>
 <pre><code>##        Estimativa Erro_padrao  CV Limite_inferior Limite_superior
-## A02401    3021423      231566 7.7         2567562         3357401
-## A02402    3972055      313605 7.9         2567562         3357401</code></pre>
+## A02401    3021423      231566 7.7         2567562         3475283
+## A02402    3972055      313605 7.9         3357401         4586709</code></pre>
 </div>
 </div>
 
