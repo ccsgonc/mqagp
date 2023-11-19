@@ -1,0 +1,261 @@
+---
+title: "Indicadores no R: indicadores ambientais no MapBiomas"
+author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
+date: "20-novembro-2023"
+output:
+  html_document: 
+  toc: true
+  toc_float: true
+editor_options: 
+  markdown: 
+  wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+O objetivo deste tutorial é explorar a base de dados do MapBiomas.
+
+# Introdução
+
+O MapBiomas é uma iniciativa inovadora que utiliza tecnologia de ponta para mapear a cobertura e o uso do solo no Brasil. Esta iniciativa colaborativa reúne organizações da sociedade civil, universidades e empresas de tecnologia para gerar dados anuais de alta precisão sobre as mudanças na paisagem brasileira. Utilizando imagens de satélite e algoritmos avançados de aprendizado de máquina, o MapBiomas oferece uma visão detalhada das transformações ocorridas em diferentes ecossistemas, desde a expansão urbana até a desflorestação, agricultura e recuperação de áreas degradadas. Estas informações são cruciais para o planejamento ambiental, políticas públicas, estudos científicos e atividades de conservação, contribuindo significativamente para o entendimento e a gestão sustentável dos recursos naturais do Brasil.
+
+# Base de dados
+
+O MapBiomas oferece em seu portal robusto uma área dedicada ao download de sua extensa base de dados, disponível no site oficial do projeto, em <https://brasil.mapbiomas.org/estatisticas/>. Nesta página, os usuários podem encontrar uma variedade de informações e estatísticas relacionadas à cobertura e uso do solo no Brasil. O processo de download é intuitivo e bem estruturado, permitindo aos usuários selecionar e baixar dados específicos de acordo com suas necessidades, seja para fins de pesquisa, planejamento ambiental ou estudos de conservação. A plataforma fornece dados classificados por coleções anuais, abrangendo diversas categorias de uso do solo e cobertura vegetal. Esses dados são essenciais para entender as dinâmicas ambientais do Brasil e são uma ferramenta valiosa para políticas públicas, gestão ambiental e projetos de sustentabilidade.
+
+# Conceitos principais
+
+"Cobertura da terra" e "uso da terra" são dois conceitos fundamentais em geografia, planejamento ambiental e estudos relacionados à gestão de recursos naturais. Embora muitas vezes usados de forma intercambiável, eles têm significados distintos.
+
+1.  **Cobertura da Terra**: Refere-se às características físicas e biológicas da superfície terrestre. Inclui elementos naturais como florestas, rios, lagos, e montanhas, bem como características artificiais como áreas urbanizadas, estradas e construções. A cobertura da terra é, portanto, uma descrição daquilo que cobre a terra, podendo ser vegetação, água, construções artificiais, entre outros. É um termo mais relacionado à ecologia e geografia física, destacando os aspectos naturais e físicos do ambiente.
+
+2.  **Uso da Terra**: Este conceito, por outro lado, descreve como as pessoas utilizam a terra, incluindo práticas como agricultura, urbanização, conservação, e recreação. É uma perspectiva mais centrada na ação humana, refletindo as decisões econômicas, culturais e políticas que influenciam como a terra é utilizada. Por exemplo, uma área pode ser coberta por floresta (cobertura da terra), mas seu uso pode ser para conservação, exploração madeireira, ou recreação.
+
+3.  **Transições**: são as mudanças na cobertura e uso da terra que têm implicações significativas para questões como mudanças climáticas, biodiversidade, sustentabilidade dos recursos naturais, e qualidade de vida humana.
+
+# Base de dados 
+
+```{r dados, echo=TRUE, warning=FALSE}
+# carrega as bibliotecas
+library(readxl)
+library(dplyr)
+library(tidyverse)
+library(gt)
+library(networkD3)
+
+# Opção de vizualização
+options(scipen = 999)
+
+# importando os dados
+df.cobertura <- read_excel("TABELA-GERAL-MAPBIOMAS-COL8.0-BIOMASxESTADOS-1.xlsx", 
+    sheet = "COBERTURA_COL8.0")
+View(df.cobertura)
+```
+
+## Minas Gerais - cobertura e uso
+
+### Nível 0
+
+Os dados apresentados fornecem uma visão da cobertura da terra categorizadas como Antrópica (Anthropic), Natural e Não Aplicada (Not applied) ao longo dos anos de 1985 a 2022. Esta análise será realizada em duas partes: primeiro, a análise dos valores absolutos (área em hectares) e, em seguida, a análise percentual.
+
+```{r indicadores0, echo=TRUE, warning=FALSE}
+# prepara tabela
+tab00a<- df.cobertura %>% filter(state == "Minas Gerais") %>% 
+  group_by(level_0) %>% 
+  summarise(`1985`=round(sum(`1985`,na.rm = TRUE)/1000),
+            `1990`=round(sum(`1990`,na.rm = TRUE)/1000),
+            `2000`=round(sum(`2000`,na.rm = TRUE)/1000),
+            `2010`=round(sum(`2010`,na.rm = TRUE)/1000),
+            `2020`=round(sum(`2020`,na.rm = TRUE)/1000),
+            `2022`=round(sum(`2022`,na.rm = TRUE)/1000)) 
+tab00a %>%  gt()
+
+```
+
+1.  **Anthropic (Áreas Antrópicas)**: Houve um aumento constante na área antrópica de 34,005,829 ha em 1985 para 37,030,845.5 ha em 2022. Este crescimento indica uma expansão contínua de áreas utilizadas para atividades humanas, como urbanização, agricultura, e infraestrutura.
+
+2.  **Natural**: A área classificada como natural diminuiu de 24,192,392.4 ha em 1985 para 21,416,949.3 ha em 2022. Este declínio reflete a perda de ecossistemas naturais, possivelmente devido à conversão em áreas antrópicas.
+
+3.  **Not Applied**: Esta categoria, que pode incluir áreas não mapeadas ou indeterminadas, mostrou variações menores, começando em 453,159.3 ha em 1985 e aumentando para 203,585.8 ha em 2022, com um declínio inicial seguido de um aumento recente.
+
+```{r indicadores0b, echo=TRUE, warning=FALSE}
+# conferencia de totais de área
+colSums(tab00a[,c(2:7)],na.rm=TRUE)
+
+# salva a área total
+area <- colSums(tab00a[,c(2:7)],na.rm=TRUE)[1]*1000
+
+# fazendo em proporção
+tab00b<- df.cobertura %>% filter(state == "Minas Gerais") %>% 
+  group_by(level_0) %>% 
+  summarise(`1985`=round(sum(`1985`,na.rm = TRUE)/area*100,2),
+            `1990`=round(sum(`1990`,na.rm = TRUE)/area*100,2),
+            `2000`=round(sum(`2000`,na.rm = TRUE)/area*100,2),
+            `2010`=round(sum(`2010`,na.rm = TRUE)/area*100,2),
+            `2020`=round(sum(`2020`,na.rm = TRUE)/area*100,2),
+            `2022`=round(sum(`2022`,na.rm = TRUE)/area*100,2)) 
+tab00b %>%  gt()
+```
+
+1.  **Anthropic**: Em termos percentuais, houve um aumento de 57.98% em 1985 para 63.14% em 2022. Este crescimento percentual sugere que a expansão das áreas antrópicas está ocorrendo a um ritmo mais rápido do que qualquer outra mudança de uso da terra.
+
+2.  **Natural**: A porcentagem de área natural diminuiu de 41.25% em 1985 para 36.52% em 2022. Este declínio percentual é consistente com a expansão das áreas antrópicas e indica uma pressão crescente sobre os ecossistemas naturais.
+
+3.  **Not Applied**: A proporção desta categoria teve uma pequena variação, começando com 0.77% em 1985, diminuindo para 0.23% em 2010 e 2020, e depois aumentando ligeiramente para 0.35% em 2022.
+
+### Nível 1
+
+```{r indicadores1, echo=TRUE, warning=FALSE}
+# prepara tabela
+tab01a<- df.cobertura %>% filter(state == "Minas Gerais") %>% 
+  group_by(level_1) %>% 
+  summarise(`1985`=round(sum(`1985`,na.rm = TRUE)/1000),
+            `1990`=round(sum(`1990`,na.rm = TRUE)/1000),
+            `2000`=round(sum(`2000`,na.rm = TRUE)/1000),
+            `2010`=round(sum(`2010`,na.rm = TRUE)/1000),
+            `2020`=round(sum(`2020`,na.rm = TRUE)/1000),
+            `2022`=round(sum(`2022`,na.rm = TRUE)/1000)) 
+tab01a %>%  gt()
+
+# conferencia de totais de área
+colSums(tab01a[,c(2:7)],na.rm=TRUE)
+
+# salva a área total
+area <- colSums(tab01a[,c(2:7)],na.rm=TRUE)[1]*1000
+
+# fazendo em proporção
+tab01b<- df.cobertura %>% filter(state == "Minas Gerais") %>% 
+  group_by(level_1) %>% 
+  summarise(`1985`=round(sum(`1985`,na.rm = TRUE)/area*100,2),
+            `1990`=round(sum(`1990`,na.rm = TRUE)/area*100,2),
+            `2000`=round(sum(`2000`,na.rm = TRUE)/area*100,2),
+            `2010`=round(sum(`2010`,na.rm = TRUE)/area*100,2),
+            `2020`=round(sum(`2020`,na.rm = TRUE)/area*100,2),
+            `2022`=round(sum(`2022`,na.rm = TRUE)/area*100,2)) 
+tab01b %>% gt()
+```
+
+1.  **Floresta (Forest)**: Observa-se uma tendência de declínio constante na cobertura florestal, de 34.54% em 1985 para 30.54% em 2022. Este decréscimo indica uma perda contínua de áreas florestais, possivelmente devido à desflorestação para outras formas de uso da terra, como agricultura ou urbanização.
+
+2.  **Formação Natural Não Florestal (Non Forest Natural Formation)**: Houve uma diminuição de 5.48% em 1985 para 4.71% em 2000, seguida por uma estabilização e um leve aumento para 4.81% em 2022. Este padrão sugere uma certa resiliência ou recuperação dessas áreas naturais não florestais após um período inicial de declínio.
+
+3.  **Agricultura (Farming)**: Esta categoria apresentou um aumento consistente, de 57.73% em 1985 para 62.33% em 2022. Este aumento reflete uma expansão contínua da terra utilizada para agricultura, o que pode estar relacionado ao crescimento da população e à demanda por alimentos, bem como a políticas de uso da terra.
+
+4.  **Área Não Vegetada (Non Vegetated Area)**: Houve um aumento nesta categoria, de 1.02% em 1985 para 1.15% em 2022. Este crescimento pode ser atribuído à expansão de áreas urbanas, infraestrutura e outras atividades que resultam na remoção da vegetação natural.
+
+5.  **Água (Water)**: A cobertura de água teve pequenas variações, diminuindo ligeiramente de 1.23% em 1985 para 1.10% em 2000, e depois aumentando para 1.17% em 2022. Estas variações podem ser devido a mudanças naturais em corpos d'água ou a alterações antrópicas, como a construção de reservatórios.
+
+6.  **Não Observado (Non Observed)**: Manteve-se em 0.00% ao longo de todo o período, indicando que não houve áreas não mapeadas ou indeterminadas nos dados analisados.
+
+### Nível 2
+
+```{r indicadores2, echo=TRUE, warning=FALSE}
+# prepara tabela
+tab02a<- df.cobertura %>% filter(state == "Minas Gerais") %>% 
+  group_by(level_2) %>% 
+  summarise(`1985`=round(sum(`1985`,na.rm = TRUE)/1000),
+            `1990`=round(sum(`1990`,na.rm = TRUE)/1000),
+            `2000`=round(sum(`2000`,na.rm = TRUE)/1000),
+            `2010`=round(sum(`2010`,na.rm = TRUE)/1000),
+            `2020`=round(sum(`2020`,na.rm = TRUE)/1000),
+            `2022`=round(sum(`2022`,na.rm = TRUE)/1000)) 
+tab02a %>% gt
+
+# conferencia de totais de área
+colSums(tab02a[,c(2:7)],na.rm=TRUE)
+
+# salva a área total
+area <- colSums(tab02a[,c(2:7)],na.rm=TRUE)[1]*1000
+
+# fazendo em proporção
+tab02b<- df.cobertura %>% filter(state == "Minas Gerais") %>% 
+  group_by(level_2) %>% 
+  summarise(`1985`=round(sum(`1985`,na.rm = TRUE)/area*100,2),
+            `1990`=round(sum(`1990`,na.rm = TRUE)/area*100,2),
+            `2000`=round(sum(`2000`,na.rm = TRUE)/area*100,2),
+            `2010`=round(sum(`2010`,na.rm = TRUE)/area*100,2),
+            `2020`=round(sum(`2020`,na.rm = TRUE)/area*100,2),
+            `2022`=round(sum(`2022`,na.rm = TRUE)/area*100,2)) 
+tab02b %>%  gt()
+```
+
+
+## Brasil - transições
+
+### Nível resumido
+```{r dados2, echo=TRUE, warning=FALSE}
+# preparação dos dados
+df.transicao <- read.table("sankey_data.csv",header = T,sep=";")
+df.transicao %>% gt()
+# atribui nomes as linhas
+rownames(df.transicao)<-df.transicao$X
+# corrige nomes das colunas
+colnames(df.transicao) <- gsub('\\.', ' ', colnames(df.transicao))
+# verifica nomes
+rownames(df.transicao)
+# exclui a primeira coluna
+df.transicao<-df.transicao[,-c(1)]
+# transforma em formato longo
+df.transicao_long <- df.transicao %>%
+  rownames_to_column %>%
+  gather(key = 'key', value = 'value', -rowname) %>%
+  filter(value > 0)
+# renomeia as colunas
+colnames(df.transicao_long) <- c("source", "target", "value")
+# adiciona espaço depois do nome
+df.transicao_long$target <- paste(df.transicao_long$target, " ", sep="")
+# Deste fluxo, precisamos criar um quadro de dados de nós: ele lista todas as entidades envolvidas no fluxo.
+nodes <- data.frame(name=c(as.character(df.transicao_long$source), as.character(df.transicao_long$target)) %>% unique())
+# reformata para usar os IDs
+df.transicao_long$IDsource=match(df.transicao_long$source, nodes$name)-1
+df.transicao_long$IDtarget=match(df.transicao_long$target, nodes$name)-1
+
+# prepare colour scale
+ColourScal ='d3.scaleOrdinal() .range(["#FDE725FF","#B4DE2CFF","#6DCD59FF","#35B779FF","#1F9E89FF","#26828EFF","#31688EFF","#3E4A89FF","#482878FF","#440154FF"])'
+
+
+# Make the Network
+sankeyNetwork(Links = df.transicao_long, Nodes = nodes,
+              Source = "IDsource", Target = "IDtarget",
+              Value = "value", NodeID = "name",
+              sinksRight=FALSE, colourScale=ColourScal, nodeWidth=40, fontSize=13, nodePadding=20)
+
+```
+
+### Nível completo
+
+```{r dados3, echo=TRUE, warning=FALSE}
+#sankey completo
+df.transicao_comp <- read.table("sankey_data_completo.csv",header = T,sep=";", dec=".")
+rownames(df.transicao_comp)<-df.transicao_comp$X
+rownames(df.transicao_comp)
+colnames(df.transicao_comp) <- gsub('\\.', ' ', colnames(df.transicao_comp))
+df.transicao_comp<-df.transicao_comp[,-c(1)]
+
+# formato longo
+df.transicao_comp_long <- df.transicao_comp %>%
+  rownames_to_column %>%
+  gather(key = 'key', value = 'value', -rowname) %>%
+  filter(value > 0)
+colnames(df.transicao_comp_long) <- c("source", "target", "value")
+df.transicao_comp_long$target <- paste(df.transicao_comp_long$target, " ", sep="")
+
+# nodes
+nodes <- data.frame(name=c(as.character(df.transicao_comp_long$source), as.character(df.transicao_comp_long$target)) %>% unique())
+
+# ids
+df.transicao_comp_long$IDsource=match(df.transicao_comp_long$source, nodes$name)-1
+df.transicao_comp_long$IDtarget=match(df.transicao_comp_long$target, nodes$name)-1
+
+# prepare colour scale
+ColourScal ='d3.scaleOrdinal() .range(["#FDE725FF","#B4DE2CFF","#6DCD59FF","#35B779FF","#1F9E89FF","#26828EFF","#31688EFF","#3E4A89FF","#482878FF","#440154FF"])'
+
+# Make the Network
+sankeyNetwork(Links = df.transicao_comp_long, Nodes = nodes,
+              Source = "IDsource", Target = "IDtarget",
+              Value = "value", NodeID = "name",
+              sinksRight=FALSE, colourScale=ColourScal, nodeWidth=40, fontSize=13, nodePadding=20)
+
+```

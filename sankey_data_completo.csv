@@ -1,0 +1,10 @@
+;Agricultura;Corpo dagua;Floresta natural;Floresta plantada;Formacao natural nao florestal;Infraestrutura urbana;Mosaico;Outras areas nao vegetadas;Pastagem
+Agricultura;0;0;1;1;1;0;1;0;2
+Corpo dagua;0;0;1;0;0;0;0;0;1
+Floresta natural;14;2;0;4;5;1;7;0;85
+Floresta plantada;0;0;0;0;0;0;0;0;0
+Formacao natural nao florestal;7;1;6;1;0;1;1;0;10
+Infraestrutura urbana;0;0;0;0;0;0;0;0;0
+Mosaico;7;0;7;1;0;1;0;0;21
+Outras areas nao vegetadas;0;0;0;0;0;0;0;0;1
+Pastagem;29;1;23;4;2;3;16;0;0
