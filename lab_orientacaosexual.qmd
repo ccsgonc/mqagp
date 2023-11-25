@@ -1,0 +1,385 @@
+---
+title: "Indicadores no R: orientação sexual na PNS"
+author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
+date: "27-novembro-2023"
+output:
+  html_document: 
+    toc: true
+    toc_float: true
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+O objetivo deste tutorial é extrair os dados amostrais da PNS e mostrar
+as possibilidades de análise dessa pesquisa com ênfase na orientação
+sexual.
+
+# PNS
+
+A Pesquisa Nacional de Saúde (PNS) é um importante levantamento
+realizado pelo Instituto Brasileiro de Geografia e Estatística (IBGE) em
+parceria com o Ministério da Saúde no Brasil. O objetivo da PNS é
+coletar informações detalhadas sobre a saúde da população brasileira,
+incluindo dados relacionados a condições de saúde, estilo de vida,
+acesso aos serviços de saúde, uso de medicamentos, entre outros aspectos
+relevantes.
+
+A PNS é um estudo abrangente que fornece informações valiosas para a
+formulação de políticas de saúde, planejamento de serviços de saúde,
+pesquisa acadêmica e tomada de decisões relacionadas à saúde pública.
+
+Além disso, a pesquisa permite o acompanhamento das tendências em saúde
+ao longo do tempo e a identificação de desafios de saúde específicos que
+podem necessitar de intervenções.
+
+Alguns dos principais tópicos cobertos pela PNS incluem:
+
+-   Condições de Saúde: A pesquisa coleta informações sobre a
+    prevalência de doenças crônicas, deficiências, condições de saúde
+    mental, entre outras.
+
+-   Estilo de Vida: A PNS abrange informações sobre hábitos relacionados
+    à saúde, como consumo de tabaco, consumo de álcool, dieta, atividade
+    física, entre outros.
+
+-   Acesso aos Serviços de Saúde: Ela investiga o acesso a serviços de
+    saúde, cobertura de seguro de saúde, uso de serviços de saúde e
+    barreiras ao acesso.
+
+-   Uso de Medicamentos: A pesquisa coleta dados sobre o uso de
+    medicamentos, incluindo prescrição e automedicação.
+
+-   Fatores Socioeconômicos: A PNS considera fatores socioeconômicos,
+    como renda, educação e ocupação, que podem estar relacionados à
+    saúde.
+
+# Orientação sexual
+
+De acordo com o art. 5º da Lei Maria da Penha, violência doméstica e
+familiar contra a mulher é "qualquer ação ou omissão baseada no gênero
+que lhe cause morte, lesão, sofrimento físico, sexual ou psicológico e
+dano moral ou patrimonial".
+
+Conforme o Instituto Maria da Penha, um dos mitos da violência doméstica
+é que:
+
+*"A violência doméstica só acontece em famílias de baixa renda e pouca
+instrução."*
+
+A violência doméstica é um fenômeno que não distingue classe social,
+raça, etnia, religião, orientação sexual, idade e grau de escolaridade.
+Todos os dias, somos impactados por notícias de mulheres que foram
+assassinadas por seus companheiros ou ex-parceiros. Na maioria desses
+casos, elas já vinham sofrendo diversos tipos de violência há algum
+tempo, mas a situação só chega ao conhecimento de outras pessoas quando
+as agressões crescem a ponto de culminar no feminicídio.
+
+Fonte:
+<https://www.institutomariadapenha.org.br/violencia-domestica/o-que-e-violencia-domestica.html>
+
+## Sobre os tipo de violência
+
+A orientação sexual é um termo usado para descrever a atração emocional,
+romântica, sexual ou afetiva duradoura de uma pessoa por outras. Varia
+amplamente entre os indivíduos e pode ser fluida ao longo do tempo.
+Alguns dos tipos mais comuns de orientação sexual incluem:
+
+1.  **Heterossexualidade**: Atração por pessoas do sexo oposto.
+
+2.  **Homossexualidade**: Atração por pessoas do mesmo sexo. Homens que
+    sentem atração por outros homens são geralmente chamados de gays,
+    enquanto mulheres que sentem atração por outras mulheres são muitas
+    vezes chamadas de lésbicas.
+
+3.  **Bissexualidade**: Atração por pessoas de ambos os sexos.
+
+4.  **Assexualidade**: Pouca ou nenhuma atração sexual por outras
+    pessoas. Assexuais podem ainda ter relacionamentos românticos, mas
+    com pouco interesse em atividade sexual.
+
+5.  **Pansexualidade**: Atração por pessoas independentemente de seu
+    sexo ou identidade de gênero.
+
+6.  **Demissexualidade**: Atração sexual que se desenvolve apenas após a
+    formação de um vínculo emocional forte.
+
+7.  **Queer**: Um termo guarda-chuva usado por algumas pessoas que não
+    se identificam com categorias tradicionais de orientação sexual.
+
+8.  **Polissexualidade**: Atração por múltiplas, mas não todas,
+    identidades de gênero ou sexuais.
+
+Estes são apenas alguns exemplos e é importante reconhecer que a
+orientação sexual é pessoal e pode ser expressa de maneiras únicas para
+cada indivíduo. Além disso, o entendimento e a aceitação das diferentes
+orientações sexuais continuam a evoluir na sociedade.
+
+No questionário na PNS inclui: 
+
+1. Heterosexual 
+2. Bissexual 
+3. Homosexual 
+4. Outra orientação 
+5. Não sabe 
+6. Recusou-se a responder
+
+# Base de dados
+
+Download online dos dados:
+
+```{r dados, echo=TRUE, warning=FALSE}
+# carrega as bibliotecas
+library(PNSIBGE)
+library(survey)
+library(dplyr)
+
+# definição de variáveis
+variaveis_selecionadas <- c("Y008","C016","C015","C009","V0001","V0026", "V0031", "C006", "VDD004A", "VDE002", "E01401", "VDF003", "VDF004", "C014")
+
+# importando os dados do questionário básico
+dadosPNS <- get_pns(year=2019, vars = variaveis_selecionadas)
+
+# Utilizar opção para ajuste de UPAs com único setor
+options(survey.lonely.psu = "adjust")
+
+# Opção de vizualização
+options(scipen = 999)
+
+# modifica e cria variáveis
+dadosPNS$variables <- dadosPNS$variables %>% 
+  mutate(one = 1,
+         outraorientacao = 1 *(Y008 == "Homosexual"| Y008 == "Bissexual" | Y008 == "Outra orientação"),
+         cerimonia = 1 *(C016 == "Sim"),
+         cartório = 1 *(C015 == "Sim"),
+         raca_cor = case_when(C009 == "Preta" | C009 == "Parda" ~ "Negra",
+                              C009 == "Amarela"  | C009 == "Indígena" | C009 == "Ignorado" ~ "Outras",
+                             C009 == "Branca" ~ "Branca")
+)
+
+
+```
+
+# Estimativas
+
+## 1. Orientação sexual
+
+```{r dados1, echo=TRUE, warning=FALSE}
+# Total de pessoas segundo orientação sexual - Brasil - 2019
+tab.1a <- data.frame(Estimativa  = round(coef(svytotal(~ Y008, dadosPNS, na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svytotal(~ Y008, dadosPNS, na.rm = TRUE)),0),
+                    CV = round(cv(svytotal(~ Y008, dadosPNS, na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svytotal(~ Y008, dadosPNS, na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svytotal(~ Y008, dadosPNS, na.rm = TRUE))[,2],0))
+tab.1a  
+
+# Proporção de pessoas segundo orientação sexual - Brasil - 2019
+tab.1b <- data.frame(Estimativa  = round(coef(svymean(~ Y008, dadosPNS, na.rm = TRUE))*100,1),
+                    Erro_padrao = round(SE(svymean(~ Y008, dadosPNS, na.rm = TRUE))*100,1),
+                    CV = round(cv(svymean(~ Y008, dadosPNS, na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svymean(~ Y008, dadosPNS, na.rm = TRUE))[,1]*100,1),
+                    Limite_superior = round(confint(svymean(~ Y008, dadosPNS, na.rm = TRUE))[,2]*100,1))
+tab.1b  
+
+# Total de pessoas segundo orientação sexual - Minas Gerais - 2019
+tab.1c <- data.frame(Estimativa  = round(coef(svytotal(~ Y008, subset(dadosPNS, V0001=="Minas Gerais"), na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svytotal(~ Y008, subset(dadosPNS, V0001=="Minas Gerais"), na.rm = TRUE)),0),
+                    CV = round(cv(svytotal(~ Y008, subset(dadosPNS, V0001=="Minas Gerais"), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svytotal(~ Y008, subset(dadosPNS, V0001=="Minas Gerais"), na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svytotal(~ Y008, subset(dadosPNS, V0001=="Minas Gerais"), na.rm = TRUE))[,2],0))
+tab.1c  
+
+# Proporção de pessoas segundo orientação sexual - Minas Gerais - 2019
+tab.1d <- data.frame(Estimativa  = round(coef(svymean(~ Y008, subset(dadosPNS, V0001=="Minas Gerais"), na.rm = TRUE))*100,1),
+                    Erro_padrao = round(SE(svymean(~ Y008, subset(dadosPNS, V0001=="Minas Gerais"), na.rm = TRUE))*100,1),
+                    CV = round(cv(svymean(~ Y008, subset(dadosPNS, V0001=="Minas Gerais"), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svymean(~ Y008, subset(dadosPNS, V0001=="Minas Gerais"), na.rm = TRUE))[,1]*100,1),
+                    Limite_superior = round(confint(svymean(~ Y008, subset(dadosPNS, V0001=="Minas Gerais"), na.rm = TRUE))[,2]*100,1))
+tab.1d  
+```
+
+## 2. Situação de domicílio, sexo, nível de instrução e raça ou cor
+
+```{r dados2, echo=TRUE, warning=FALSE}
+# Total de pessoas segundo situação do domicílio, tipo de área, sexo e nível de instrução - Brasil - 2019
+tab.2a <- data.frame(Estimativa  = round(coef(svytotal(~ V0026 + V0031 + C006 + VDD004A + raca_cor, dadosPNS, na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svytotal(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, dadosPNS, na.rm = TRUE)),0),
+                    CV = round(cv(svytotal(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, dadosPNS, na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svytotal(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, dadosPNS, na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svytotal(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, dadosPNS, na.rm = TRUE))[,2],0))
+tab.2a  
+
+# Proporção de pessoas segundo situação do domicílio, tipo de área, sexo e nível de instrução - Brasil - 2019
+tab.2b <- data.frame(Estimativa  = round(coef(svymean(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, dadosPNS, na.rm = TRUE))*100,1),
+                    Erro_padrao = round(SE(svymean(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, dadosPNS, na.rm = TRUE))*100,1),
+                    CV = round(cv(svymean(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, dadosPNS, na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svymean(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, dadosPNS, na.rm = TRUE))[,1]*100,1),
+                    Limite_superior = round(confint(svymean(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, dadosPNS, na.rm = TRUE))[,2]*100,1))
+tab.2b  
+
+# Total de pessoas com outra orientação segundo situação do domicílio, tipo de área, sexo e nível de instrução - Brasil - 2019
+tab.2c <- data.frame(Estimativa  = round(coef(svytotal(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, subset(dadosPNS, outraorientacao == 1), na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svytotal(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, subset(dadosPNS, outraorientacao == 1), na.rm = TRUE)),0),
+                    CV = round(cv(svytotal(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, subset(dadosPNS, outraorientacao == 1), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svytotal(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, subset(dadosPNS, outraorientacao == 1), na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svytotal(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, subset(dadosPNS, outraorientacao == 1), na.rm = TRUE))[,2],0))
+tab.2c  
+
+# Proporção de pessoas com outra orientação segundo situação do domicílio, tipo de área, sexo e nível de instrução - Brasil - 2019
+tab.2d <- data.frame(Estimativa  = round(coef(svymean(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, subset(dadosPNS, outraorientacao == 1), na.rm = TRUE))*100,1),
+                    Erro_padrao = round(SE(svymean(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, subset(dadosPNS, outraorientacao == 1), na.rm = TRUE))*100,1),
+                    CV = round(cv(svymean(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, subset(dadosPNS, outraorientacao == 1), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svymean(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, subset(dadosPNS, outraorientacao == 1), na.rm = TRUE))[,1]*100,1),
+                    Limite_superior = round(confint(svymean(~ V0026 + V0031 + C006 + VDD004A+ raca_cor, subset(dadosPNS, outraorientacao == 1), na.rm = TRUE))[,2]*100,1))
+tab.2d 
+```
+
+## 3. Situação de ocupação
+
+```{r dados3, echo=TRUE, warning=FALSE}
+# Total de pessoas por situação de ocupação - Brasil - 2019
+tab.3a <- data.frame(Estimativa  = round(coef(svytotal(~VDE002, dadosPNS, na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svytotal(~VDE002, dadosPNS, na.rm = TRUE)),0),
+                    CV = round(cv(svytotal(~VDE002, dadosPNS, na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svytotal(~VDE002, dadosPNS, na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svytotal(~VDE002, dadosPNS, na.rm = TRUE))[,2],0))
+tab.3a
+
+# Proporção de pessoas por situação de ocupação - Brasil - 2019
+tab.3b <- data.frame(Estimativa  = round(coef(svymean(~VDE002, dadosPNS, na.rm = TRUE))*100,1),
+                    Erro_padrao = round(SE(svymean(~VDE002, dadosPNS, na.rm = TRUE))*100,1),
+                    CV = round(cv(svymean(~VDE002, dadosPNS, na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svymean(~VDE002, dadosPNS, na.rm = TRUE))[,1]*100,1),
+                    Limite_superior = round(confint(svymean(~VDE002, dadosPNS, na.rm = TRUE))[,2]*100,1))
+tab.3b
+
+# Total de pessoas com outra orientação por situação de ocupação - Brasil - 2019
+tab.3c <- data.frame(Estimativa  = round(coef(svytotal(~VDE002, subset(dadosPNS, outraorientacao==1), na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svytotal(~VDE002, subset(dadosPNS, outraorientacao==1), na.rm = TRUE)),0),
+                    CV = round(cv(svytotal(~VDE002, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svytotal(~VDE002, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svytotal(~VDE002, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))[,2],0))
+tab.3c
+
+# Proporção de pessoas com outra orientação por situação de ocupação - Brasil - 2019
+tab.3d <- data.frame(Estimativa  = round(coef(svymean(~VDE002, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))*100,1),
+                    Erro_padrao = round(SE(svymean(~VDE002, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))*100,1),
+                    CV = round(cv(svymean(~VDE002, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svymean(~VDE002, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))[,1]*100,1),
+                    Limite_superior = round(confint(svymean(~VDE002, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))[,2]*100,1))
+tab.3d
+
+# Total de pessoas com outra orientação por tipo de ocupação - Brasil - 2019
+tab.3e <- data.frame(Estimativa  = round(coef(svytotal(~E01401, subset(dadosPNS, outraorientacao==1), na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svytotal(~E01401, subset(dadosPNS, outraorientacao==1), na.rm = TRUE)),0),
+                    CV = round(cv(svytotal(~E01401, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svytotal(~E01401, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svytotal(~E01401, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))[,2],0))
+tab.3e
+
+
+```
+
+## 4. Rendimento
+
+```{r dados4, echo=TRUE, warning=FALSE}
+# Rendimento domiciliar per capita por orientação sexual - Brasil - 2019
+tab.4a <- data.frame(Estimativa  = round(coef(svyby(~ VDF003,by = ~Y008, dadosPNS,svymean, na.rm = TRUE)),2),
+                    Erro_padrao = round(SE(svyby(~ VDF003, by = ~Y008, dadosPNS,svymean, na.rm = TRUE)),2),
+                    CV = round(cv(svyby(~ VDF003, by = ~Y008, dadosPNS,svymean, na.rm = TRUE)),1),
+                    Limite_inferior = round(confint(svyby(~ VDF003,by = ~Y008, dadosPNS,svymean, na.rm = TRUE))[,1],2),
+                    Limite_superior = round(confint(svyby(~ VDF003,by = ~Y008, dadosPNS,svymean, na.rm = TRUE))[,2],2))
+tab.4a
+
+# Total de pessoas com outra orientação por faixa de rendimento domiciliar per capita - Brasil - 2019
+tab.4b <- data.frame(Estimativa  = round(coef(svytotal(~VDF004, subset(dadosPNS,outraorientacao==1), na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svytotal(~VDF004, subset(dadosPNS,outraorientacao==1), na.rm = TRUE)),0),
+                    CV = round(cv(svytotal(~VDF004, subset(dadosPNS,outraorientacao==1), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svytotal(~VDF004, subset(dadosPNS,outraorientacao==1), na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svytotal(~VDF004, subset(dadosPNS,outraorientacao==1), na.rm = TRUE))[,2],0))
+tab.4b
+
+# Proporção de pessoas com outra orientação por faixa de rendimento domiciliar per capita - Brasil - 2019
+tab.4c <- data.frame(Estimativa  = round(coef(svymean(~VDF004, subset(dadosPNS,outraorientacao==1), na.rm = TRUE))*100,1),
+                    Erro_padrao = round(SE(svymean(~VDF004, subset(dadosPNS,outraorientacao==1), na.rm = TRUE))*100,1),
+                    CV = round(cv(svymean(~VDF004, subset(dadosPNS,outraorientacao==1), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svymean(~VDF004, subset(dadosPNS,outraorientacao==1), na.rm = TRUE))[,1]*100,1),
+                    Limite_superior = round(confint(svymean(~VDF004, subset(dadosPNS,outraorientacao==1), na.rm = TRUE))[,2]*100,1))
+tab.4c
+
+
+```
+
+## 5. Nupcialidade
+
+```{r dados5, echo=TRUE, warning=FALSE}
+# Total de pessoas por natureza da união - Brasil - 2019
+tab.5a <- data.frame(Estimativa  = round(coef(svytotal(~C014, dadosPNS, na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svytotal(~C014, dadosPNS, na.rm = TRUE)),0),
+                    CV = round(cv(svytotal(~C014, dadosPNS, na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svytotal(~C014, dadosPNS, na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svytotal(~C014, dadosPNS, na.rm = TRUE))[,2],0))
+tab.5a
+
+# Proporção de pessoas por natureza da união - Brasil - 2019
+tab.5b <- data.frame(Estimativa  = round(coef(svymean(~C014, dadosPNS, na.rm = TRUE))*100,1),
+                    Erro_padrao = round(SE(svymean(~C014, dadosPNS, na.rm = TRUE))*100,1),
+                    CV = round(cv(svymean(~C014, dadosPNS, na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svymean(~C014, dadosPNS, na.rm = TRUE))[,1]*100,1),
+                    Limite_superior = round(confint(svymean(~C014, dadosPNS, na.rm = TRUE))[,2]*100,1))
+tab.5b
+
+# Total de pessoas com outra orientação por natureza da união - Brasil - 2019
+tab.5c <- data.frame(Estimativa  = round(coef(svytotal(~C014, subset(dadosPNS, outraorientacao==1), na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svytotal(~C014, subset(dadosPNS, outraorientacao==1), na.rm = TRUE)),0),
+                    CV = round(cv(svytotal(~C014, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svytotal(~C014, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svytotal(~C014, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))[,2],0))
+tab.5c
+
+# Proporção de pessoas com outra orientação por natureza da união - Brasil - 2019
+tab.5d <- data.frame(Estimativa  = round(coef(svymean(~C014, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))*100,1),
+                    Erro_padrao = round(SE(svymean(~C014, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))*100,1),
+                    CV = round(cv(svymean(~C014, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svymean(~C014, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))[,1]*100,1),
+                    Limite_superior = round(confint(svymean(~C014, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))[,2]*100,1))
+tab.5d
+
+# Total de pessoas segundo cerimônia e registro em cartório - Brasil - 2019
+tab.5e <- data.frame(Estimativa  = round(coef(svytotal(~cerimonia + cartório, dadosPNS, na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svytotal(~cerimonia + cartório, dadosPNS, na.rm = TRUE)),0),
+                    CV = round(cv(svytotal(~cerimonia + cartório, dadosPNS, na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svytotal(~cerimonia + cartório, dadosPNS, na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svytotal(~cerimonia + cartório, dadosPNS, na.rm = TRUE))[,2],0))
+tab.5e
+
+# Proporção de pessoas segundo cerimônia e registro em cartório - Brasil - 2019
+tab.5f <- data.frame(Estimativa  = round(coef(svymean(~cerimonia + cartório, dadosPNS, na.rm = TRUE))*100,1),
+                    Erro_padrao = round(SE(svymean(~cerimonia + cartório, dadosPNS, na.rm = TRUE))*100,1),
+                    CV = round(cv(svymean(~cerimonia + cartório, dadosPNS, na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svymean(~cerimonia + cartório, dadosPNS, na.rm = TRUE))[,1]*100,1),
+                    Limite_superior = round(confint(svymean(~cerimonia + cartório, dadosPNS, na.rm = TRUE))[,2]*100,1))
+tab.5f
+
+# Total de pessoas com outra orientação segundo cerimônia e registro em cartório - Brasil - 2019
+tab.5g <- data.frame(Estimativa  = round(coef(svytotal(~cerimonia + cartório, subset(dadosPNS, outraorientacao==1), na.rm = TRUE)),0),
+                    Erro_padrao = round(SE(svytotal(~cerimonia + cartório, subset(dadosPNS, outraorientacao==1), na.rm = TRUE)),0),
+                    CV = round(cv(svytotal(~cerimonia + cartório, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svytotal(~cerimonia + cartório, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))[,1],0),
+                    Limite_superior = round(confint(svytotal(~cerimonia + cartório, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))[,2],0))
+tab.5g
+
+# Proporção de pessoas com outra orientação segundo cerimônia e registro em cartório - Brasil - 2019
+tab.5h <- data.frame(Estimativa  = round(coef(svymean(~cerimonia + cartório, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))*100,1),
+                    Erro_padrao = round(SE(svymean(~cerimonia + cartório, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))*100,1),
+                    CV = round(cv(svymean(~cerimonia + cartório, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))*100,1),
+                    Limite_inferior = round(confint(svymean(~cerimonia + cartório, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))[,1]*100,1),
+                    Limite_superior = round(confint(svymean(~cerimonia + cartório, subset(dadosPNS, outraorientacao==1), na.rm = TRUE))[,2]*100,1))
+tab.5h
+
+
+```

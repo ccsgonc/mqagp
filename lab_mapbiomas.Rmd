@@ -4,11 +4,11 @@ author: "Caio Gonçalves - caio.goncalves@fjp.mg.gov.br"
 date: "20-novembro-2023"
 output:
   html_document: 
-  toc: true
-  toc_float: true
+    toc: true
+    toc_float: true
 editor_options: 
   markdown: 
-  wrap: 72
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -54,9 +54,9 @@ df.cobertura <- read_excel("TABELA-GERAL-MAPBIOMAS-COL8.0-BIOMASxESTADOS-1.xlsx"
 View(df.cobertura)
 ```
 
-## Minas Gerais - cobertura e uso
+# Minas Gerais - cobertura e uso
 
-### Nível 0
+## Nível 0
 
 Os dados apresentados fornecem uma visão da cobertura da terra categorizadas como Antrópica (Anthropic), Natural e Não Aplicada (Not applied) ao longo dos anos de 1985 a 2022. Esta análise será realizada em duas partes: primeiro, a análise dos valores absolutos (área em hectares) e, em seguida, a análise percentual.
 
@@ -105,7 +105,7 @@ tab00b %>%  gt()
 
 3.  **Not Applied**: A proporção desta categoria teve uma pequena variação, começando com 0.77% em 1985, diminuindo para 0.23% em 2010 e 2020, e depois aumentando ligeiramente para 0.35% em 2022.
 
-### Nível 1
+## Nível 1
 
 ```{r indicadores1, echo=TRUE, warning=FALSE}
 # prepara tabela
@@ -149,7 +149,7 @@ tab01b %>% gt()
 
 6.  **Não Observado (Non Observed)**: Manteve-se em 0.00% ao longo de todo o período, indicando que não houve áreas não mapeadas ou indeterminadas nos dados analisados.
 
-### Nível 2
+## Nível 2
 
 ```{r indicadores2, echo=TRUE, warning=FALSE}
 # prepara tabela
@@ -182,9 +182,9 @@ tab02b %>%  gt()
 ```
 
 
-## Brasil - transições
+# Brasil - transições
 
-### Nível resumido
+## Nível resumido
 ```{r dados2, echo=TRUE, warning=FALSE}
 # preparação dos dados
 df.transicao <- read.table("sankey_data.csv",header = T,sep=";")
@@ -224,7 +224,7 @@ sankeyNetwork(Links = df.transicao_long, Nodes = nodes,
 
 ```
 
-### Nível completo
+## Nível completo
 
 ```{r dados3, echo=TRUE, warning=FALSE}
 #sankey completo
